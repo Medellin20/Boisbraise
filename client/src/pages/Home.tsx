@@ -44,7 +44,7 @@ const products: Product[] = [
     unit: "Raummeter",
     category: "Premiumholz",
     badge: "Bestseller",
-    image: "/images/wood/Capture d’écran du 2026-09-25 14-21-13.png",
+    image: "/images/wood/oak-logs.jpg",
     accent: "#c86532",
   },
   {
@@ -55,7 +55,7 @@ const products: Product[] = [
     unit: "Raummeter",
     category: "Premiumholz",
     badge: "Preis-Leistung",
-    image: "/images/wood/Capture d’écran du 2026-09-25 14-21-32.png",
+    image: "/images/wood/mixed-firewood.jpg",
     accent: "#df8a38",
   },
   {
@@ -65,7 +65,7 @@ const products: Product[] = [
     price: 14,
     unit: "pro Set",
     category: "Anzünden",
-    image: "/images/wood/Capture d’écran du 2026-09-25 14-21-53.png",
+    image: "/images/wood/kindling.jpg",
     accent: "#7d8a60",
   },
   {
@@ -76,7 +76,7 @@ const products: Product[] = [
     unit: "Raummeter",
     category: "Premiumholz",
     badge: "Neu",
-    image: "/images/wood/Capture d’écran du 2026-09-25 14-22-12.png",
+    image: "/images/wood/dry-oak.jpg",
     accent: "#a64e2e",
   },
 ];
@@ -251,7 +251,7 @@ export default function Home() {
 
           <div className="relative min-h-[370px] overflow-hidden rounded-[30px] bg-[#43372b] shadow-[0_24px_60px_rgba(67,50,32,.18)] sm:min-h-[470px] lg:min-h-[560px] lg:rounded-[36px]">
             <img
-              src="/manus-storage/boisbraise-hero_fe6392cd.jpg"
+              src="/images/wood/oak-logs.jpg"
               alt="Brennholz in warmer Atmosphäre"
               className="absolute inset-0 size-full object-cover transition duration-700 hover:scale-[1.025]"
             />
@@ -339,7 +339,7 @@ export default function Home() {
         <section className="container pb-20 sm:pb-28" id="engagement">
           <div className="grid overflow-hidden rounded-[30px] bg-[#302a23] text-[#fff8ed] shadow-[0_22px_55px_rgba(51,38,26,.16)] lg:grid-cols-[.85fr_1.15fr]">
             <div className="relative min-h-[300px] overflow-hidden bg-[#6f4c35] lg:min-h-[420px]">
-              <img src="/manus-storage/boisbraise-hero_fe6392cd.jpg" alt="Regionaler Laubwald" className="absolute inset-0 size-full object-cover opacity-75 mix-blend-luminosity" />
+              <img src="/images/wood/oak-logs.jpg" alt="Regionaler Laubwald" className="absolute inset-0 size-full object-cover opacity-75 mix-blend-luminosity" />
               <div className="absolute inset-0 bg-gradient-to-br from-[#543b2b]/30 to-[#302a23]/70" />
               <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-4 sm:bottom-8 sm:left-8 sm:right-8"><span className="font-display text-2xl font-semibold tracking-[-.04em]">Vom Wald bis zu Ihrem Ofen.</span><span className="grid size-12 place-items-center rounded-full bg-[#f4ad4b] text-[#34281c]"><Leaf size={20} /></span></div>
             </div>
