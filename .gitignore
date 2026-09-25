@@ -1,0 +1,21 @@
+node_modules/
+.next/
+out/
+dist/
+
+# Local environment files
+.env*
+!.env.example
+
+# TypeScript and tooling caches
+*.tsbuildinfo
+.eslintcache
+.turbo/
+
+# Debug and local logs
+.manus-logs/
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
