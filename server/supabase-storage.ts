@@ -5,11 +5,11 @@ const defaultBucket = "product-images";
 let storageClient: SupabaseClient | undefined;
 
 function getStorage() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error(
-      "Supabase n’est pas configuré. Définissez NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY.",
+      "Supabase n’est pas configuré. Définissez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY.",
     );
   }
 
