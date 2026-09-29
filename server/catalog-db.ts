@@ -102,7 +102,7 @@ const initialProducts: Array<{
     name: "Chêne séché",
     description: "Une combustion lente et régulière, idéale pour les longues soirées.",
     category: "Chêne",
-    image: "/images/wood/prototypes/chene.svg",
+    image: "/images/catalog/chene.jpeg",
     prices: { "25 cm": 92, "33 cm": 84, "40 cm": 80, "50 cm": 74, "1 m": 66 },
   },
   {
@@ -110,7 +110,7 @@ const initialProducts: Array<{
     name: "Hêtre séché",
     description: "Une chaleur homogène et un feu facile à maîtriser au quotidien.",
     category: "Hêtre",
-    image: "/images/wood/prototypes/hetre.svg",
+    image: "/images/catalog/hetre.jpeg",
     prices: { "25 cm": 84, "33 cm": 76, "40 cm": 72, "50 cm": 66, "1 m": 58 },
   },
   {
@@ -118,7 +118,7 @@ const initialProducts: Array<{
     name: "Frêne séché",
     description: "Un bois polyvalent qui s’allume facilement et chauffe efficacement.",
     category: "Frêne",
-    image: "/images/wood/prototypes/frene.svg",
+    image: "/images/catalog/frene.jpeg",
     prices: { "25 cm": 88, "33 cm": 80, "40 cm": 76, "50 cm": 70, "1 m": 62 },
   },
   {
@@ -126,7 +126,7 @@ const initialProducts: Array<{
     name: "Charme séché",
     description: "Un bois dense à la belle tenue au feu et au pouvoir calorifique élevé.",
     category: "Charme",
-    image: "/images/wood/prototypes/charme.svg",
+    image: "/images/catalog/charme.jpeg",
     prices: { "25 cm": 96, "33 cm": 88, "40 cm": 84, "50 cm": 78, "1 m": 70 },
   },
   {
@@ -134,7 +134,7 @@ const initialProducts: Array<{
     name: "Mélange de feuillus",
     description: "Un assortiment équilibré de bois durs pour toute la saison.",
     category: "Mélange",
-    image: "/images/wood/prototypes/melange.svg",
+    image: "/images/catalog/melange.jpeg",
     prices: { "25 cm": 82, "33 cm": 74, "40 cm": 70, "50 cm": 64, "1 m": 56 },
   },
 ];
@@ -182,6 +182,33 @@ try {
     database
       .prepare("INSERT INTO catalog_migrations (id) VALUES (?)")
       .run(prototypeMigration);
+  }
+  const catalogPhotoMigration = "wood-catalog-user-photos-v1";
+  if (
+    !database
+      .prepare("SELECT 1 FROM catalog_migrations WHERE id = ?")
+      .get(catalogPhotoMigration)
+  ) {
+    const productPhotoById = new Map(
+      initialProducts.map((product) => [product.id, product.image]),
+    );
+    const replacePrototypePhoto = database.prepare(
+      "UPDATE product_images SET path = ? WHERE product_id = ? AND path = ?",
+    );
+    for (const product of initialProducts) {
+      const imagePath = productPhotoById.get(product.id);
+      if (!imagePath) {
+        throw new Error(`Photo de catalogue absente pour le produit ${product.id}.`);
+      }
+      replacePrototypePhoto.run(
+        imagePath,
+        product.id,
+        `/images/wood/prototypes/${product.id}.svg`,
+      );
+    }
+    database
+      .prepare("INSERT INTO catalog_migrations (id) VALUES (?)")
+      .run(catalogPhotoMigration);
   }
   if (database.prepare("SELECT COUNT(*) AS count FROM products").get()?.count === 0) {
     const addProduct = database.prepare(
