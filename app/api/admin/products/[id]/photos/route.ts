@@ -1,36 +1,40 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { randomUUID } from "node:crypto";
 import { addProductImage } from "../../../../../../server/catalog-db";
+import {
+  deleteProductPhoto,
+  uploadProductPhoto,
+} from "../../../../../../server/supabase-storage";
+import { requireAdmin } from "../../../../../../server/admin-auth";
 
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
 const maximumFileSize = 5 * 1024 * 1024;
 
-function validImageType(file: File, bytes: Uint8Array): string | null {
+function validImageType(file: File, bytes: Uint8Array) {
   if (
     file.type === "image/jpeg" &&
     bytes[0] === 0xff &&
     bytes[1] === 0xd8 &&
     bytes[2] === 0xff
-  ) return ".jpg";
+  ) return { extension: ".jpg", contentType: "image/jpeg" };
   if (
     file.type === "image/png" &&
     bytes[0] === 0x89 &&
     bytes[1] === 0x50 &&
     bytes[2] === 0x4e &&
     bytes[3] === 0x47
-  ) return ".png";
+  ) return { extension: ".png", contentType: "image/png" };
   if (
     file.type === "image/webp" &&
     String.fromCharCode(...bytes.slice(0, 4)) === "RIFF" &&
     String.fromCharCode(...bytes.slice(8, 12)) === "WEBP"
-  ) return ".webp";
+  ) return { extension: ".webp", contentType: "image/webp" };
   return null;
 }
 
 export async function POST(request: Request, { params }: RouteContext) {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
   const { id } = await params;
   let form: FormData;
   try {
@@ -48,8 +52,8 @@ export async function POST(request: Request, { params }: RouteContext) {
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const extension = validImageType(file, bytes);
-  if (!extension) {
+  const imageType = validImageType(file, bytes);
+  if (!imageType) {
     return Response.json({ error: "Formats acceptés : JPEG, PNG ou WebP." }, { status: 400 });
   }
 
@@ -62,35 +66,44 @@ export async function POST(request: Request, { params }: RouteContext) {
     return Response.json({ error: "Photo à remplacer invalide." }, { status: 400 });
   }
   const setPrimary = form.get("isPrimary") === "true";
-  const relativePath = `/uploads/catalog/${randomUUID()}${extension}`;
-  const uploadDirectory = path.join(process.cwd(), "public", "uploads", "catalog");
-  await mkdir(uploadDirectory, { recursive: true });
-  await writeFile(
-    path.join(uploadDirectory, path.basename(relativePath)),
-    bytes,
-    { flag: "wx" },
-  );
+  let uploadedPhoto: Awaited<ReturnType<typeof uploadProductPhoto>>;
+  try {
+    uploadedPhoto = await uploadProductPhoto(
+      id,
+      bytes,
+      imageType.contentType,
+      imageType.extension,
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Échec de l’envoi vers Supabase Storage.";
+    const status = message.includes("n’est pas configuré") ? 503 : 502;
+    return Response.json({ error: message }, { status });
+  }
 
   let result: ReturnType<typeof addProductImage>;
   try {
-    result = addProductImage(id, relativePath, replaceImageId, setPrimary);
+    result = addProductImage(
+      id,
+      uploadedPhoto.publicUrl,
+      replaceImageId,
+      setPrimary,
+    );
   } catch (error) {
-    const { unlink } = await import("node:fs/promises");
-    await unlink(path.join(uploadDirectory, path.basename(relativePath)));
-    const message = error instanceof Error ? error.message : "Échec de l’ajout de la photo.";
+    await deleteProductPhoto(uploadedPhoto.publicUrl).catch((cleanupError: unknown) => {
+      console.error(
+        `Échec du nettoyage de la photo Supabase temporaire ${uploadedPhoto.key}.`,
+        cleanupError,
+      );
+    });
+    const message =
+      error instanceof Error ? error.message : "Échec de l’ajout de la photo.";
     return Response.json({ error: message }, { status: 400 });
   }
 
-  if (result.removedPath?.startsWith("/uploads/catalog/")) {
-    const previousPath = path.join(
-      uploadDirectory,
-      path.basename(result.removedPath),
-    );
-    const { unlink } = await import("node:fs/promises");
-    await unlink(previousPath).catch((error: NodeJS.ErrnoException) => {
-      if (error.code !== "ENOENT") {
-        console.error("Impossible de supprimer l’ancienne photo remplacée.", error);
-      }
+  if (result.removedPath && result.removedPath !== uploadedPhoto.publicUrl) {
+    await deleteProductPhoto(result.removedPath).catch((error: unknown) => {
+      console.error("Impossible de supprimer l’ancienne photo remplacée dans Supabase Storage.", error);
     });
   }
   return Response.json({ success: true }, { status: 201 });

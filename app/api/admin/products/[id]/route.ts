@@ -5,12 +5,15 @@ import {
   type WoodCategory,
 } from "../../../../../shared/catalog";
 import { updateCatalogProduct } from "../../../../../server/catalog-db";
+import { requireAdmin } from "../../../../../server/admin-auth";
 
 export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
   const { id } = await params;
   let body: unknown;
   try {

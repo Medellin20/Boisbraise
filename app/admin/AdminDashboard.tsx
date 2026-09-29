@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import {
   LOG_LENGTHS,
@@ -57,6 +57,10 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState<"catalog" | "orders">("catalog");
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
   const [error, setError] = useState("");
 
   const refresh = async () => {
@@ -73,12 +77,60 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    fetch("/api/admin/auth", { cache: "no-store" })
+      .then(readJson<{ authenticated: boolean }>)
+      .then((session) => setAuthenticated(session.authenticated))
+      .catch((cause: unknown) => {
+        setAuthError(cause instanceof Error ? cause.message : "Vérification de session impossible.");
+      })
+      .finally(() => setAuthLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!authenticated) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     refresh()
       .catch((cause: unknown) => {
         setError(cause instanceof Error ? cause.message : "Chargement impossible.");
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [authenticated]);
+
+  const login = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAuthError("");
+    try {
+      await readJson(
+        await fetch("/api/admin/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password }),
+        }),
+      );
+      setPassword("");
+      setAuthenticated(true);
+    } catch (cause) {
+      setAuthError(cause instanceof Error ? cause.message : "Connexion impossible.");
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await readJson(
+        await fetch("/api/admin/auth", {
+          method: "DELETE",
+        }),
+      );
+      setAuthenticated(false);
+      setProducts([]);
+      setOrders([]);
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : "Déconnexion impossible.");
+    }
+  };
 
   const saveProduct = async (product: CatalogProduct) => {
     try {
@@ -193,6 +245,60 @@ export default function AdminDashboard() {
     );
   };
 
+  if (authLoading) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#f5f1e8] p-6 text-[#25221e]">
+        <p className="text-sm text-[#766e62]">Vérification de la session admin…</p>
+      </main>
+    );
+  }
+
+  if (!authenticated) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-[#f5f1e8] px-4 py-10 text-[#25221e]">
+        <section className="w-full max-w-md rounded-[26px] border border-[#e3d9ca] bg-[#fbf7ef] p-7 shadow-xl sm:p-9">
+          <a href="/" className="text-sm font-semibold text-[#52684b] hover:underline">
+            ← Retour au catalogue
+          </a>
+          <p className="mt-8 text-xs font-bold uppercase tracking-[.18em] text-[#52684b]">
+            Espace sécurisé
+          </p>
+          <h1 className="font-display mt-2 text-4xl font-semibold">
+            Connexion admin
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[#766e62]">
+            Saisissez le mot de passe administrateur pour gérer les tarifs, les
+            photos et les commandes.
+          </p>
+          <form onSubmit={login} className="mt-7 space-y-4">
+            <label className="block text-xs font-bold text-[#63594d]">
+              Mot de passe
+              <input
+                type="password"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="mt-2 h-12 w-full rounded-xl border border-[#ded2c1] bg-white px-4 text-sm font-medium outline-none focus:border-[#52684b] focus:ring-2 focus:ring-[#52684b]/15"
+              />
+            </label>
+            {authError && (
+              <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">
+                {authError}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="h-12 w-full rounded-full bg-[#52684b] text-sm font-bold text-white hover:bg-[#41543b]"
+            >
+              Se connecter
+            </button>
+          </form>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-[#f5f1e8] px-4 py-8 text-[#25221e] sm:px-8 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -208,11 +314,13 @@ export default function AdminDashboard() {
               Gestion de l’activité
             </h1>
           </div>
-          <p className="max-w-lg rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900">
-            Attention : l’administration n’est pas protégée par un compte. Toute
-            personne connaissant cette adresse peut modifier les tarifs, les
-            photos et les commandes.
-          </p>
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="h-10 rounded-full border border-[#cfc4b5] px-4 text-sm font-semibold text-[#52684b] hover:bg-white"
+          >
+            Se déconnecter
+          </button>
         </header>
 
         <div className="mt-7 flex gap-2 border-b border-[#ded5c8]">

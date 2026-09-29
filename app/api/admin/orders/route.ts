@@ -3,16 +3,21 @@ import {
   updateOrderStatus,
   type OrderStatus,
 } from "../../../../server/catalog-db";
+import { requireAdmin } from "../../../../server/admin-auth";
 
 export const runtime = "nodejs";
 
 const orderStatuses: OrderStatus[] = ["new", "confirmed", "delivered", "cancelled"];
 
-export function GET() {
+export function GET(request: Request) {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
   return Response.json(getAdminOrders());
 }
 
 export async function PATCH(request: Request) {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
   let body: unknown;
   try {
     body = await request.json();

@@ -1,9 +1,9 @@
-import { unlink } from "node:fs/promises";
-import path from "node:path";
 import {
   deleteProductImage,
   setProductPrimaryImage,
 } from "../../../../../../../server/catalog-db";
+import { deleteProductPhoto } from "../../../../../../../server/supabase-storage";
+import { requireAdmin } from "../../../../../../../server/admin-auth";
 
 export const runtime = "nodejs";
 
@@ -16,6 +16,8 @@ function parseImageId(value: string): number | null {
 }
 
 export async function PATCH(_request: Request, { params }: RouteContext) {
+  const denied = requireAdmin(_request);
+  if (denied) return denied;
   const { id, imageId: rawImageId } = await params;
   const imageId = parseImageId(rawImageId);
   if (imageId === null) {
@@ -31,6 +33,8 @@ export async function PATCH(_request: Request, { params }: RouteContext) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
+  const denied = requireAdmin(_request);
+  if (denied) return denied;
   const { id, imageId: rawImageId } = await params;
   const imageId = parseImageId(rawImageId);
   if (imageId === null) {
@@ -38,15 +42,17 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
   }
   try {
     const result = deleteProductImage(id, imageId);
-    if (result.removedPath.startsWith("/uploads/catalog/")) {
-      const uploadsDirectory = path.join(process.cwd(), "public", "uploads", "catalog");
-      await unlink(
-        path.join(uploadsDirectory, path.basename(result.removedPath)),
-      ).catch((error: NodeJS.ErrnoException) => {
-        if (error.code !== "ENOENT") {
-          console.error("La photo a été retirée de la base mais son fichier reste présent.", error);
-        }
-      });
+    try {
+      await deleteProductPhoto(result.removedPath);
+    } catch (error) {
+      console.error(
+        "La photo a été retirée du catalogue mais reste dans Supabase Storage.",
+        error,
+      );
+      return Response.json(
+        { error: "La photo a été retirée du catalogue mais sa suppression du stockage a échoué." },
+        { status: 502 },
+      );
     }
     return Response.json({ success: true });
   } catch (error) {
