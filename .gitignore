@@ -16,6 +16,10 @@ dist/
 .manus-logs/
 *.log
 
+# Persistent local catalog data and uploaded product photos
+data/catalog.sqlite*
+public/uploads/catalog/
+
 # Operating system files
 .DS_Store
 Thumbs.db
