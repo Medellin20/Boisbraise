@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="70" y1="44" x2="875" y2="656" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EEE1CB"/>
+      <stop offset="1" stop-color="#C7A984"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="315" y1="250" x2="719" y2="490" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A56B3D"/>
+      <stop offset=".52" stop-color="#794727"/>
+      <stop offset="1" stop-color="#50301F"/>
+    </linearGradient>
+    <linearGradient id="end" x1="275" y1="277" x2="405" y2="394" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4DDB5"/>
+      <stop offset="1" stop-color="#CAA273"/>
+    </linearGradient>
+    <filter id="shadow" x="136" y="146" width="715" height="421" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h960v680H0z"/>
+  <circle cx="788" cy="128" r="112" fill="#F6EBD9" fill-opacity=".45"/>
+  <path d="M0 506c158-81 285-49 420-8 188 57 343 68 540-36v218H0V506Z" fill="#435342" fill-opacity=".16"/>
+  <ellipse cx="492" cy="473" fill="#3B291C" fill-opacity=".28" filter="url(#shadow)" rx="326" ry="55"/>
+  <g stroke="#54321F" stroke-width="7">
+    <rect x="236" y="315" width="480" height="87" rx="42" fill="url(#wood)" transform="rotate(-8 236 315)"/>
+    <rect x="304" y="228" width="458" height="88" rx="44" fill="url(#wood)" transform="rotate(8 304 228)"/>
+    <rect x="253" y="418" width="461" height="83" rx="41" fill="url(#wood)" transform="rotate(-3 253 418)"/>
+  </g>
+  <g stroke="#8C5B35" stroke-linecap="round" stroke-width="5" opacity=".9">
+    <path d="m402 282 138-22m-74 43 203-18M367 374l174-19m-113 45 177-18m-186 94 153-14"/>
+    <path d="m595 240 44 11m-231 68 31 7m225 89 29 6m-302 73 48-1"/>
+  </g>
+  <g stroke="#6C452C" stroke-width="6">
+    <ellipse cx="272" cy="354" fill="url(#end)" rx="51" ry="43" transform="rotate(-8 272 354)"/>
+    <ellipse cx="340" cy="257" fill="url(#end)" rx="52" ry="43" transform="rotate(8 340 257)"/>
+    <ellipse cx="286" cy="439" fill="url(#end)" rx="50" ry="41" transform="rotate(-3 286 439)"/>
+  </g>
+  <g stroke="#A77544" stroke-linecap="round" stroke-width="4" opacity=".8">
+    <path d="M251 353c10-17 31-23 47-11m-42 20c11-7 24-7 34-1m34-104c10-16 31-21 48-10m-46 21c11-6 23-5 33 0m-55 190c11-14 29-17 43-8"/>
+  </g>
+  <rect x="48" y="47" width="196" height="38" rx="19" fill="#FBF7EF" fill-opacity=".88"/>
+  <text x="70" y="72" fill="#4B5D43" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="2">VISUEL PROTOTYPE</text>
+  <text x="62" y="597" fill="#493626" font-family="Georgia,serif" font-size="58" font-weight="700">Chêne</text>
+  <text x="66" y="630" fill="#69533E" font-family="Arial,sans-serif" font-size="17" letter-spacing="3">BOIS DUR · FEU LONGUE DURÉE</text>
+</svg>

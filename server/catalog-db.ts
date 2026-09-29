@@ -84,6 +84,9 @@ database.exec(`
       CHECK (status IN ('new', 'confirmed', 'delivered', 'cancelled')),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
   );
+  CREATE TABLE IF NOT EXISTS catalog_migrations (
+    id TEXT PRIMARY KEY
+  );
 `);
 
 const initialProducts: Array<{
@@ -99,7 +102,7 @@ const initialProducts: Array<{
     name: "Chêne séché",
     description: "Une combustion lente et régulière, idéale pour les longues soirées.",
     category: "Chêne",
-    image: "/images/wood/oak-logs.jpg",
+    image: "/images/wood/prototypes/chene.svg",
     prices: { "25 cm": 92, "33 cm": 84, "40 cm": 80, "50 cm": 74, "1 m": 66 },
   },
   {
@@ -107,7 +110,7 @@ const initialProducts: Array<{
     name: "Hêtre séché",
     description: "Une chaleur homogène et un feu facile à maîtriser au quotidien.",
     category: "Hêtre",
-    image: "/images/wood/mixed-firewood.jpg",
+    image: "/images/wood/prototypes/hetre.svg",
     prices: { "25 cm": 84, "33 cm": 76, "40 cm": 72, "50 cm": 66, "1 m": 58 },
   },
   {
@@ -115,7 +118,7 @@ const initialProducts: Array<{
     name: "Frêne séché",
     description: "Un bois polyvalent qui s’allume facilement et chauffe efficacement.",
     category: "Frêne",
-    image: "/images/wood/dry-oak.jpg",
+    image: "/images/wood/prototypes/frene.svg",
     prices: { "25 cm": 88, "33 cm": 80, "40 cm": 76, "50 cm": 70, "1 m": 62 },
   },
   {
@@ -123,7 +126,7 @@ const initialProducts: Array<{
     name: "Charme séché",
     description: "Un bois dense à la belle tenue au feu et au pouvoir calorifique élevé.",
     category: "Charme",
-    image: "/images/wood/oak-logs.jpg",
+    image: "/images/wood/prototypes/charme.svg",
     prices: { "25 cm": 96, "33 cm": 88, "40 cm": 84, "50 cm": 78, "1 m": 70 },
   },
   {
@@ -131,7 +134,7 @@ const initialProducts: Array<{
     name: "Mélange de feuillus",
     description: "Un assortiment équilibré de bois durs pour toute la saison.",
     category: "Mélange",
-    image: "/images/wood/mixed-firewood.jpg",
+    image: "/images/wood/prototypes/melange.svg",
     prices: { "25 cm": 82, "33 cm": 74, "40 cm": 70, "50 cm": 64, "1 m": 56 },
   },
 ];
@@ -145,6 +148,40 @@ try {
     database.exec(
       "ALTER TABLE orders ADD COLUMN delivery_fee REAL NOT NULL DEFAULT 0",
     );
+  }
+  const prototypeMigration = "wood-catalog-prototype-images-v1";
+  if (
+    !database
+      .prepare("SELECT 1 FROM catalog_migrations WHERE id = ?")
+      .get(prototypeMigration)
+  ) {
+    const prototypeImageByProduct = new Map(
+      initialProducts.map((product) => [product.id, product.image]),
+    );
+    const legacyImageByProduct: Record<string, string> = {
+      chene: "/images/wood/oak-logs.jpg",
+      hetre: "/images/wood/mixed-firewood.jpg",
+      frene: "/images/wood/dry-oak.jpg",
+      charme: "/images/wood/oak-logs.jpg",
+      melange: "/images/wood/mixed-firewood.jpg",
+    };
+    const replaceSeededImage = database.prepare(
+      "UPDATE product_images SET path = ? WHERE product_id = ? AND path = ?",
+    );
+    for (const [productId, legacyPath] of Object.entries(legacyImageByProduct)) {
+      const prototypePath = prototypeImageByProduct.get(productId);
+      if (!prototypePath) {
+        throw new Error(`Image prototype manquante pour le produit ${productId}.`);
+      }
+      replaceSeededImage.run(
+        prototypePath,
+        productId,
+        legacyPath,
+      );
+    }
+    database
+      .prepare("INSERT INTO catalog_migrations (id) VALUES (?)")
+      .run(prototypeMigration);
   }
   if (database.prepare("SELECT COUNT(*) AS count FROM products").get()?.count === 0) {
     const addProduct = database.prepare(

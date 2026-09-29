@@ -407,6 +407,13 @@ export default function AdminDashboard() {
                               alt={product.name}
                               className="h-40 w-full object-cover"
                             />
+                            {image.path.startsWith(
+                              "/images/wood/prototypes/",
+                            ) && (
+                              <span className="absolute bottom-2 right-2 rounded-full bg-[#302a23]/85 px-2.5 py-1 text-[10px] font-bold text-white">
+                                Visuel prototype
+                              </span>
+                            )}
                             {image.isPrimary && (
                               <span className="absolute left-2 top-2 rounded-full bg-[#e9efdf] px-2.5 py-1 text-[10px] font-bold text-[#536548]">
                                 Image principale

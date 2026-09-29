@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 680" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="60" y1="40" x2="900" y2="650" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7E9D9"/><stop offset="1" stop-color="#B8C09D"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="300" y1="220" x2="720" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C18B58"/><stop offset=".54" stop-color="#9A653E"/><stop offset="1" stop-color="#66452F"/>
+    </linearGradient>
+    <linearGradient id="end" x1="300" y1="240" x2="410" y2="372" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5E6C9"/><stop offset="1" stop-color="#D4B88B"/>
+    </linearGradient>
+    <filter id="shadow" x="130" y="150" width="725" height="415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="20"/></filter>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h960v680H0z"/>
+  <path d="M778 0h182v190c-79 12-142-37-182-190Z" fill="#F6F1E6" fill-opacity=".5"/>
+  <path d="M0 510c166-75 297-45 434-5 186 55 339 60 526-39v214H0V510Z" fill="#425342" fill-opacity=".2"/>
+  <ellipse cx="490" cy="471" fill="#37412F" fill-opacity=".27" filter="url(#shadow)" rx="324" ry="52"/>
+  <g stroke="#68472F" stroke-width="7">
+    <rect x="247" y="318" width="473" height="83" rx="41" fill="url(#wood)" transform="rotate(-7 247 318)"/>
+    <rect x="309" y="231" width="452" height="87" rx="43" fill="url(#wood)" transform="rotate(7 309 231)"/>
+    <rect x="266" y="417" width="454" height="81" rx="40" fill="url(#wood)" transform="rotate(-2 266 417)"/>
+  </g>
+  <g stroke="#DEB17A" stroke-linecap="round" stroke-width="4" opacity=".85">
+    <path d="m402 281 142-18m-76 42 205-20M374 373l176-20m-116 43 176-17m-183 92 160-12"/>
+    <path d="m595 236 39 10m-231 67 28 7m232 89 28 6m-299 71 36-1"/>
+  </g>
+  <g stroke="#806044" stroke-width="6">
+    <ellipse cx="282" cy="355" fill="url(#end)" rx="50" ry="42" transform="rotate(-7 282 355)"/>
+    <ellipse cx="345" cy="259" fill="url(#end)" rx="51" ry="42" transform="rotate(7 345 259)"/>
+    <ellipse cx="299" cy="439" fill="url(#end)" rx="49" ry="40" transform="rotate(-2 299 439)"/>
+  </g>
+  <g stroke="#B48856" stroke-linecap="round" stroke-width="4">
+    <path d="M266 351c11-14 29-18 43-8m-39 18c9-5 20-5 29-1m34-102c12-13 30-15 43-6m-41 17c10-4 21-3 29 1m-51 187c10-12 27-14 40-7"/>
+  </g>
+  <rect x="48" y="47" width="196" height="38" rx="19" fill="#FBF7EF" fill-opacity=".9"/>
+  <text x="70" y="72" fill="#4B5D43" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="2">VISUEL PROTOTYPE</text>
+  <text x="62" y="597" fill="#40392D" font-family="Georgia,serif" font-size="58" font-weight="700">Hêtre</text>
+  <text x="66" y="630" fill="#596047" font-family="Arial,sans-serif" font-size="17" letter-spacing="3">CHALEUR HOMOGÈNE · FEU FACILE</text>
+</svg>
