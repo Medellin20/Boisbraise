@@ -118,10 +118,13 @@ export default function Home() {
   );
 
   const cartCount = cart.length;
-  const subtotal = cart.reduce(
-    (sum, line) => sum + line.unitPrice * line.volume,
-    0,
-  );
+  // Keep client totals consistent with per-line rounding in the database.
+  const subtotal = Math.round(
+    cart.reduce(
+      (sum, line) => sum + Math.round(line.unitPrice * line.volume * 100) / 100,
+      0,
+    ) * 100,
+  ) / 100;
   const delivery = subtotal >= 150 || subtotal === 0 ? 0 : 12;
   const total = subtotal + delivery;
 
@@ -130,8 +133,12 @@ export default function Home() {
     logLength: LogLength,
     selectedVolume: number,
   ) => {
-    if (!Number.isFinite(selectedVolume) || selectedVolume <= 0) {
-      toast.error("Choisissez une quantité supérieure à 0 m³.");
+    if (
+      !Number.isFinite(selectedVolume) ||
+      selectedVolume <= 0 ||
+      Math.round(selectedVolume * 10) !== selectedVolume * 10
+    ) {
+      toast.error("Choisissez une quantité supérieure à 0 m³, par pas de 0,1 m³.");
       return;
     }
     const alreadySelected = cart
@@ -150,7 +157,10 @@ export default function Home() {
       if (existing) {
         return current.map((line) =>
           line.id === product.id && line.logLength === logLength
-            ? { ...line, volume: line.volume + selectedVolume }
+            ? {
+                ...line,
+                volume: Math.round((line.volume + selectedVolume) * 10) / 10,
+              }
             : line,
         );
       }
@@ -162,25 +172,28 @@ export default function Home() {
   };
 
   const updateQuantity = (id: string, logLength: LogLength, delta: number) => {
-    setCart((current) =>
-      current
-        .map((line) =>
-          line.id === id && line.logLength === logLength
-            ? {
-                ...line,
-                volume: Math.max(
-                  0,
-                  Math.min(
-                    products.find((product) => product.id === id)?.stock ??
-                      line.volume + delta,
-                    Math.round((line.volume + delta) * 10) / 10,
-                  ),
-                ),
-              }
-            : line,
-        )
-        .filter((line) => line.volume > 0),
-    );
+    setCart((current) => {
+      const productStock = products.find((product) => product.id === id)?.stock;
+      const otherProductVolume = current
+        .filter((line) => line.id === id && line.logLength !== logLength)
+        .reduce((sum, line) => sum + line.volume, 0);
+      return current
+        .map((line) => {
+          if (line.id !== id || line.logLength !== logLength) return line;
+          const available = Math.max(
+            0,
+            (productStock ?? line.volume + delta) - otherProductVolume,
+          );
+          return {
+            ...line,
+            volume: Math.max(
+              0,
+              Math.min(available, Math.round((line.volume + delta) * 10) / 10),
+            ),
+          };
+        })
+        .filter((line) => line.volume > 0);
+    });
   };
 
   const submitOrder = async (event: FormEvent<HTMLFormElement>) => {
@@ -231,7 +244,7 @@ export default function Home() {
   };
 
   const checkDelivery = () => {
-    if (postalCode.length < 5) {
+    if (!/^\d{5}$/.test(postalCode)) {
       toast.error("Bitte geben Sie eine 5-stellige Postleitzahl ein.");
       return;
     }
@@ -515,12 +528,21 @@ export default function Home() {
                         <input
                           type="number"
                           min="0.1"
+                          max={product.stock}
                           step="0.1"
                           value={selectedVolume}
                           onChange={(event) =>
                             setSelectedVolumes((current) => ({
                               ...current,
                               [product.id]: Number(event.target.value),
+                            }))
+                          }
+                          onBlur={() =>
+                            setSelectedVolumes((current) => ({
+                              ...current,
+                              [product.id]: Math.round(
+                                (current[product.id] ?? 1) * 10,
+                              ) / 10,
                             }))
                           }
                           className="mt-2 h-11 w-full rounded-xl border border-[#ded2c1] bg-white px-3 text-sm font-medium text-[#40382f] outline-none focus:border-[#52684b] focus:ring-2 focus:ring-[#52684b]/15"
@@ -792,13 +814,15 @@ export default function Home() {
                     Code postal
                     <input
                       required
-                      maxLength={12}
+                      maxLength={5}
+                      inputMode="numeric"
+                      pattern="[0-9]{5}"
                       autoComplete="postal-code"
                       value={checkoutDetails.postalCode}
                       onChange={(event) =>
                         setCheckoutDetails((current) => ({
                           ...current,
-                          postalCode: event.target.value,
+                          postalCode: event.target.value.replace(/\D/g, "").slice(0, 5),
                         }))
                       }
                       className="mt-1.5 h-11 w-full rounded-xl border border-[#ded2c1] bg-white px-3 text-sm font-medium"

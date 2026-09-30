@@ -28,7 +28,8 @@ export async function POST(request: Request) {
     !requiredText("customerName", 100) ||
     !requiredText("phone", 30) ||
     !validEmail ||
-    !requiredText("postalCode", 12) ||
+    typeof value.postalCode !== "string" ||
+    !/^\d{5}$/.test(value.postalCode.trim()) ||
     !requiredText("address", 250) ||
     (value.deliveryNotes !== undefined &&
       (typeof value.deliveryNotes !== "string" ||
