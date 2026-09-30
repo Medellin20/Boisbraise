@@ -88,7 +88,29 @@ export function rejectCrossOriginRequest(request: Request): Response | null {
   const origin = request.headers.get("origin");
   if (!origin) return null;
   try {
-    if (new URL(origin).origin === new URL(request.url).origin) return null;
+    const originUrl = new URL(origin);
+    const requestOrigin = new URL(request.url).origin;
+    const configuredOrigin = process.env.ADMIN_ALLOWED_ORIGIN?.trim();
+    const allowedOrigins = new Set([requestOrigin]);
+
+    if (configuredOrigin) {
+      const configuredUrl = new URL(configuredOrigin);
+      if (
+        configuredUrl.origin !== configuredOrigin ||
+        (process.env.NODE_ENV === "production" &&
+          configuredUrl.protocol !== "https:")
+      ) {
+        return Response.json(
+          { error: "ADMIN_ALLOWED_ORIGIN doit être une origine valide." },
+          { status: 503 },
+        );
+      }
+      allowedOrigins.add(configuredUrl.origin);
+    }
+
+    if (originUrl.origin === origin && allowedOrigins.has(originUrl.origin)) {
+      return null;
+    }
   } catch {
     return Response.json({ error: "Origine de requête invalide." }, { status: 403 });
   }

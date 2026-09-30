@@ -21,3 +21,8 @@ The seed statements only fill missing products, prices, and default images.
 They do not overwrite existing product edits or add another default image
 when a product already has one. Existing records that were stored only in a
 local SQLite file are not automatically transferred by running the schema.
+
+5. If the admin login is deployed behind a reverse proxy and rejects the site's own
+   login request, set ADMIN_ALLOWED_ORIGIN to the exact public origin (for example
+   https://shop.example.com) in the server environment. Do not include a path or
+   trailing slash. Production origins must use HTTPS.
