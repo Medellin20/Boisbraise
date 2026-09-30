@@ -1,7 +1,7 @@
 import {
   deleteProductImage,
   setProductPrimaryImage,
-} from "../../../../../../../server/catalog-db";
+} from "../../../../../../../server/supabase-catalog";
 import { deleteProductPhoto } from "../../../../../../../server/supabase-storage";
 import { requireAdmin } from "../../../../../../../server/admin-auth";
 
@@ -21,13 +21,17 @@ export async function PATCH(_request: Request, { params }: RouteContext) {
   const { id, imageId: rawImageId } = await params;
   const imageId = parseImageId(rawImageId);
   if (imageId === null) {
-    return Response.json({ error: "Identifiant de photo invalide." }, { status: 400 });
+    return Response.json(
+      { error: "Identifiant de photo invalide." },
+      { status: 400 },
+    );
   }
   try {
-    setProductPrimaryImage(id, imageId);
+    await setProductPrimaryImage(id, imageId);
     return Response.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Échec de mise à jour.";
+    const message =
+      error instanceof Error ? error.message : "Échec de mise à jour.";
     return Response.json({ error: message }, { status: 404 });
   }
 }
@@ -38,10 +42,13 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
   const { id, imageId: rawImageId } = await params;
   const imageId = parseImageId(rawImageId);
   if (imageId === null) {
-    return Response.json({ error: "Identifiant de photo invalide." }, { status: 400 });
+    return Response.json(
+      { error: "Identifiant de photo invalide." },
+      { status: 400 },
+    );
   }
   try {
-    const result = deleteProductImage(id, imageId);
+    const result = await deleteProductImage(id, imageId);
     try {
       await deleteProductPhoto(result.removedPath);
     } catch (error) {
@@ -49,14 +56,16 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
         "La photo a été retirée du catalogue mais reste dans Supabase Storage.",
         error,
       );
-      return Response.json(
-        { error: "La photo a été retirée du catalogue mais sa suppression du stockage a échoué." },
-        { status: 502 },
-      );
+      return Response.json({
+        success: true,
+        warning:
+          "La photo a été retirée du catalogue mais sa suppression du stockage a échoué.",
+      });
     }
     return Response.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Échec de suppression.";
+    const message =
+      error instanceof Error ? error.message : "Échec de suppression.";
     return Response.json({ error: message }, { status: 400 });
   }
 }

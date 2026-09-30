@@ -4,7 +4,7 @@ import {
   type LogLength,
   type WoodCategory,
 } from "../../../../../shared/catalog";
-import { updateCatalogProduct } from "../../../../../server/catalog-db";
+import { updateCatalogProduct } from "../../../../../server/supabase-catalog";
 import { requireAdmin } from "../../../../../server/admin-auth";
 
 export const runtime = "nodejs";
@@ -51,7 +51,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   }
 
   try {
-    updateCatalogProduct(id, {
+    await updateCatalogProduct(id, {
       name: value.name.trim(),
       description: value.description.trim(),
       category: value.category as WoodCategory,
@@ -66,6 +66,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return Response.json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Échec de mise à jour.";
-    return Response.json({ error: message }, { status: 404 });
+    console.error("Impossible de mettre à jour le produit dans Supabase.", error);
+    return Response.json(
+      { error: message },
+      { status: message.startsWith("Supabase :") ? 503 : 404 },
+    );
   }
 }

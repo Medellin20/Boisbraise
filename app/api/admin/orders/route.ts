@@ -2,17 +2,24 @@ import {
   getAdminOrders,
   updateOrderStatus,
   type OrderStatus,
-} from "../../../../server/catalog-db";
+} from "../../../../server/supabase-catalog";
 import { requireAdmin } from "../../../../server/admin-auth";
 
 export const runtime = "nodejs";
 
 const orderStatuses: OrderStatus[] = ["new", "confirmed", "delivered", "cancelled"];
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
   const denied = requireAdmin(request);
   if (denied) return denied;
-  return Response.json(getAdminOrders());
+  try {
+    return Response.json(await getAdminOrders());
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Les commandes sont indisponibles.";
+    console.error("Impossible de charger les commandes depuis Supabase.", error);
+    return Response.json({ error: message }, { status: 503 });
+  }
 }
 
 export async function PATCH(request: Request) {
@@ -36,10 +43,14 @@ export async function PATCH(request: Request) {
     return Response.json({ error: "Statut ou identifiant de commande invalide." }, { status: 400 });
   }
   try {
-    updateOrderStatus(value.id, value.status as OrderStatus);
+    await updateOrderStatus(value.id, value.status as OrderStatus);
     return Response.json({ success: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "La commande n’a pas pu être mise à jour.";
-    return Response.json({ error: message }, { status: 404 });
+    console.error("Impossible de mettre à jour la commande dans Supabase.", error);
+    return Response.json(
+      { error: message },
+      { status: message.startsWith("Supabase :") ? 503 : 404 },
+    );
   }
 }

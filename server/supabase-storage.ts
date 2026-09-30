@@ -1,29 +1,45 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  getServerSupabase,
+  SupabaseConfigurationError,
+} from "./supabase-client";
 
 const defaultBucket = "product-images";
 
-let storageClient: SupabaseClient | undefined;
+export { SupabaseConfigurationError as SupabaseStorageConfigurationError };
 
 function getStorage() {
+  const client = getServerSupabase();
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error(
-      "Supabase n’est pas configuré. Définissez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY.",
+  if (!supabaseUrl) {
+    throw new SupabaseConfigurationError(
+      "SUPABASE_URL doit être configurée dans l’environnement du serveur.",
     );
   }
-
-  storageClient ??= createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
   return {
-    client: storageClient,
+    client,
     bucket: process.env.SUPABASE_STORAGE_BUCKET || defaultBucket,
     supabaseUrl: new URL(supabaseUrl),
   };
+}
+
+export async function checkProductPhotoStorage(): Promise<void> {
+  const { client, bucket } = getStorage();
+  const { data, error } = await client.storage.getBucket(bucket);
+  if (error) {
+    if (error.statusCode === "404") {
+      throw new SupabaseConfigurationError(
+        `Le bucket Supabase « ${bucket} » n’existe pas. Créez-le dans Storage et rendez-le public.`,
+      );
+    }
+    throw new Error(
+      `Impossible de vérifier le bucket Supabase : ${error.message}`,
+    );
+  }
+  if (!data.public) {
+    throw new SupabaseConfigurationError(
+      `Le bucket Supabase « ${bucket} » est privé. Rendez-le public pour afficher les photos dans le catalogue.`,
+    );
+  }
 }
 
 export async function uploadProductPhoto(

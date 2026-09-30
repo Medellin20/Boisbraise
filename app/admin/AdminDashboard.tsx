@@ -47,7 +47,16 @@ const formatPrice = (price: number) =>
   }).format(price);
 
 async function readJson<T>(response: Response): Promise<T> {
-  const result = (await response.json()) as T & { error?: string };
+  let result: T & { error?: string };
+  try {
+    result = (await response.json()) as T & { error?: string };
+  } catch {
+    throw new Error(
+      response.ok
+        ? "Le serveur a renvoyé une réponse invalide."
+        : `Le serveur a refusé la requête (HTTP ${response.status}).`,
+    );
+  }
   if (!response.ok) throw new Error(result.error ?? "Une erreur est survenue.");
   return result;
 }
@@ -62,6 +71,13 @@ export default function AdminDashboard() {
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [error, setError] = useState("");
+  const [uploadingProductId, setUploadingProductId] = useState<string | null>(
+    null,
+  );
+  const [storageStatus, setStorageStatus] = useState<
+    "unknown" | "checking" | "ready" | "error"
+  >("unknown");
+  const [storageError, setStorageError] = useState("");
 
   const refresh = async () => {
     const [catalogResponse, ordersResponse] = await Promise.all([
@@ -81,7 +97,11 @@ export default function AdminDashboard() {
       .then(readJson<{ authenticated: boolean }>)
       .then((session) => setAuthenticated(session.authenticated))
       .catch((cause: unknown) => {
-        setAuthError(cause instanceof Error ? cause.message : "Vérification de session impossible.");
+        setAuthError(
+          cause instanceof Error
+            ? cause.message
+            : "Vérification de session impossible.",
+        );
       })
       .finally(() => setAuthLoading(false));
   }, []);
@@ -94,7 +114,9 @@ export default function AdminDashboard() {
     setLoading(true);
     refresh()
       .catch((cause: unknown) => {
-        setError(cause instanceof Error ? cause.message : "Chargement impossible.");
+        setError(
+          cause instanceof Error ? cause.message : "Chargement impossible.",
+        );
       })
       .finally(() => setLoading(false));
   }, [authenticated]);
@@ -113,7 +135,9 @@ export default function AdminDashboard() {
       setPassword("");
       setAuthenticated(true);
     } catch (cause) {
-      setAuthError(cause instanceof Error ? cause.message : "Connexion impossible.");
+      setAuthError(
+        cause instanceof Error ? cause.message : "Connexion impossible.",
+      );
     }
   };
 
@@ -128,7 +152,9 @@ export default function AdminDashboard() {
       setProducts([]);
       setOrders([]);
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "Déconnexion impossible.");
+      toast.error(
+        cause instanceof Error ? cause.message : "Déconnexion impossible.",
+      );
     }
   };
 
@@ -156,11 +182,33 @@ export default function AdminDashboard() {
     }
   };
 
+  const checkPhotoStorage = async () => {
+    setStorageStatus("checking");
+    setStorageError("");
+    try {
+      await readJson<{ ready: true }>(
+        await fetch("/api/admin/storage", { cache: "no-store" }),
+      );
+      setStorageStatus("ready");
+      toast.success("Stockage des photos prêt.");
+    } catch (cause) {
+      const message =
+        cause instanceof Error
+          ? cause.message
+          : "Vérification Supabase impossible.";
+      setStorageError(message);
+      setStorageStatus("error");
+      toast.error(message);
+    }
+  };
+
   const uploadImage = async (
     product: CatalogProduct,
     file: File,
     replaceImageId?: number,
   ) => {
+    if (uploadingProductId) return;
+    setUploadingProductId(product.id);
     const form = new FormData();
     form.set("photo", file);
     form.set(
@@ -176,16 +224,22 @@ export default function AdminDashboard() {
       form.set("replaceImageId", String(replaceImageId));
     }
     try {
-      await readJson(
+      const result = await readJson<{ success: true; warning?: string }>(
         await fetch(`/api/admin/products/${product.id}/photos`, {
           method: "POST",
           body: form,
         }),
       );
       await refresh();
-      toast.success(replaceImageId ? "Photo remplacée." : "Photo ajoutée.");
+      if (result.warning) {
+        toast.warning(result.warning);
+      } else {
+        toast.success(replaceImageId ? "Photo remplacée." : "Photo ajoutée.");
+      }
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : "Envoi impossible.");
+    } finally {
+      setUploadingProductId(null);
     }
   };
 
@@ -199,26 +253,37 @@ export default function AdminDashboard() {
       await refresh();
       toast.success("Image principale mise à jour.");
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "Mise à jour impossible.");
+      toast.error(
+        cause instanceof Error ? cause.message : "Mise à jour impossible.",
+      );
     }
   };
 
   const removeImage = async (productId: string, imageId: number) => {
     if (!window.confirm("Supprimer définitivement cette photo ?")) return;
     try {
-      await readJson(
+      const result = await readJson<{ success: true; warning?: string }>(
         await fetch(`/api/admin/products/${productId}/photos/${imageId}`, {
           method: "DELETE",
         }),
       );
       await refresh();
-      toast.success("Photo supprimée.");
+      if (result.warning) {
+        toast.warning(result.warning);
+      } else {
+        toast.success("Photo supprimée.");
+      }
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "Suppression impossible.");
+      toast.error(
+        cause instanceof Error ? cause.message : "Suppression impossible.",
+      );
     }
   };
 
-  const changeOrderStatus = async (orderId: string, status: Order["status"]) => {
+  const changeOrderStatus = async (
+    orderId: string,
+    status: Order["status"],
+  ) => {
     try {
       await readJson(
         await fetch("/api/admin/orders", {
@@ -230,7 +295,9 @@ export default function AdminDashboard() {
       await refresh();
       toast.success("Statut de commande mis à jour.");
     } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : "Mise à jour impossible.");
+      toast.error(
+        cause instanceof Error ? cause.message : "Mise à jour impossible.",
+      );
     }
   };
 
@@ -248,7 +315,9 @@ export default function AdminDashboard() {
   if (authLoading) {
     return (
       <main className="grid min-h-screen place-items-center bg-[#f5f1e8] p-6 text-[#25221e]">
-        <p className="text-sm text-[#766e62]">Vérification de la session admin…</p>
+        <p className="text-sm text-[#766e62]">
+          Vérification de la session admin…
+        </p>
       </main>
     );
   }
@@ -257,7 +326,10 @@ export default function AdminDashboard() {
     return (
       <main className="grid min-h-screen place-items-center bg-[#f5f1e8] px-4 py-10 text-[#25221e]">
         <section className="w-full max-w-md rounded-[26px] border border-[#e3d9ca] bg-[#fbf7ef] p-7 shadow-xl sm:p-9">
-          <a href="/" className="text-sm font-semibold text-[#52684b] hover:underline">
+          <a
+            href="/"
+            className="text-sm font-semibold text-[#52684b] hover:underline"
+          >
             ← Retour au catalogue
           </a>
           <p className="mt-8 text-xs font-bold uppercase tracking-[.18em] text-[#52684b]">
@@ -283,7 +355,10 @@ export default function AdminDashboard() {
               />
             </label>
             {authError && (
-              <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">
+              <p
+                role="alert"
+                className="rounded-xl bg-red-50 p-3 text-sm text-red-800"
+              >
                 {authError}
               </p>
             )}
@@ -302,7 +377,10 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-[#f5f1e8] px-4 py-8 text-[#25221e] sm:px-8 lg:px-12">
       <div className="mx-auto max-w-7xl">
-        <a href="/" className="text-sm font-semibold text-[#52684b] hover:underline">
+        <a
+          href="/"
+          className="text-sm font-semibold text-[#52684b] hover:underline"
+        >
           ← Retour au catalogue
         </a>
         <header className="mt-7 flex flex-col justify-between gap-5 border-b border-[#ded5c8] pb-7 sm:flex-row sm:items-end">
@@ -324,10 +402,12 @@ export default function AdminDashboard() {
         </header>
 
         <div className="mt-7 flex gap-2 border-b border-[#ded5c8]">
-          {([
-            ["catalog", "Catalogue & tarifs"],
-            ["orders", `Commandes (${orders.length})`],
-          ] as const).map(([tab, label]) => (
+          {(
+            [
+              ["catalog", "Catalogue & tarifs"],
+              ["orders", `Commandes (${orders.length})`],
+            ] as const
+          ).map(([tab, label]) => (
             <button
               key={tab}
               type="button"
@@ -344,12 +424,17 @@ export default function AdminDashboard() {
         </div>
 
         {error && (
-          <p role="alert" className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-800">
+          <p
+            role="alert"
+            className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-800"
+          >
             {error}
           </p>
         )}
         {loading ? (
-          <p className="py-12 text-sm text-[#766e62]">Chargement des données…</p>
+          <p className="py-12 text-sm text-[#766e62]">
+            Chargement des données…
+          </p>
         ) : activeTab === "catalog" ? (
           <section className="space-y-7 py-7" aria-label="Catalogue et tarifs">
             <div className="flex flex-wrap items-end justify-between gap-3">
@@ -359,7 +444,35 @@ export default function AdminDashboard() {
                   Prix au m³ (1 m³ = 1 stère), par longueur de bûche.
                 </p>
               </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  disabled={storageStatus === "checking"}
+                  onClick={() => void checkPhotoStorage()}
+                  className="rounded-full border border-[#cfc4b5] px-4 py-2.5 text-xs font-semibold text-[#52684b] disabled:opacity-50"
+                >
+                  {storageStatus === "checking"
+                    ? "Vérification du stockage…"
+                    : "Tester le stockage photo"}
+                </button>
+                {storageStatus === "ready" && (
+                  <span
+                    role="status"
+                    className="text-xs font-semibold text-[#536548]"
+                  >
+                    Supabase Storage est prêt.
+                  </span>
+                )}
+              </div>
             </div>
+            {storageStatus === "error" && (
+              <p
+                role="alert"
+                className="rounded-xl bg-red-50 p-3 text-sm leading-5 text-red-800"
+              >
+                {storageError}
+              </p>
+            )}
 
             {products.map((product) => (
               <article
@@ -479,17 +592,26 @@ export default function AdminDashboard() {
                 <div className="border-t border-[#e9dfd1] bg-[#f8f3e9] p-5">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h3 className="font-semibold">Photos de {product.name}</h3>
+                      <h3 className="font-semibold">
+                        Photos de {product.name}
+                      </h3>
                       <p className="mt-1 text-xs text-[#82786b]">
                         JPEG, PNG ou WebP · 5 Mo maximum
                       </p>
                     </div>
-                    <label className="cursor-pointer rounded-full border border-[#cfc4b5] bg-white px-4 py-2 text-xs font-bold text-[#52684b] hover:bg-[#f2ede3]">
+                    <label
+                      className={`rounded-full border border-[#cfc4b5] bg-white px-4 py-2 text-xs font-bold text-[#52684b] hover:bg-[#f2ede3] ${
+                        uploadingProductId
+                          ? "pointer-events-none opacity-50"
+                          : "cursor-pointer"
+                      }`}
+                    >
                       Ajouter une photo
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         className="sr-only"
+                        disabled={uploadingProductId !== null}
                         onChange={(event) => {
                           const file = event.target.files?.[0];
                           if (file) void uploadImage(product, file);
@@ -498,6 +620,14 @@ export default function AdminDashboard() {
                       />
                     </label>
                   </div>
+                  {uploadingProductId === product.id && (
+                    <p
+                      role="status"
+                      className="mb-4 rounded-xl bg-[#e9efdf] px-4 py-3 text-sm font-semibold text-[#536548]"
+                    >
+                      Envoi de la photo vers Supabase…
+                    </p>
+                  )}
                   {product.images.length === 0 ? (
                     <p className="rounded-xl border border-dashed border-[#d8ccbb] p-6 text-center text-sm text-[#82786b]">
                       Aucune photo. Ajoutez-en une pour l’afficher au catalogue.
@@ -528,6 +658,7 @@ export default function AdminDashboard() {
                                 type="file"
                                 accept="image/jpeg,image/png,image/webp"
                                 className="sr-only"
+                                disabled={uploadingProductId !== null}
                                 onChange={(event) => {
                                   const file = event.target.files?.[0];
                                   if (file) {
@@ -550,7 +681,9 @@ export default function AdminDashboard() {
                             )}
                             <button
                               type="button"
-                              onClick={() => void removeImage(product.id, image.id)}
+                              onClick={() =>
+                                void removeImage(product.id, image.id)
+                              }
                               className="rounded-full border border-red-200 px-3 py-1.5 text-[11px] font-semibold text-red-700"
                             >
                               Supprimer

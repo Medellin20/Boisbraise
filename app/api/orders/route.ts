@@ -1,5 +1,5 @@
 import { LOG_LENGTHS, type LogLength } from "../../../shared/catalog";
-import { createOrder } from "../../../server/catalog-db";
+import { createOrder } from "../../../server/supabase-catalog";
 
 export const runtime = "nodejs";
 
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order = createOrder({
+    const order = await createOrder({
       customerName: (value.customerName as string).trim(),
       phone: (value.phone as string).trim(),
       email: (value.email as string).trim(),
@@ -80,11 +80,19 @@ export async function POST(request: Request) {
       items: requestedItems,
     });
     return Response.json(
-      { orderId: order.id, total: order.total, deliveryFee: order.deliveryFee },
+      {
+        orderId: order.id,
+        total: order.total,
+        deliveryFee: order.deliveryFee,
+      },
       { status: 201 },
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "La commande n’a pas pu être enregistrée.";
-    return Response.json({ error: message }, { status: 400 });
+    console.error("Impossible d’enregistrer la commande dans Supabase.", error);
+    return Response.json(
+      { error: message },
+      { status: message.startsWith("Supabase :") ? 503 : 400 },
+    );
   }
 }
