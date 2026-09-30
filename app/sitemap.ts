@@ -1,0 +1,4 @@
+import type { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/utils/site-url';
+import { getPublishedWoodProducts } from '@/lib/data/wood-products';
+export default async function sitemap():Promise<MetadataRoute.Sitemap>{const siteUrl=getSiteUrl();const staticRoutes=['','/catalogue','/comment-ca-marche','/a-propos','/contact','/faq','/mentions-legales','/confidentialite','/conditions-generales'].map(route=>({url:`${siteUrl}${route}`,lastModified:new Date(),changeFrequency:(route===''?'daily':'weekly') as 'daily'|'weekly',priority:route===''?1:0.6}));const products=await getPublishedWoodProducts();return [...staticRoutes,...products.map(product=>({url:`${siteUrl}/catalogue/${product.slug}`,lastModified:new Date(product.updated_at),changeFrequency:'weekly' as const,priority:0.8}))];}

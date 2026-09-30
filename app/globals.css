@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-sand-100 text-ink antialiased;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+    overflow-wrap: anywhere;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    @apply bg-canal-200 text-ink-900;
+  }
+
+  /* Anneau de focus visible et cohérent au clavier partout dans l'app */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ink-700 ring-offset-2 ring-offset-sand-100;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .scrollbar-safe {
+    scrollbar-width: thin;
+    overscroll-behavior-inline: contain;
+  }
+
+  /* Motif "ligne de canal" — signature visuelle utilisée entre les sections */
+  .canal-divider {
+    @apply relative h-px w-full bg-canal-line;
+  }
+  .canal-divider::after {
+    content: '';
+    @apply absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-brick-500;
+  }
+}
+
+/* Skeleton shimmer keyframe fallback (au cas où le plugin tailwind ne l'ait pas injecté) */
+@keyframes shimmer {
+  from { background-position: -700px 0; }
+  to { background-position: 700px 0; }
+}
+
+/* Diaporama photographique de la bannière d’accueil. Les décalages négatifs
+   permettent d’afficher immédiatement la première image, sans écran vide. */
+.hero-slide {
+  opacity: 0;
+  transform: scale(1.04);
+  animation: hero-slideshow 18s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.hero-slide:nth-child(2) {
+  animation-delay: -12s;
+}
+
+.hero-slide:nth-child(3) {
+  animation-delay: -6s;
+}
+
+@keyframes hero-slideshow {
+  0%, 27% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  34%, 94% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+
+  .hero-slide:first-child {
+    opacity: 1;
+  }
+}
+
+/* Intégration compacte du sélecteur Google Translate dans la navigation. */
+.language-translator .goog-te-gadget {
+  color: transparent;
+  font-size: 0;
+  line-height: 1;
+}
+
+.language-translator .goog-te-gadget .goog-te-combo {
+  margin: 0;
+  width: 100%;
+  height: 2rem;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: #39332d;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.language-translator .goog-logo-link,
+.language-translator .goog-te-gadget span {
+  display: none !important;
+}
+
+body > .skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+/* Les tarifs utilisent des champs numériques sobres et identiques sur tous les navigateurs. */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+input[type='number'] {
+  appearance: textfield;
+}
+
+/* Une palette sable partagée par toutes les pages et les fenêtres modales. */
+:root {
+  --ink-default: 57 51 45;
+  --ink-50: 250 248 244;
+  --ink-100: 233 226 215;
+  --ink-200: 213 203 188;
+  --ink-300: 183 170 151;
+  --ink-400: 146 131 111;
+  --ink-500: 112 97 79;
+  --ink-600: 98 83 63;
+  --ink-700: 81 68 49;
+  --ink-800: 68 56 41;
+  --ink-900: 55 46 36;
+  --ink-950: 45 38 31;
+  --canal-default: 139 118 88;
+  --canal-50: 250 247 240;
+  --canal-100: 238 230 216;
+  --canal-200: 221 206 183;
+  --canal-300: 201 181 145;
+  --canal-400: 173 148 109;
+  --canal-500: 139 115 80;
+  --canal-600: 120 96 63;
+  --canal-700: 100 78 51;
+  --canal-800: 81 64 44;
+  --canal-900: 64 50 36;
+  --brick-default: 128 99 68;
+  --brick-50: 250 245 238;
+  --brick-100: 240 228 213;
+  --brick-200: 223 200 172;
+  --brick-300: 198 167 130;
+  --brick-400: 172 136 96;
+  --brick-500: 128 99 68;
+  --brick-600: 110 82 55;
+  --brick-700: 92 67 46;
+  --brick-800: 73 54 37;
+  --sand-default: 246 241 232;
+  --sand-50: 255 253 248;
+  --sand-100: 246 241 232;
+  --sand-200: 236 227 213;
+  --sand-300: 217 203 183;
+  --sand-400: 186 170 147;
+}
+.site-background { background: #f6f1e8; color: #39332d; }
+.site-background h1, .site-background h2, .site-background h3 { font-family: var(--font-roboto), Arial, sans-serif; font-weight: 400; }
+.site-background :is(input, select, textarea) { border-radius: 0.75rem; }
+.site-nav { background: #f6f1e8f5 !important; border-color: #d5cbbc !important; }
+.brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid #b9a17d; border-radius: 13px; background: #21492d; color: #f7f1e6; font: 800 12px/1 var(--font-roboto), Arial, sans-serif; letter-spacing: -.04em; box-shadow: 0 4px 10px #21492d24; }
+.brand-name { color: #173a27; font: 700 27px/1 var(--font-roboto), Arial, sans-serif; letter-spacing: -1.2px; }
+.brand-dot { color: #8b633b; }
+.site-footer { background: #e7dccb; }
+.catalogue-heading { border-left: 5px solid #806344; background: #ece3d5; color: #39332d; }
+.catalogue-heading :is(h1, p, span) { color: #62533f; }
+.catalogue-heading nav a { color: #62533f; border-color: #b7aa97; border-radius: 0; }
+.catalogue-heading nav a[aria-current='page'] { color: white; background: #62533f; }
+/* Surfaces chaudes et espacements partagés, y compris dans les portails. */
+@layer base {
+  input, select, textarea { accent-color: #806344; }
+}
+@layer utilities {
+  .bg-white { background-color: #fffdf8; }
+}
+.site-background main > .container-app { padding-top: clamp(2rem, 5vw, 4rem); padding-bottom: clamp(3rem, 6vw, 5rem); }
+.site-footer { color: #514431; border-top-color: #c9b591; }
+.site-background .property-editorial { background: #fffdf8; }
+.collection-spread { align-items: start; }
+.collection-story, .hero-note, .approach-section > * { min-width: 0; }
+.journal-button { min-height: 48px; }
+.journal-text-link { min-height: 44px; }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .journal-section-title { grid-template-columns: .65fr 1.35fr; }
+  .journal-section-title > p { grid-column: 2; }
+  .approach-section { gap: 32px; }
+  .hero-photo { height: 420px; }
+}
+@media (max-width: 389px) {
+  .brand-name { font-size: 23px; }
+  .brand-mark { width: 34px; height: 34px; border-radius: 11px; }
+  .journal-hero h1 { font-size: 2.9rem; }
+  .hero-photo figcaption { flex-direction: column; gap: 5px; }
+}
+
+/* Identité boutique bois, inspirée des maquettes produit fournies. */
+.wood-home, .wood-catalog { background: #f5ecd9; color: #39332d; }
+.wood-hero { position: relative; overflow: hidden; background: radial-gradient(ellipse at 86% 20%, #e3ddc1 0%, transparent 42%), linear-gradient(125deg, #fbf8f1 0%, #f5ecd9 58%, #e8e3cc 100%); }
+.wood-hero::before { position: absolute; inset: 0; background-image: radial-gradient(#6f795327 .7px, transparent .7px); background-size: 19px 19px; content: ""; opacity: .24; mask-image: linear-gradient(90deg, transparent, black); pointer-events: none; }
+.wood-hero-image { background: #677155; }
+.wood-hero-note { animation: wood-note-enter .7s .25s both; }
+.wood-benefit-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.wood-benefit-card:hover { transform: translateY(-3px); border-color: #d2c2a8; box-shadow: 0 15px 28px rgba(62,49,32,.12); }
+@keyframes wood-note-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.wood-benefits { border-bottom: 8px solid #f0e4cb; background: #fbf8f2; }
+.wood-heading, .wood-home h1, .wood-home h2, .wood-catalog h1, .wood-catalog h2, .wood-product-card h3 { font-family: var(--font-roboto), Arial, sans-serif !important; }
+.wood-chip { display: inline-flex; min-height: 26px; align-items: center; gap: 5px; border: 1px solid; border-radius: 9999px; padding: 3px 9px; font-size: 11px; line-height: 1.2; white-space: nowrap; }
+.wood-chip-green { border-color: #c8d2c6; background: #edf1ed; color: #24452d; }
+.wood-chip-orange { border-color: #ebc9a9; background: #faf0e5; color: #81522f; }
+.wood-chip-red { border-color: #efc6c1; background: #fbebea; color: #bd3a2f; }
+
+
+.wood-product-card { animation: wood-card-enter .55s cubic-bezier(.2,.7,.2,1) both; transition: transform .24s ease, box-shadow .24s ease; }
+.wood-product-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgba(62,49,32,.15); }
+.wood-winter-section { background: linear-gradient(135deg,#f8f3e8 0%,#efe3ca 55%,#f8f3e8 100%); }
+.wood-winter-glow { position:absolute; width:18rem; height:18rem; top:50%; left:50%; border-radius:9999px; background:radial-gradient(circle,rgba(205,130,65,.18),transparent 70%); transform:translate(-50%,-50%); animation: wood-glow 5s ease-in-out infinite; pointer-events:none; }
+.wood-cta:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(33,73,45,.24); }
+@keyframes wood-card-enter { from { opacity:0; } to { opacity:1; } }
+@keyframes wood-glow { 0%,100% { opacity:.55; scale:.96; } 50% { opacity:1; scale:1.08; } }
+@media (prefers-reduced-motion: reduce) { .wood-product-card, .wood-winter-glow, .wood-hero-note { animation:none; transition:none; } .wood-product-card:hover, .wood-cta:hover, .wood-benefit-card:hover { transform:none; } }

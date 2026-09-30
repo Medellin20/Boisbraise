@@ -1,0 +1,8 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
+import { getPublishedWoodProducts } from '@/lib/data/wood-products';
+import { WoodProductCard } from '@/components/wood/product-card';
+export const metadata:Metadata={title:'Nos essences',description:'Choisissez votre bois et consultez nos prix par longueur.'};
+export const dynamic='force-dynamic';
+export default async function CataloguePage(){const products=await getPublishedWoodProducts();return <main className="wood-catalog min-h-screen"><section className="container-app py-10 sm:py-14"><div className="flex items-end justify-between gap-5"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-[#bd682b]">Nos essences</p><h1 className="wood-heading mt-2 text-4xl font-medium text-[#102b1e] sm:text-5xl">Choisissez votre bois</h1></div><Link href="/contact" className="hidden items-center gap-2 rounded-xl border border-[#e3d9c8] bg-white px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-[#f9f5ed] sm:inline-flex">Tout le catalogue <ArrowUpRight size={15}/></Link></div>{products.length?<div className="mt-9 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{products.map(product=><WoodProductCard key={product.id} product={product}/>)}</div>:<div className="mt-9 rounded-2xl border border-dashed border-[#d7cdbb] bg-white/70 p-10 text-center"><p className="font-semibold text-[#183421]">Le catalogue est en préparation.</p><p className="mt-2 text-sm text-[#645f55]">Contactez-nous pour connaître les essences disponibles.</p></div>}<p className="mt-5 text-xs text-[#766e62]">Prix affichés au m³ (stère). Disponibilité et livraison à confirmer selon votre zone.</p></section></main>;}
