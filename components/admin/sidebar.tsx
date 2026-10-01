@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Trees, LogOut, Menu, X, CreditCard } from 'lucide-react';
+import { LayoutDashboard, Trees, LogOut, Menu, X, CreditCard, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { logoutAdmin } from '@/actions/admin-auth';
 
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Übersicht', icon: LayoutDashboard, exact: true },
   { href: '/admin/bois', label: 'Holzkatalog', icon: Trees },
   { href: '/admin/paiement', label: 'Zahlung & Bankverbindung', icon: CreditCard },
+  { href: '/admin/kontakt', label: 'Footer-Kontaktdaten', icon: Mail },
 ];
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
@@ -97,7 +98,7 @@ export function AdminSidebar() {
           aria-controls="admin-mobile-menu"
           onClick={() => setMobileOpen(true)}
           className="flex h-11 w-11 items-center justify-center rounded-lg text-ink-700"
-          aria-label="Ouvrir le menu admin"
+          aria-label="Admin-Menü öffnen"
         >
           <Menu className="h-5.5 w-5.5" />
         </button>
@@ -106,7 +107,7 @@ export function AdminSidebar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div className="absolute inset-0 bg-ink-950/60" onClick={() => setMobileOpen(false)} />
-          <div ref={panelRef} id="admin-mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation administrateur" className="relative flex h-dvh w-[min(18rem,calc(100vw-2rem))] flex-col bg-ink-950 shadow-2xl">
+          <div ref={panelRef} id="admin-mobile-menu" role="dialog" aria-modal="true" aria-label="Administrationsnavigation" className="relative flex h-dvh w-[min(18rem,calc(100vw-2rem))] flex-col bg-ink-950 shadow-2xl">
             <div className="flex shrink-0 items-center justify-between px-5 py-4">
               <SidebarHeader compact />
               <button
