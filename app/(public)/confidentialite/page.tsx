@@ -1,45 +1,39 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/shared/legal-page';
 
-export const metadata: Metadata = { title: 'Politique de confidentialité' };
+export const metadata: Metadata = { title: 'Datenschutzerklärung' };
 
 export default function ConfidentialitePage() {
   return (
-    <LegalPage title="Politique de confidentialité" updatedAt="21 août 2026">
-      <h2>Données collectées</h2>
+    <LegalPage title="Datenschutzerklärung" updatedAt="21. August 2026">
+      <h2>Erhobene Daten</h2>
       <p>
-        Lorsque vous utilisez le formulaire de contact, les informations que vous saisissez sont transmises afin de répondre à votre demande. Les catégories exactes de données, le responsable du traitement et les durées de conservation doivent être confirmés par l’exploitant.
+        Wenn Sie das Kontaktformular nutzen, werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Die genauen Datenkategorien, der Verantwortliche und die Aufbewahrungsfristen müssen vom Betreiber bestätigt werden.
       </p>
 
-      <h2>Finalités du traitement</h2>
+      <h2>Zwecke der Verarbeitung</h2>
       <p>
-        Les informations sont destinées au traitement des demandes de renseignements et de devis portant sur les produits et leur livraison.
+        Die Angaben dienen der Bearbeitung von Fragen und Angebotsanfragen zu Produkten und deren Lieferung.
       </p>
 
-      <h2>Conservation des données</h2>
+      <h2>Speicherdauer</h2>
       <p>
-        Vos données sont conservées pour la durée nécessaire au traitement de votre dossier, puis
-        archivées conformément aux obligations légales applicables.
+        Ihre Daten werden so lange gespeichert, wie es zur Bearbeitung Ihres Anliegens erforderlich ist, und anschließend gemäß den geltenden gesetzlichen Pflichten archiviert.
       </p>
 
-      <h2>Sécurité</h2>
+      <h2>Sicherheit</h2>
       <p>
-        Vos données sont stockées sur une infrastructure Supabase sécurisée, protégée par des
-        politiques de sécurité au niveau des lignes (Row Level Security). L’accès aux dossiers est
-        réservé à notre équipe administrative.
+        Ihre Daten werden auf einer geschützten Supabase-Infrastruktur gespeichert und durch Row-Level-Security-Richtlinien geschützt. Der Zugriff ist unserem Verwaltungsteam vorbehalten.
       </p>
 
-      <h2>Vos droits</h2>
+      <h2>Ihre Rechte</h2>
       <p>
-        Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d’un
-        droit d’accès, de rectification et de suppression de vos données. Pour exercer ces droits,
-        contactez-nous à [adresse e-mail de contact à compléter].
+        Gemäß der Datenschutz-Grundverordnung (DSGVO) haben Sie das Recht auf Auskunft, Berichtigung und Löschung Ihrer Daten. Zur Ausübung dieser Rechte kontaktieren Sie uns unter [Kontakt-E-Mail ergänzen].
       </p>
 
       <h2>Cookies</h2>
       <p>
-        Ce site utilise le stockage local de votre navigateur uniquement pour mémoriser vos favoris ;
-        aucun cookie de suivi publicitaire n’est utilisé.
+        Diese Website verwendet den lokalen Browserspeicher ausschließlich zum Merken Ihrer Favoriten. Werbe-Tracking-Cookies werden nicht eingesetzt.
       </p>
     </LegalPage>
   );

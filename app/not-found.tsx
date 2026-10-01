@@ -12,22 +12,22 @@ export default function NotFound() {
         <div className="container-app text-center">
           <p className="text-eyebrow text-canal-600">Erreur 404</p>
           <h1 className="mt-3 text-display-md font-extrabold text-ink-900 sm:text-display-lg">
-            Page introuvable
+            Seite nicht gefunden
           </h1>
           <p className="mx-auto mt-4 max-w-md text-ink-500">
-            La page ou le produit que vous recherchez n’existe pas ou n’est plus disponible.
+            Die gesuchte Seite oder das Produkt existiert nicht oder ist nicht mehr verfügbar.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild variant="outline">
               <Link href="/">
                 <Home className="h-4 w-4" />
-                Retour à l’accueil
+                Zurück zur Startseite
               </Link>
             </Button>
             <Button asChild>
               <Link href="/catalogue">
                 <Search className="h-4 w-4" />
-                Voir le catalogue bois
+                Holzkatalog ansehen
               </Link>
             </Button>
           </div>

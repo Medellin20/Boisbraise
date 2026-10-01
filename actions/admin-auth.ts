@@ -53,22 +53,23 @@ export async function loginAdmin(_prevState: AdminLoginState, formData: FormData
   const rateLimit = checkRateLimit(clientKey);
 
   if (!rateLimit.allowed) {
+    const retryMinutes = Math.ceil((rateLimit.retryAfterSeconds ?? 60) / 60);
     return {
       success: false,
-      message: `Trop de tentatives. Réessayez dans ${Math.ceil((rateLimit.retryAfterSeconds ?? 60) / 60)} minute(s).`,
+      message: `Zu viele Anmeldeversuche. Bitte versuchen Sie es in ${retryMinutes} ${retryMinutes === 1 ? 'Minute' : 'Minuten'} erneut.`,
     };
   }
 
   const parsed = adminLoginSchema.safeParse({ password: formData.get('password') });
   if (!parsed.success) {
-    return { success: false, message: 'Merci de saisir le mot de passe.' };
+    return { success: false, message: 'Bitte geben Sie das Passwort ein.' };
   }
 
   const expectedPassword = process.env.ADMIN_PASSWORD;
   if (!expectedPassword) {
     return {
       success: false,
-      message: 'ADMIN_PASSWORD n’est pas configuré côté serveur. Ajoutez-le dans .env.local.',
+      message: 'ADMIN_PASSWORD ist auf dem Server nicht eingerichtet. Fügen Sie den Wert in .env.local hinzu.',
     };
   }
 
@@ -76,7 +77,7 @@ export async function loginAdmin(_prevState: AdminLoginState, formData: FormData
 
   if (!isValid) {
     registerFailedAttempt(clientKey);
-    return { success: false, message: 'Mot de passe incorrect.' };
+    return { success: false, message: 'Falsches Passwort.' };
   }
 
   clearRateLimit(clientKey);

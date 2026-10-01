@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import { Accordion } from '@/components/shared/accordion';
 import { FadeIn } from '@/components/ui/fade-in';
-export const metadata: Metadata = { title: 'FAQ', description: 'Questions fréquentes sur le choix, le devis et la livraison du bois.' };
+export const metadata: Metadata = { title: 'FAQ', description: 'Häufige Fragen zu Holzauswahl, Angebot und Lieferung.' };
 const CATEGORIES = [
-  { title: 'Produits & devis', items: [
-    { question: 'Quels types de bois proposez-vous ?', answer: 'Nous présentons des familles de produits pour le chauffage, le bois brut et la construction. Contactez-nous pour connaître les essences, formats et disponibilités du moment.' },
-    { question: 'Comment obtenir un prix ?', answer: 'Envoyez-nous votre usage, les dimensions ou le volume souhaité et votre destination. Nous vous répondrons avec une offre selon la disponibilité et les modalités de livraison.' },
-    { question: 'Puis-je commander une quantité ou une dimension particulière ?', answer: 'Indiquez votre besoin dans le formulaire. Nous confirmerons ce qui est possible avant toute commande.' },
+  { title: 'Produkte & Angebote', items: [
+    { question: 'Welche Holzarten bieten Sie an?', answer: 'Wir bieten Holz zum Heizen, Rohholz und Bauholz an. Kontaktieren Sie uns zu aktuell verfügbaren Holzarten und Formaten.' },
+    { question: 'Wie erhalte ich einen Preis?', answer: 'Senden Sie uns den Verwendungszweck, die gewünschten Maße oder Mengen und den Lieferort. Wir erstellen ein Angebot abhängig von Verfügbarkeit und Lieferung.' },
+    { question: 'Kann ich eine bestimmte Menge oder Größe bestellen?', answer: 'Teilen Sie uns Ihren Bedarf über das Formular mit. Wir bestätigen die Möglichkeiten vor Ihrer Bestellung.' },
   ] },
-  { title: 'Retrait & livraison', items: [
-    { question: 'Livrez-vous dans ma région ?', answer: 'Les possibilités et frais de transport dépendent de la destination, du volume et du type de produit. Précisez votre localité pour que nous puissions vous répondre.' },
-    { question: 'Quand ma commande peut-elle être livrée ?', answer: 'Le délai est confirmé avec le devis, en fonction des stocks et de l’organisation du transport.' },
+  { title: 'Abholung & Lieferung', items: [
+    { question: 'Liefern Sie in meine Region?', answer: 'Möglichkeiten und Transportkosten hängen von Lieferort, Menge und Produktart ab. Geben Sie Ihren Ort an, damit wir Ihnen Bescheid geben können.' },
+    { question: 'Wann kann meine Bestellung geliefert werden?', answer: 'Den Lieferzeitraum bestätigen wir mit dem Angebot, abhängig vom Lagerbestand und der Transportplanung.' },
   ] },
 ];
-export default function FaqPage() { return <div className="container-app py-14 sm:py-20"><FadeIn><span className="text-eyebrow uppercase text-canal-600">HolzNest · Aide</span><h1 className="mt-2 text-display-sm font-extrabold text-ink-900 sm:text-display-md">Questions fréquentes</h1><p className="mt-3 max-w-xl text-ink-500">Les informations utiles pour demander un devis et organiser votre commande.</p></FadeIn><div className="mt-12 max-w-3xl space-y-10">{CATEGORIES.map((category,i)=><FadeIn key={category.title} delay={i*.05}><h2 className="mb-4 text-lg font-bold text-ink-900">{category.title}</h2><Accordion items={category.items}/></FadeIn>)}</div></div>; }
+export default function FaqPage() { return <div className="container-app py-14 sm:py-20"><FadeIn><span className="text-eyebrow uppercase text-canal-600">HolzNest · Hilfe</span><h1 className="mt-2 text-display-sm font-extrabold text-ink-900 sm:text-display-md">Häufige Fragen</h1><p className="mt-3 max-w-xl text-ink-500">Wichtige Informationen für Ihre Angebotsanfrage und Bestellung.</p></FadeIn><div className="mt-12 max-w-3xl space-y-10">{CATEGORIES.map((category,i)=><FadeIn key={category.title} delay={i*.05}><h2 className="mb-4 text-lg font-bold text-ink-900">{category.title}</h2><Accordion items={category.items}/></FadeIn>)}</div></div>; }

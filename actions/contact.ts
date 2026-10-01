@@ -10,13 +10,13 @@ export async function submitContactMessage(input: ContactInput): Promise<ActionR
   if (!parsed.success) {
     return {
       success: false,
-      message: 'Merci de corriger les champs indiqués.',
+      message: 'Bitte korrigieren Sie die markierten Felder.',
       fieldErrors: parsed.error.flatten().fieldErrors,
     };
   }
 
   if (parsed.data.website) {
-    return { success: true, message: 'Votre message a été envoyé.' };
+    return { success: true, message: 'Ihre Nachricht wurde gesendet.' };
   }
 
   const supabase = createAdminClient();
@@ -29,7 +29,7 @@ export async function submitContactMessage(input: ContactInput): Promise<ActionR
   });
 
   if (error) {
-    return { success: false, message: 'Une erreur est survenue, merci de réessayer.' };
+    return { success: false, message: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
   }
 
   await sendAdminAlert(`Nouveau message de contact — ${parsed.data.subject}`, {
@@ -40,5 +40,5 @@ export async function submitContactMessage(input: ContactInput): Promise<ActionR
     Message: parsed.data.message,
   });
 
-  return { success: true, message: 'Votre message a été envoyé. Nous vous répondrons rapidement.' };
+  return { success: true, message: 'Ihre Nachricht wurde gesendet. Wir melden uns schnellstmöglich bei Ihnen.' };
 }

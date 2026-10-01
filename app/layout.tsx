@@ -18,32 +18,32 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'HolzNest — Vente de bois',
+    default: 'HolzNest — Holzverkauf',
     template: '%s | HolzNest',
   },
   description:
-    'Bois de chauffage, grumes et bois de construction. Demandez votre devis et organisez votre livraison.',
+    'Brennholz, Rundholz und Bauholz. Fordern Sie ein Angebot an und organisieren Sie Ihre Lieferung.',
   keywords: [
-    'vente de bois',
-    'bois de chauffage',
-    'grumes et billons',
-    'bois de construction',
-    'livraison de bois',
+    'Holzverkauf',
+    'Brennholz',
+    'Rundholz und Holzstämme',
+    'Bauholz',
+    'Holzlieferung',
     'HolzNest',
   ],
   openGraph: {
     type: 'website',
-    locale: 'fr_FR',
+    locale: 'de_DE',
     siteName: 'HolzNest',
-    title: 'HolzNest — Vente de bois',
+    title: 'HolzNest — Holzverkauf',
     description:
-      'Trouvez le bois adapté à votre projet et demandez un devis.',
+      'Finden Sie das passende Holz für Ihr Vorhaben und fordern Sie ein Angebot an.',
     url: siteUrl,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HolzNest — Vente de bois',
-    description: 'Bois de chauffage, grumes et bois de construction.',
+    title: 'HolzNest — Holzverkauf',
+    description: 'Brennholz, Rundholz und Bauholz.',
   },
   robots: {
     index: true,
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={roboto.variable}>
+    <html lang="de" className={roboto.variable}>
       <body className="font-sans">
         <PageTransition>{children}</PageTransition>
         <Toaster

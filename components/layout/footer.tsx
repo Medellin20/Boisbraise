@@ -3,18 +3,18 @@ import { Facebook, TreePine, Instagram, Linkedin, Mail, Phone } from 'lucide-rea
 import { GermanReviewCarousel } from '@/components/shared/german-review-carousel';
 
 const COLUMN_LINKS = [
-  { href: '/', label: 'Accueil' },
-  { href: '/catalogue', label: 'Catalogue bois' },
-  { href: '/comment-ca-marche', label: 'Comment ça marche' },
-  { href: '/a-propos', label: 'À propos' },
-  { href: '/contact', label: 'Contact' },
+  { href: '/', label: 'Startseite' },
+  { href: '/catalogue', label: 'Holzkatalog' },
+  { href: '/comment-ca-marche', label: 'So funktioniert es' },
+  { href: '/a-propos', label: 'Über uns' },
+  { href: '/contact', label: 'Kontakt' },
   { href: '/faq', label: 'FAQ' },
 ];
 
 const LEGAL_LINKS = [
-  { href: '/mentions-legales', label: 'Mentions légales' },
-  { href: '/confidentialite', label: 'Confidentialité' },
-  { href: '/conditions-generales', label: 'Conditions générales' },
+  { href: '/mentions-legales', label: 'Impressum' },
+  { href: '/confidentialite', label: 'Datenschutz' },
+  { href: '/conditions-generales', label: 'Allgemeine Geschäftsbedingungen' },
 ];
 
 export function Footer() {
@@ -34,7 +34,7 @@ export function Footer() {
             </span>
           </Link>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-600">
-            Bois de chauffage, grumes et bois de construction. Une offre adaptée à votre projet, avec livraison à organiser.
+            Brennholz, Rundholz und Bauholz. Das passende Angebot für Ihr Vorhaben – mit organisierter Lieferung.
           </p>
           <div className="mt-5 flex items-center gap-3">
             <a
@@ -75,7 +75,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-eyebrow uppercase text-ink-600">Informations légales</h3>
+          <h3 className="text-eyebrow uppercase text-ink-600">Rechtliches</h3>
           <ul className="mt-4 space-y-2.5">
             {LEGAL_LINKS.map((link) => (
               <li key={link.href}>
@@ -88,7 +88,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-eyebrow uppercase text-ink-600">Contact</h3>
+          <h3 className="text-eyebrow uppercase text-ink-600">Kontakt</h3>
           <ul className="mt-4 space-y-3">
             <li>
               <a
@@ -114,8 +114,8 @@ export function Footer() {
 
       <div className="border-t border-ink-200">
         <div className="container-app flex flex-col items-center justify-between gap-3 py-5 text-xs text-ink-600 sm:flex-row">
-          <p>© {year} HolzNest. Tous droits réservés.</p>
-          <p>Bois, vente et livraison</p>
+          <p>© {year} HolzNest. Alle Rechte vorbehalten.</p>
+          <p>Holzverkauf und Lieferung</p>
         </div>
       </div>
     </footer>

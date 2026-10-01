@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils/cn';
 import { logoutAdmin } from '@/actions/admin-auth';
 
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard, exact: true },
-  { href: '/admin/bois', label: 'Catalogue bois', icon: Trees },
-  { href: '/admin/paiement', label: 'Paiement et RIB', icon: CreditCard },
+  { href: '/admin', label: 'Übersicht', icon: LayoutDashboard, exact: true },
+  { href: '/admin/bois', label: 'Holzkatalog', icon: Trees },
+  { href: '/admin/paiement', label: 'Zahlung & Bankverbindung', icon: CreditCard },
 ];
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
@@ -135,7 +135,7 @@ function SidebarHeader({ compact }: { compact?: boolean }) {
       </span>
       <div>
         <p className="text-sm font-extrabold text-white">HolzNest</p>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-sand-400">Administration</p>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-sand-400">Verwaltung</p>
       </div>
     </Link>
   );
@@ -150,7 +150,7 @@ function LogoutSection() {
           className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-sand-300 transition-colors hover:bg-white/5 hover:text-white"
         >
           <LogOut className="h-4.5 w-4.5" />
-          Déconnexion
+          Abmelden
         </button>
       </form>
     </div>

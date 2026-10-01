@@ -17,14 +17,13 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Button } from '@/components/ui/button';
-import { LanguageTranslator } from '@/components/layout/language-translator';
 
 const NAV_LINKS = [
-  { href: '/', label: 'Accueil', icon: Home },
-  { href: '/catalogue', label: 'Catalogue bois', icon: Trees },
-  { href: '/comment-ca-marche', label: 'Commande & livraison', icon: Workflow },
-  { href: '/a-propos', label: 'À propos', icon: Info },
-  { href: '/contact', label: 'Contact', icon: Mail },
+  { href: '/', label: 'Startseite', icon: Home },
+  { href: '/catalogue', label: 'Holzkatalog', icon: Trees },
+  { href: '/comment-ca-marche', label: 'Bestellung & Lieferung', icon: Workflow },
+  { href: '/a-propos', label: 'Über uns', icon: Info },
+  { href: '/contact', label: 'Kontakt', icon: Mail },
 ];
 
 function isActivePath(pathname: string, href: string) {
@@ -95,7 +94,7 @@ export function Navbar() {
       )}
     >
       <nav className="container-app flex h-16 items-center justify-between md:h-20">
-        <Link href="/" aria-label="HolzNest — Accueil" className="flex items-center gap-2 shrink-0">
+        <Link href="/" aria-label="HolzNest — Startseite" className="flex items-center gap-2 shrink-0">
           <span className="brand-mark" aria-hidden="true">HN</span>
           <span className="brand-name">Holz<span className="brand-dot">Nest</span></span>
         </Link>
@@ -119,11 +118,10 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          <LanguageTranslator id="desktop-language-translator" />
           <Button asChild size="md">
             <Link href="/catalogue">
               <Search className="h-4 w-4" />
-              Voir le catalogue
+              Katalog ansehen
             </Link>
           </Button>
           <div ref={tabletMenuRef} className="relative min-[1400px]:hidden">
@@ -144,7 +142,7 @@ export function Navbar() {
                       <link.icon className="h-4.5 w-4.5 text-canal-600" /> {link.label}
                     </Link>
                   ))}
-                  <Link href="/faq" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-600 hover:bg-sand-100"><CircleHelp className="h-4.5 w-4.5 text-canal-600" /> Questions fréquentes</Link>
+                  <Link href="/faq" className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-600 hover:bg-sand-100"><CircleHelp className="h-4.5 w-4.5 text-canal-600" /> Häufige Fragen</Link>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -152,11 +150,10 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1.5 md:hidden">
-          <LanguageTranslator id="mobile-language-translator" />
           <button
             onClick={() => setMobileOpen((open) => !open)}
             className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-ink-700 hover:bg-sand-100"
-            aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-label={mobileOpen ? 'Menü schließen' : 'Menü öffnen'}
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
           >
@@ -173,7 +170,7 @@ export function Navbar() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.2 }}
               id="mobile-navigation"
-              aria-label="Navigation principale"
+              aria-label="Hauptnavigation"
               className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-ink-100 bg-white shadow-lifted md:hidden"
             >
               <div className="container-app py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
@@ -205,7 +202,7 @@ export function Navbar() {
                   className="flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-ink-600 hover:bg-sand-100"
                 >
                   <CircleHelp className="h-5 w-5" />
-                  Questions fréquentes
+                  Häufige Fragen
                 </Link>
               </div>
             </motion.div>

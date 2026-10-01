@@ -55,25 +55,25 @@ function getPaymentDetails(settings: {
 
 export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult> {
   const parsed = woodOrderSchema.safeParse(value);
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Vérifiez les informations de la commande.');
-  if (parsed.data.website) return fail('La commande n’a pas pu être transmise.');
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Bitte überprüfen Sie Ihre Bestelldaten.');
+  if (parsed.data.website) return fail('Die Bestellung konnte nicht übermittelt werden.');
 
   const deliveryFeeCents = getDeliveryFeeCents();
   if (deliveryFeeCents == null) {
-    return fail('Les frais de livraison ne sont pas configurés. Complétez WOOD_DELIVERY_FEE_EUR dans .env avant de prendre des commandes.');
+    return fail('Die Lieferkosten sind nicht eingerichtet. Bitte konfigurieren Sie WOOD_DELIVERY_FEE_EUR in .env.');
   }
   let settingsClient: ReturnType<typeof createAdminClient>;
   try { settingsClient = createAdminClient(); }
-  catch { return fail('La configuration admin Supabase est incomplète.'); }
+  catch { return fail('Die Supabase-Administratorkonfiguration ist unvollständig.'); }
   const { data: paymentSettings, error: settingsError } = await settingsClient
     .from('wood_store_settings').select('payment_method,payment_url,bank_name,bank_account_holder,bank_iban,bank_bic').eq('id', 1).maybeSingle();
-  if (settingsError) return fail('Les réglages de paiement ne sont pas disponibles. Appliquez la migration Supabase des réglages boutique.');
+  if (settingsError) return fail('Die Zahlungseinstellungen sind nicht verfügbar. Wenden Sie die Supabase-Migration für die Shop-Einstellungen an.');
   const payment = getPaymentDetails(paymentSettings);
-  if (!payment) return fail('Le moyen de paiement sélectionné est incomplet. Configurez-le dans Administration > Paiement et RIB.');
+  if (!payment) return fail('Die ausgewählte Zahlungsart ist unvollständig. Richten Sie sie unter Verwaltung > Zahlung & Bankverbindung ein.');
 
   const emailRecipient = process.env.WOOD_ORDER_EMAIL?.trim() || process.env.ALERT_EMAIL?.trim();
   if (!process.env.GMAIL_USER?.trim() || !process.env.GMAIL_APP_PASSWORD?.trim() || !emailRecipient) {
-    return fail('L’envoi des commandes n’est pas configuré. Complétez GMAIL_USER, GMAIL_APP_PASSWORD et WOOD_ORDER_EMAIL dans .env.');
+    return fail('Der Bestellversand ist nicht eingerichtet. Bitte konfigurieren Sie GMAIL_USER, GMAIL_APP_PASSWORD und WOOD_ORDER_EMAIL in .env.');
   }
 
   const supabase = createClient();
@@ -83,15 +83,15 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
     .select('id,slug,name,in_stock,stock_m3')
     .in('slug', slugs)
     .eq('is_published', true);
-  if (productsError) return fail('Le catalogue est momentanément indisponible. Réessayez dans quelques instants.');
-  if (!products?.length || products.length !== slugs.length) return fail('Un produit du panier n’est plus disponible. Actualisez le catalogue.');
+  if (productsError) return fail('Der Katalog ist vorübergehend nicht verfügbar. Bitte versuchen Sie es gleich noch einmal.');
+  if (!products?.length || products.length !== slugs.length) return fail('Ein Produkt im Warenkorb ist nicht mehr verfügbar. Bitte aktualisieren Sie den Katalog.');
 
   const productIds = products.map((product) => product.id);
   const { data: lengths, error: lengthsError } = await supabase
     .from('wood_product_lengths')
     .select('product_id,length_cm,price_per_m3')
     .in('product_id', productIds);
-  if (lengthsError) return fail('Les tarifs du catalogue sont momentanément indisponibles.');
+  if (lengthsError) return fail('Die Katalogpreise sind vorübergehend nicht verfügbar.');
 
   const orderLines: OrderLine[] = [];
   const quantitiesByProduct = new Map<string, number>();
@@ -99,9 +99,9 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
 
   for (const requested of parsed.data.lines) {
     const product = products.find((item) => item.slug === requested.slug);
-    if (!product || !product.in_stock) return fail(`${product?.name ?? 'Un article'} n’est plus disponible.`);
+    if (!product || !product.in_stock) return fail(`${product?.name ?? 'Ein Artikel'} ist nicht mehr verfügbar.`);
     const selectedLength = lengths?.find((item) => item.product_id === product.id && item.length_cm === requested.lengthCm);
-    if (!selectedLength || selectedLength.price_per_m3 == null) return fail(`Le prix de ${product.name} (${lengthLabel(requested.lengthCm)}) doit être confirmé par devis.`);
+    if (!selectedLength || selectedLength.price_per_m3 == null) return fail(`Der Preis für ${product.name} (${lengthLabel(requested.lengthCm)}) muss per Angebot bestätigt werden.`);
 
     quantitiesByProduct.set(product.id, (quantitiesByProduct.get(product.id) ?? 0) + requested.quantity);
     const unitPriceCents = toCents(Number(selectedLength.price_per_m3));
@@ -120,7 +120,7 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
   for (const product of products) {
     const requestedQuantity = quantitiesByProduct.get(product.id) ?? 0;
     if (product.stock_m3 != null && requestedQuantity > product.stock_m3) {
-      return fail(`Le stock de ${product.name} est limité à ${product.stock_m3} m³.`);
+      return fail(`Der Lagerbestand von ${product.name} ist auf ${product.stock_m3} m³ begrenzt.`);
     }
   }
 
@@ -159,6 +159,6 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
     Paiement: payment.method === 'link' ? payment.url : `RIB · ${payment.accountHolder} · ${payment.iban}`,
   }, emailRecipient);
 
-  if (!sent) return fail('L’e-mail de commande n’a pas pu être envoyé. Vérifiez vos réglages Gmail dans .env puis réessayez.');
-  return { success: true, message: 'Commande transmise. Les instructions de paiement sont prêtes.', order };
+  if (!sent) return fail('Die Bestell-E-Mail konnte nicht gesendet werden. Bitte überprüfen Sie Ihre Gmail-Einstellungen in .env.');
+  return { success: true, message: 'Bestellung übermittelt. Die Zahlungsinformationen stehen bereit.', order };
 }

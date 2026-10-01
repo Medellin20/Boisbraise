@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { LegalPage } from '@/components/shared/legal-page';
-export const metadata: Metadata = { title: 'Conditions générales de vente' };
+export const metadata: Metadata = { title: 'Allgemeine Geschäftsbedingungen' };
 export default function ConditionsGeneralesPage() {
-  return <LegalPage title="Conditions générales de vente" updatedAt="À compléter">
-    <p><em>Projet de contenu à faire valider et compléter par le vendeur avant toute vente en ligne. Les éléments entre crochets doivent être remplacés par les informations exactes de l’entreprise.</em></p>
-    <h2>Vendeur</h2><p>[Raison sociale, forme juridique, adresse, immatriculation et coordonnées du vendeur à compléter.]</p>
-    <h2>Devis et commande</h2><p>Les caractéristiques, essences, dimensions, volumes, prix, taxes applicables et disponibilités doivent être confirmés dans le devis transmis au client. La commande et ses modalités de validation sont à préciser par le vendeur.</p>
-    <h2>Retrait et livraison</h2><p>Les zones desservies, frais, délais, conditions d’accès et modalités de réception sont précisés dans l’offre acceptée. Ils dépendent notamment du produit, du volume et de la destination.</p>
-    <h2>Paiement, annulation et réclamations</h2><p>[Décrire les moyens et échéances de paiement, les règles d’annulation, le traitement des réclamations et les garanties applicables.]</p>
-    <h2>Droit applicable</h2><p>[Juridiction et droit applicables à compléter selon le lieu d’établissement du vendeur et les règles en vigueur.]</p>
+  return <LegalPage title="Allgemeine Geschäftsbedingungen" updatedAt="Noch zu ergänzen">
+    <p><em>Dieser Entwurf muss vom Verkäufer vor dem Onlineverkauf geprüft und vervollständigt werden. Angaben in eckigen Klammern sind durch die tatsächlichen Unternehmensdaten zu ersetzen.</em></p>
+    <h2>Verkäufer</h2><p>[Firmenname, Rechtsform, Anschrift, Registereintrag und Kontaktdaten des Verkäufers ergänzen.]</p>
+    <h2>Angebot und Bestellung</h2><p>Eigenschaften, Holzarten, Maße, Mengen, Preise, Steuern und Verfügbarkeit müssen im Kundenangebot bestätigt werden. Der Verkäufer legt Bestell- und Bestätigungsbedingungen fest.</p>
+    <h2>Abholung und Lieferung</h2><p>Liefergebiete, Kosten, Fristen, Zufahrtsbedingungen und Übergabe werden im angenommenen Angebot festgelegt. Sie hängen insbesondere von Produkt, Menge und Lieferort ab.</p>
+    <h2>Zahlung, Stornierung und Reklamationen</h2><p>[Zahlungsarten und -fristen, Stornierungsregeln, Bearbeitung von Reklamationen und geltende Garantien beschreiben.]</p>
+    <h2>Anwendbares Recht</h2><p>[Zuständiges Gericht und anwendbares Recht gemäß Sitz des Verkäufers und geltenden Vorschriften ergänzen.]</p>
   </LegalPage>;
 }

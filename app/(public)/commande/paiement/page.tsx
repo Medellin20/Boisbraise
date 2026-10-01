@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { PaymentInstructions } from '@/components/wood/payment-instructions';
 
-export const metadata: Metadata = { title: 'Instructions de paiement', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: 'Zahlungsinformationen', robots: { index: false, follow: false } };
 
 export default function PaymentPage() {
   return (

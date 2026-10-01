@@ -20,12 +20,12 @@ const settingsSchema = z.object({
     try {
       if (new URL(value.paymentUrl).protocol !== 'https:') throw new Error();
     } catch {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['paymentUrl'], message: 'Saisissez un lien de paiement HTTPS valide.' });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['paymentUrl'], message: 'Bitte geben Sie einen gültigen HTTPS-Zahlungslink ein.' });
     }
   } else {
     const iban = value.bankIban.replace(/\s/g, '').toUpperCase();
-    if (!value.bankAccountHolder) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['bankAccountHolder'], message: 'Le nom du titulaire est requis pour le RIB.' });
-    if (!/^[A-Z]{2}[A-Z0-9]{13,32}$/.test(iban)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['bankIban'], message: 'Saisissez un IBAN valide.' });
+    if (!value.bankAccountHolder) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['bankAccountHolder'], message: 'Der Kontoinhaber ist erforderlich.' });
+    if (!/^[A-Z]{2}[A-Z0-9]{13,32}$/.test(iban)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['bankIban'], message: 'Bitte geben Sie eine gültige IBAN ein.' });
   }
 });
 
@@ -34,9 +34,9 @@ export type PaymentSettingsResult = { success: boolean; message: string };
 
 export async function saveAdminPaymentSettings(value: unknown): Promise<PaymentSettingsResult> {
   const token = cookies().get(ADMIN_SESSION_COOKIE)?.value;
-  if (!await isValidAdminSessionToken(token)) return { success: false, message: 'Session administrateur expirée. Reconnectez-vous.' };
+  if (!await isValidAdminSessionToken(token)) return { success: false, message: 'Ihre Administratorsitzung ist abgelaufen. Bitte melden Sie sich erneut an.' };
   const parsed = settingsSchema.safeParse(value);
-  if (!parsed.success) return { success: false, message: parsed.error.issues[0]?.message ?? 'Vérifiez vos réglages.' };
+  if (!parsed.success) return { success: false, message: parsed.error.issues[0]?.message ?? 'Bitte überprüfen Sie Ihre Einstellungen.' };
 
   const data = parsed.data;
   const supabase = createAdminClient();
@@ -50,9 +50,9 @@ export async function saveAdminPaymentSettings(value: unknown): Promise<PaymentS
     bank_bic: data.bankBic.replace(/\s/g, '').toUpperCase(),
     updated_at: new Date().toISOString(),
   }, { onConflict: 'id' });
-  if (error) return { success: false, message: 'Impossible d’enregistrer. Appliquez la migration des réglages de paiement Supabase, puis réessayez.' };
+  if (error) return { success: false, message: 'Speichern nicht möglich. Wenden Sie die Supabase-Migration für Zahlungseinstellungen an und versuchen Sie es erneut.' };
 
   await logAdminAction({ action: 'store.payment_settings.update', entityType: 'store_settings', entityId: '1' });
   revalidatePath('/admin/paiement');
-  return { success: true, message: 'Moyen de paiement enregistré.' };
+  return { success: true, message: 'Zahlungsart gespeichert.' };
 }
