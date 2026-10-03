@@ -33,22 +33,29 @@ function getPaymentDetails(settings: {
   bank_bic: string;
 } | null): OrderPayment | null {
   if (!settings) return null;
-  if (settings.payment_method === 'link' && settings.payment_url) {
-    try {
-      const url = new URL(settings.payment_url);
-      if (url.protocol === 'https:') return { method: 'link', url: url.toString() };
-    } catch {}
-    return null;
+  let link: { url: string } | undefined;
+  try {
+    const url = new URL(settings.payment_url);
+    if (url.protocol === 'https:') link = { url: url.toString() };
+  } catch {
+    link = undefined;
   }
+
   const iban = settings.bank_iban.replace(/\s/g, '').toUpperCase();
-  if (settings.payment_method === 'rib' && iban && settings.bank_account_holder) {
-    return {
-      method: 'rib',
+  const rib = /^[A-Z]{2}[A-Z0-9]{13,32}$/.test(iban) && settings.bank_account_holder
+    ? {
       accountHolder: settings.bank_account_holder,
       bankName: settings.bank_name,
       iban,
       bic: settings.bank_bic.replace(/\s/g, '').toUpperCase(),
-    };
+    }
+    : undefined;
+
+  if (settings.payment_method === 'link' && link) {
+    return rib ? { method: 'link', link, rib } : { method: 'link', link };
+  }
+  if (settings.payment_method === 'rib' && rib) {
+    return link ? { method: 'rib', link, rib } : { method: 'rib', rib };
   }
   return null;
 }
@@ -156,7 +163,9 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
     'Total commande': formatPrice(totalCents),
     'Acompte à recevoir (50 % du total)': formatPrice(depositCents),
     'Solde restant': formatPrice(totalCents - depositCents),
-    Paiement: payment.method === 'link' ? payment.url : `RIB · ${payment.accountHolder} · ${payment.iban}`,
+    Paiement: payment.method === 'link'
+      ? payment.link.url
+      : `RIB · ${payment.rib.accountHolder} · ${payment.rib.iban}`,
   }, emailRecipient);
 
   if (!sent) return fail('Die Bestell-E-Mail konnte nicht gesendet werden. Bitte überprüfen Sie Ihre Gmail-Einstellungen in .env.');

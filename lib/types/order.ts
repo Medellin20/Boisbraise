@@ -17,9 +17,12 @@ export type OrderLine = {
   total: number;
 };
 
+type BankPayment = { accountHolder: string; bankName: string; iban: string; bic: string };
+type PaymentLink = { url: string };
+
 export type OrderPayment =
-  | { method: 'link'; url: string }
-  | { method: 'rib'; accountHolder: string; bankName: string; iban: string; bic: string };
+  | { method: 'link'; link: PaymentLink; rib?: BankPayment }
+  | { method: 'rib'; rib: BankPayment; link?: PaymentLink };
 
 export type OrderConfirmation = {
   reference: string;

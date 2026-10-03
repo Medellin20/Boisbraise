@@ -17,7 +17,7 @@ export default async function AdminPaymentSettingsPage() {
     bankBic: data?.bank_bic ?? '',
   } as const;
   return <div className="mx-auto max-w-4xl">
-    <header className="mb-6"><p className="text-xs font-bold uppercase tracking-widest text-[#806344]">HolzNest · Shop-Einstellungen</p><h1 className="mt-1 text-2xl font-extrabold text-ink-900">Zahlung & Bankverbindung</h1><p className="mt-1 text-sm text-ink-500">Speichern Sie Ihre Zahlungsdaten und wählen Sie aus, welche Zahlungsart Kunden nach der Bestellung sehen.</p></header>
+    <header className="mb-6"><p className="text-xs font-bold uppercase tracking-widest text-[#806344]">HolzNest · Shop-Einstellungen</p><h1 className="mt-1 text-2xl font-extrabold text-ink-900">Zahlung & Bankverbindung</h1><p className="mt-1 text-sm text-ink-500">Speichern Sie Ihre Zahlungsdaten und legen Sie fest, welche Zahlungsart Kunden zuerst sehen. Bei vollständiger Einrichtung beider Optionen können Kunden wechseln.</p></header>
     {error ? <div role="alert" className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">Wenden Sie die Migration <code>20260930_wood_store_settings.sql</code> in Supabase, um diese Einstellungen zu aktivieren.</div> : null}
     <PaymentSettingsForm initial={initial} />
   </div>;

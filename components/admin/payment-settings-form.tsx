@@ -37,7 +37,7 @@ export function PaymentSettingsForm({ initial }: { initial: PaymentSettingsInput
   return <form onSubmit={(event) => { event.preventDefault(); void submit(new FormData(event.currentTarget)); }} className="space-y-6">
     <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6">
       <h2 className="font-bold text-ink-900">Zahlungsart für Kunden</h2>
-      <p className="mt-1 text-sm text-ink-500">Wählen Sie, was Kunden nach dem Absenden einer Bestellung angezeigt wird. Sie können beide Zahlungsarten hier speichern.</p>
+      <p className="mt-1 text-sm text-ink-500">Wählen Sie die standardmäßig angezeigte Zahlungsart. Wenn beide Zahlungsarten eingerichtet sind, können Kunden nach der Bestellung zwischen Zahlungslink und Banküberweisung wechseln.</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className={`flex cursor-pointer gap-3 rounded-xl border p-4 ${method === 'rib' ? 'border-[#31563b] bg-[#f3f7f1]' : 'border-ink-200'}`}>
           <input type="radio" name="paymentMethod" checked={method === 'rib'} onChange={() => setMethod('rib')} className="mt-1 accent-[#31563b]" />
