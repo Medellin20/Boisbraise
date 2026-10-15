@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight, Mail, Phone, TreePine } from 'lucide-react';
+import { BrandLogo } from '@/components/shared/brand-logo';
+import { ArrowRight, Mail, Phone } from 'lucide-react';
 import { GermanReviewCarousel } from '@/components/shared/german-review-carousel';
 import { createClient } from '@/lib/supabase/server';
 
@@ -19,15 +20,22 @@ const LEGAL_LINKS = [
 
 export async function Footer() {
   const year = new Date().getFullYear();
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('site_contact_settings')
-    .select('contact_email,phone_numbers')
-    .eq('id', 1)
-    .maybeSingle();
-
-  if (error) {
-    console.error('Footer-Kontaktdaten konnten nicht geladen werden.', error);
+  let data: { contact_email?: string | null; phone_numbers?: unknown } | null = null;
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const supabase = createClient();
+      const result = await supabase
+        .from('site_contact_settings')
+        .select('contact_email,phone_numbers')
+        .eq('id', 1)
+        .maybeSingle();
+      data = result.data;
+      if (result.error) {
+        console.error('Footer-Kontaktdaten konnten nicht geladen werden.', result.error);
+      }
+    } catch {
+      console.error('Footer-Kontaktdaten konnten nicht geladen werden.');
+    }
   }
 
   const email = typeof data?.contact_email === 'string' ? data.contact_email.trim() : '';
@@ -63,10 +71,7 @@ export async function Footer() {
         <div className="container-app grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8 lg:py-14">
           <div>
             <Link href="/" className="inline-flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-sand-100">
-                <TreePine className="h-5 w-5" strokeWidth={2.25} />
-              </span>
-              <span className="text-xl font-extrabold tracking-tight text-white">HolzNest</span>
+              <BrandLogo className="w-36 sm:w-40" />
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-sand-300">
               Brennholz, Rundholz und Bauholz – sorgfältig ausgewählt und zuverlässig zu Ihnen geliefert.

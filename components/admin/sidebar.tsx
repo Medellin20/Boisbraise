@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/shared/brand-logo';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Trees, LogOut, Menu, X, CreditCard, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
@@ -86,10 +87,7 @@ export function AdminSidebar() {
       {/* Topbar mobile */}
       <div className="sticky top-0 z-40 flex w-full items-center justify-between border-b border-ink-100 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
         <Link href="/admin" className="flex min-w-0 items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-700 text-white">
-            <Trees className="h-4 w-4" />
-          </span>
-          <span className="truncate font-extrabold text-ink-900">HolzNest</span>
+          <BrandLogo />
         </Link>
         <button
           type="button"
@@ -131,13 +129,8 @@ export function AdminSidebar() {
 function SidebarHeader({ compact }: { compact?: boolean }) {
   return (
     <Link href="/admin" className={cn('flex items-center gap-2', !compact && 'px-5 py-5')}>
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
-        <Trees className="h-4.5 w-4.5 text-white" />
-      </span>
-      <div>
-        <p className="text-sm font-extrabold text-white">HolzNest</p>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-sand-400">Verwaltung</p>
-      </div>
+      <BrandLogo />
+      <p className="text-[11px] font-medium uppercase tracking-wide text-sand-400">Verwaltung</p>
     </Link>
   );
 }

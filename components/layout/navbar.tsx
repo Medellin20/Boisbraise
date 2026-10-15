@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { BrandLogo } from '@/components/shared/brand-logo';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -95,8 +96,7 @@ export function Navbar() {
     >
       <nav className="container-app flex h-16 items-center justify-between md:h-20">
         <Link href="/" aria-label="HolzNest — Startseite" className="flex items-center gap-2 shrink-0">
-          <span className="brand-mark" aria-hidden="true">HN</span>
-          <span className="brand-name">Holz<span className="brand-dot">Nest</span></span>
+          <BrandLogo priority />
         </Link>
 
         <div className="hidden items-center gap-1 min-[1400px]:flex">
