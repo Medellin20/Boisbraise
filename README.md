@@ -12,7 +12,7 @@ Boutique web de bois de chauffage : catalogue d’essences, fiches produit, tari
 ## Installation
 
 1. Installer Node.js 18.18 ou supérieur, puis `npm install`.
-2. Copier `.env.example` en `.env.local` et renseigner Supabase, le mot de passe admin et le secret de session. Le fichier `.env` n’est pas modifié par l’application.
+2. Copier `.env.example` en `.env.local` et renseigner `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` et `ADMIN_SESSION_SECRET`. La clé `SUPABASE_SERVICE_ROLE_KEY` est réservée au serveur : ne la préfixez jamais par `NEXT_PUBLIC_` et ne la publiez pas. Le fichier `.env` n’est pas modifié par l’application.
 3. Dans Supabase SQL Editor, exécuter `supabase/schema.sql`, puis `supabase/migrations/20260930_wood_catalog.sql`, `supabase/rls_policies.sql` et `supabase/seed.sql`. La migration crée les tables du catalogue, les règles publiques de lecture et le bucket de photos, puis ajoute les essences de départ.
 4. Démarrer avec `npm run dev`.
 
