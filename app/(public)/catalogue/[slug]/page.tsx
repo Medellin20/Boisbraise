@@ -6,7 +6,6 @@ import { ArrowLeft, Droplets, Flame, PackageCheck, Truck } from 'lucide-react';
 import { getPublishedWoodProduct } from '@/lib/data/wood-products';
 import { ProductPurchase } from '@/components/wood/product-purchase';
 import { woodDisplayName, woodDisplayText } from '@/lib/utils/wood-display';
-import { lengthLabel } from '@/lib/utils/wood';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,7 +63,6 @@ export default async function WoodProductPage({ params }: PageProps) {
 
   const name = woodDisplayName(product.name);
   const cover = product.wood_product_images.find((image) => image.is_primary) ?? product.wood_product_images[0];
-  const lengths = product.wood_product_lengths.map((item) => lengthLabel(item.length_cm));
   const stock = !product.in_stock
     ? 'Derzeit nicht verfügbar'
     : product.stock_m3 != null
@@ -147,7 +145,7 @@ export default async function WoodProductPage({ params }: PageProps) {
             <DetailRow label="Holzart" value={name} />
             <DetailRow label="Feuchtigkeit" value={product.moisture_percent != null ? `≤ ${product.moisture_percent} %` : 'Wird bestätigt'} />
             <DetailRow label="Heizwert" value={product.calorific_value_kwh != null ? `${product.calorific_value_kwh} kWh / m³` : 'Wird bestätigt'} />
-            <DetailRow label="Scheitlängen" value={lengths.length ? lengths.join(' · ') : 'Wird bestätigt'} />
+            <DetailRow label="Bûches" value="25 cm · 33 cm · 50 cm" />
             <DetailRow label="Verfügbarkeit" value={stock} />
             <DetailRow label="Lieferung" value={product.delivery_available ? 'Möglich, abhängig von der Lieferadresse' : 'Abhängig von der Lieferadresse'} />
           </dl>

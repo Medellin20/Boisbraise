@@ -4,19 +4,16 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Save } from 'lucide-react';
 import { createWoodProduct, updateWoodProduct, type WoodProductInput } from '@/actions/admin-wood-products';
-import { WOOD_LENGTHS } from '@/lib/utils/wood';
 import { WOOD_PACKAGES } from '@/lib/utils/wood-packages';
-import type { WoodProductPackageRecord, WoodProductRecord, WoodProductLengthRecord } from '@/types/database';
+import type { WoodProductPackageRecord, WoodProductRecord } from '@/types/database';
 
-type Initial = WoodProductRecord & { wood_product_lengths: WoodProductLengthRecord[]; wood_product_packages: WoodProductPackageRecord[] };
+type Initial = WoodProductRecord & { wood_product_packages: WoodProductPackageRecord[] };
 function toSlug(value:string){return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 const inputClass='mt-1 block w-full rounded-xl border border-ink-200 bg-white px-3 py-2.5 text-sm text-ink-900';
 export function WoodProductForm({initial}:{initial?:Initial}){
   const router=useRouter();
   const [pending,setPending]=useState(false);
   const [autoSlug,setAutoSlug]=useState(!initial);
-  const defaults=useMemo(()=>Object.fromEntries(WOOD_LENGTHS.map(cm=>[cm,initial?.wood_product_lengths.find(item=>item.length_cm===cm)?.price_per_m3?.toString()??''])) as Record<number,string>,[initial]);
-  const [lengthPrices,setLengthPrices]=useState<Record<number,string>>(defaults);
   const packageDefaults=useMemo(()=>Object.fromEntries(WOOD_PACKAGES.map(item=>{const saved=initial?.wood_product_packages.find(value=>value.package_code===item.code);return [item.code,saved?(saved.price?.toString()??''):item.defaultPrice.toString()]})) as Record<string,string>,[initial]);
   const [packagePrices,setPackagePrices]=useState<Record<string,string>>(packageDefaults);
   async function submit(formData:FormData){
@@ -24,9 +21,8 @@ export function WoodProductForm({initial}:{initial?:Initial}){
     const nullable=(key:string)=>{const value=String(formData.get(key)??'').trim();return value===''?null:Number(value);};
     const value:WoodProductInput={
       name:String(formData.get('name')??'').trim(),slug:String(formData.get('slug')??'').trim(),shortDescription:String(formData.get('shortDescription')??''),description:String(formData.get('description')??''),
-      pricePerM3:Number(formData.get('pricePerM3')),moisturePercent:nullable('moisturePercent'),calorificValueKwh:nullable('calorificValueKwh'),stockM3:nullable('stockM3'),
+      moisturePercent:nullable('moisturePercent'),calorificValueKwh:nullable('calorificValueKwh'),stockM3:nullable('stockM3'),
       deliveryAvailable:formData.get('deliveryAvailable')==='on',inStock:formData.get('inStock')==='on',isPublished:formData.get('isPublished')==='on',sortOrder:Number(formData.get('sortOrder')||0),
-      lengths:WOOD_LENGTHS.map((lengthCm)=>({lengthCm,price:lengthPrices[lengthCm]?.trim()===''?null:Number(lengthPrices[lengthCm])})),
       packagePrices:WOOD_PACKAGES.map((item)=>({packageCode:item.code,price:packagePrices[item.code]?.trim()===''?null:Number(packagePrices[item.code])}))
     };
     try{
@@ -42,13 +38,11 @@ export function WoodProductForm({initial}:{initial?:Initial}){
       <label className="text-sm font-medium text-ink-700">URL-Slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={initial?.slug??''} onInput={()=>setAutoSlug(false)} className={inputClass}/></label>
       <label className="text-sm font-medium text-ink-700 sm:col-span-2">Kurzbeschreibung<p className="mt-1 text-xs font-normal text-ink-500">Ein kurzer Überblick für die Produktkarte im Katalog.</p><textarea name="shortDescription" maxLength={240} rows={2} defaultValue={initial?.short_description??''} className={inputClass}/></label>
       <label className="text-sm font-medium text-ink-700 sm:col-span-2">Ausführliche Beschreibung<p className="mt-1 text-xs font-normal leading-5 text-ink-500">Die Website stellt den Text einheitlich dar. Nutzen Sie Absätze für eine gute Lesbarkeit und beginnen Sie Aufzählungen mit „-“, „*“ oder „•“. Technische Angaben werden separat aus den Produktfeldern angezeigt.</p><textarea name="description" maxLength={5000} rows={8} placeholder="Beschreiben Sie die Holzart und ihre Eigenschaften in eigenen Worten.&#10;&#10;Optional können Sie besondere Merkmale als Liste eingeben:&#10;- Gleichmäßige Wärme&#10;- Für Kamin und Ofen geeignet" defaultValue={initial?.description??''} className={inputClass}/></label>
-      <label className="text-sm font-medium text-ink-700">Grundpreis (€ / m³)<input name="pricePerM3" type="number" min="0" step="0.01" required defaultValue={initial?.price_per_m3??''} className={inputClass}/></label>
       <label className="text-sm font-medium text-ink-700">Maximale Feuchtigkeit (%)<input name="moisturePercent" type="number" min="0" max="100" step="0.1" defaultValue={initial?.moisture_percent??''} className={inputClass}/></label>
       <label className="text-sm font-medium text-ink-700">Heizwert (kWh / m³)<input name="calorificValueKwh" type="number" min="0" step="0.01" defaultValue={initial?.calorific_value_kwh??''} className={inputClass}/></label>
       <label className="text-sm font-medium text-ink-700">Lagerbestand (m³)<input name="stockM3" type="number" min="0" step="0.01" defaultValue={initial?.stock_m3??''} className={inputClass}/></label>
       <label className="text-sm font-medium text-ink-700">Anzeigereihenfolge<input name="sortOrder" type="number" min="0" defaultValue={initial?.sort_order??0} className={inputClass}/></label>
     </div></section>
-    <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6"><h2 className="font-bold text-ink-900">Preis je Scheitlänge</h2><p className="mt-1 text-xs text-ink-500">Leer lassen, wenn der Preis erst im Angebot bestätigt wird.</p><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{WOOD_LENGTHS.map((cm)=><label key={cm} className="text-sm font-medium text-ink-700">{cm===100?'1 m':`${cm} cm`} · €/m³<input type="number" min="0" step="0.01" placeholder="Sur devis" value={lengthPrices[cm]??''} onChange={(e)=>setLengthPrices(prev=>({...prev,[cm]:e.target.value}))} className={inputClass}/></label>)}</div></section>
     <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6"><h2 className="font-bold text-ink-900">Preise je Verkaufsformat</h2><p className="mt-1 text-xs text-ink-500">Diese Formate werden auf der Produktseite angeboten. Leer lassen, wenn der Preis auf Anfrage gilt.</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{WOOD_PACKAGES.map((item)=><label key={item.code} className="text-sm font-medium text-ink-700">{item.label} · €<input type="number" min="0" step="0.01" placeholder="Sur devis" value={packagePrices[item.code]??''} onChange={(e)=>setPackagePrices(prev=>({...prev,[item.code]:e.target.value}))} className={inputClass}/></label>)}</div><p className="mt-3 text-xs text-ink-500">Longueurs disponibles : 25 cm, 33 cm et 50 cm.</p></section>
     <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6"><h2 className="font-bold text-ink-900">Verfügbarkeit und Veröffentlichung</h2><div className="mt-4 flex flex-wrap gap-5">{[['deliveryAvailable','Lieferung verfügbar',initial?.delivery_available??true],['inStock','Auf Lager',initial?.in_stock??true],['isPublished','Auf der Website veröffentlicht',initial?.is_published??false]].map(([name,label,checked])=><label key={String(name)} className="inline-flex items-center gap-2 text-sm text-ink-700"><input type="checkbox" name={String(name)} defaultChecked={Boolean(checked)} className="h-4 w-4 accent-[#31563b]"/>{String(label)}</label>)}</div></section>
     <button type="submit" disabled={pending} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#21492d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"><Save size={16}/>{pending?'Wird gespeichert …':'Produkt speichern'}</button>

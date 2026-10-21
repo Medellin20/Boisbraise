@@ -12,7 +12,7 @@ export const woodOrderSchema = z.object({
   }, { required_error: 'Bitte geben Sie Ihre Kontaktdaten ein.', invalid_type_error: 'Bitte überprüfen Sie Ihre Kontaktdaten.' }),
   lines: z.array(z.object({
     slug: z.string({ required_error: 'Das Produkt im Warenkorb ist ungültig.', invalid_type_error: 'Das Produkt im Warenkorb ist ungültig.' }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Das Produkt im Warenkorb ist ungültig.'),
-    packageCode: z.enum(['12_5_litres', '20_litres', '40_litres', '1_rm']).optional(),
+    packageCode: z.enum(['12_5_litres', '20_litres', '40_litres', '1_rm']),
     lengthCm: z.union([z.literal(25), z.literal(33), z.literal(40), z.literal(50), z.literal(100)], {
       errorMap: () => ({ message: 'Bitte wählen Sie eine gültige Scheitlänge aus.' }),
     }),

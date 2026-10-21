@@ -22,7 +22,7 @@ Le site est disponible sur `http://localhost:3000`.
 
 ## Administration
 
-Ouvrir `/admin` et se connecter avec `ADMIN_PASSWORD`. L’accueil admin mène au catalogue `/admin/bois`. Depuis cet espace, vous pouvez créer, modifier, publier ou supprimer des produits, régler les prix par longueur et par format (12,5 l, 20 l, 40 l et 1 RM), définir la longueur des bûches et gérer les photos dans Supabase Storage.
+Ouvrir `/admin` et se connecter avec `ADMIN_PASSWORD`. L’accueil admin mène au catalogue `/admin/bois`. Depuis cet espace, vous pouvez créer, modifier, publier ou supprimer des produits, régler les prix des formats (12,5 l, 20 l, 40 l et 1 RM), définir la longueur des bûches et gérer les photos dans Supabase Storage.
 
 Les actions serveur valident la session avant toute écriture avec la clé de service. Les visiteurs anonymes ne peuvent lire que les produits publiés.
 

@@ -9,13 +9,13 @@ import { woodDisplayName } from '@/lib/utils/wood-display';
 
 export const metadata: Metadata = {
   title: 'HolzNest — Brennholz und Lieferung',
-  description: 'Wählen Sie Ihr Holz und die Scheitlänge und organisieren Sie die Lieferung mit HolzNest.',
+  description: 'Wählen Sie Ihr Holz und das passende Verkaufsformat für Ihre Lieferung mit HolzNest.',
 };
 export const dynamic = 'force-dynamic';
 
 const benefits = [
   { icon: Droplets, title: 'Garantiert trockenes Holz', text: 'Natürlich unter Dach getrocknet; die Feuchtigkeit wird vor jeder Lieferung geprüft und liegt unter 20 %.' },
-  { icon: Ruler, title: 'Fünf Längen', text: '25 cm, 33 cm, 40 cm, 50 cm und 1 m für Ofen, Kamineinsatz, Kamin oder Heizkessel.' },
+  { icon: Ruler, title: 'Drei Scheitlängen', text: '25 cm, 33 cm und 50 cm passend für Ofen, Kamin und Heizkessel.' },
   { icon: Flame, title: 'Hohe Heizleistung', text: 'Ausgewählte Harthölzer mit hohem Heizwert und lang anhaltender Glut.' },
   { icon: Truck, title: 'Organisierte Lieferung', text: 'Lieferung nach Hause je nach Region, mit bestätigtem Zeitfenster vor der Abfahrt.' },
 ];
@@ -38,7 +38,7 @@ export default async function HomePage() {
               Wärme aus Holz. Ganz einfach.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-[#625b50] sm:text-lg sm:leading-8">
-              Finden Sie die passende Holzart und Scheitlänge für Ihren Ofen. Wir bereiten Ihre Bestellung vor und organisieren die Lieferung zu Ihnen nach Hause.
+              Finden Sie die passende Holzart und das richtige Verkaufsformat. Wir bereiten Ihre Bestellung vor und organisieren die Lieferung zu Ihnen nach Hause.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/catalogue" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#21492d] px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(33,73,45,.2)] transition hover:-translate-y-0.5 hover:bg-[#173a22]">
@@ -50,7 +50,7 @@ export default async function HomePage() {
             </div>
             <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-xs font-medium text-[#5c6656]">
               <span className="inline-flex items-center gap-1.5"><BadgeCheck size={15} /> Kontrollierte Feuchtigkeit</span>
-              <span className="inline-flex items-center gap-1.5"><Ruler size={15} /> 5 Längen verfügbar</span>
+              <span className="inline-flex items-center gap-1.5"><Ruler size={15} /> 3 Scheitlängen verfügbar</span>
               <span className="inline-flex items-center gap-1.5"><Truck size={15} /> Lieferung nach Termin</span>
             </div>
           </FadeIn>
@@ -65,8 +65,8 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="wood-hero-note absolute -bottom-5 left-4 rounded-2xl border border-[#e5dac8] bg-[#fffdf8] px-4 py-3 shadow-lg sm:-left-5 sm:px-5">
-              <p className="text-xs text-[#777064]">Die passende Scheitlänge für Ihren Ofen</p>
-              <p className="mt-1 font-semibold text-[#24442e]">25 cm · 33 cm · 40 cm · 50 cm · 1 m</p>
+              <p className="text-xs text-[#777064]">Die passenden Scheitlängen</p>
+              <p className="mt-1 font-semibold text-[#24442e]">25 cm · 33 cm · 50 cm</p>
             </div>
           </FadeIn>
         </div>
@@ -99,7 +99,7 @@ export default async function HomePage() {
           ) : (
             <div className="mt-9 rounded-2xl border border-dashed border-[#d7cdbb] bg-white/70 p-10 text-center text-sm text-[#645f55]">Unsere Auswahl ist bald verfügbar.</div>
           )}
-          <p className="mt-5 text-xs text-[#766e62]">Preise pro m³ (Raummeter). Verfügbarkeit und Lieferung werden je nach Region bestätigt.</p>
+          <p className="mt-5 text-xs text-[#766e62]">Verkaufsformate und Preise finden Sie auf der jeweiligen Produktseite. Verfügbarkeit und Lieferung werden je nach Region bestätigt.</p>
         </div>
       </section>
 
@@ -109,7 +109,7 @@ export default async function HomePage() {
           <div className="mx-auto max-w-4xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#d6c7ad] bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[.16em] text-[#765633]"><Flame size={15} /> Bereiten Sie sich auf die kalte Jahreszeit vor</span>
             <h2 className="wood-heading mt-5 text-3xl font-medium text-[#102b1e] sm:text-5xl">Wie viele m³ Holz brauchen Sie im Winter?</h2>
-            <p className="mx-auto mt-4 max-w-4xl text-sm leading-6 text-[#645f55] sm:text-base">Für ein 100 m² großes Haus mit Holz als Hauptheizung benötigen Sie etwa 4 bis 6 m³. Für gelegentliches Heizen reichen meist 2 bis 3 m³. Der Gesamtpreis wird anhand der gewählten Scheitlänge und Menge berechnet.</p>
+            <p className="mx-auto mt-4 max-w-4xl text-sm leading-6 text-[#645f55] sm:text-base">Der Holzbedarf hängt von Wohnfläche, Dämmung, Klima und Heizgerät ab. Wählen Sie im Katalog zwischen Säcken und Raummeter; die Preise werden pro Verkaufsformat angezeigt.</p>
             <p className="mt-2 text-xs text-[#867b69]">Richtwert: Der Bedarf hängt von Dämmung, Klima und Heizgerät ab.</p>
             <Link href="/catalogue" className="wood-cta mt-8 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#21492d] px-8 py-3 text-sm font-semibold text-white shadow-[0_5px_14px_rgba(33,73,45,.2)] transition hover:bg-[#173a22]">Holz bestellen <ArrowRight size={16} /></Link>
           </div>

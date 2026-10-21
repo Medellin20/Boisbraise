@@ -22,11 +22,10 @@ export function normalizeCartLine(value: unknown): StoredCartLine | null {
   const lengthCm = Number(line.lengthCm ?? legacyLength ?? 0);
   const quantity = Number(line.quantity);
   const packageCode = typeof line.packageCode === 'string' ? getWoodPackage(line.packageCode)?.code : undefined;
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;
-  if (packageCode ? ![25, 33, 50].includes(lengthCm) : ![25, 33, 40, 50, 100].includes(lengthCm)) return null;
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !packageCode || ![25, 33, 50].includes(lengthCm)) return null;
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) return null;
   return {
-    key: packageCode ? `${slug}-${packageCode}-${lengthCm}` : `${slug}-${lengthCm}`,
+    key: `${slug}-${packageCode}-${lengthCm}`,
     slug,
     name: typeof line.name === 'string' ? line.name : slug,
     length: lengthCm === 100 ? '1 m' : `${lengthCm} cm`,

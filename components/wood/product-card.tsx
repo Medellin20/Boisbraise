@@ -2,6 +2,46 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Flame, PackageCheck, Truck, Droplets, Image as ImageIcon } from 'lucide-react';
 import type { WoodProduct } from '@/lib/data/wood-products';
-import { formatWoodPrice, lengthLabel } from '@/lib/utils/wood';
+import { formatWoodPrice } from '@/lib/utils/wood';
+import { getWoodPackage } from '@/lib/utils/wood-packages';
 import { woodDisplayName, woodDisplayText } from '@/lib/utils/wood-display';
-export function WoodProductCard({product}:{product:WoodProduct}){const cover=product.wood_product_images.find(item=>item.is_primary)??product.wood_product_images[0];const lengths=product.wood_product_lengths.map(item=>lengthLabel(item.length_cm));return <article className="wood-product-card overflow-hidden rounded-[22px] border border-[#e6ddcf] bg-white shadow-[0_8px_22px_rgba(62,49,32,.10)]"><Link href={`/catalogue/${product.slug}`} className="group relative block h-56 overflow-hidden sm:h-64" aria-label={`${woodDisplayName(product.name)} ansehen`}>{cover?<Image src={cover.url} alt={cover.alt_text??`Holzscheite: ${woodDisplayName(product.name)}`} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"/>:<div className="flex h-full items-center justify-center bg-[#eee7d9] text-[#536147]"><ImageIcon size={44}/></div>}<span className="absolute left-4 top-4 rounded-full bg-[#f6f3e9] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#26442d]">{woodDisplayName(product.name)}</span></Link><div className="p-5 sm:p-6"><h3 className="wood-heading text-[25px] font-semibold text-[#102b1e]">{woodDisplayName(product.name)}</h3><p className="mt-1.5 min-h-12 text-sm leading-5 text-[#645f55]">{woodDisplayText(product.short_description)}</p><div className="mt-4 flex flex-wrap gap-2">{product.moisture_percent!=null&&<span className="wood-chip wood-chip-green"><Droplets size={14}/>Trockenes Holz ≤ {product.moisture_percent}%</span>}{product.delivery_available&&<span className="wood-chip wood-chip-orange"><Truck size={14}/>Lieferung verfügbar</span>}{product.calorific_value_kwh!=null&&<span className="wood-chip wood-chip-red"><Flame size={14}/>{product.calorific_value_kwh} kWh/m³</span>}{product.in_stock&&<span className="wood-chip wood-chip-green"><PackageCheck size={14}/>{product.stock_m3==null?'Auf Lager':`${product.stock_m3} m³ auf Lager`}</span>}</div><p className="mt-4 text-xs text-[#71695c]">Längen: {lengths.length?lengths.join(' · '):'Auf Anfrage'}</p><div className="mt-4 flex items-end justify-between border-t border-[#e5dbc9] pt-4"><div><span className="block text-[10px] font-medium uppercase tracking-wide text-[#6f685b]">Ab</span><strong className="text-xl text-[#142c20]">{formatWoodPrice(product.price_per_m3)}</strong><span className="ml-1 text-xs text-[#71695c]">/ m³ (Raummeter)</span></div><Link href={`/catalogue/${product.slug}`} className="inline-flex items-center gap-1.5 pb-1 text-sm font-semibold text-[#153d28] hover:underline">Ansehen <ArrowRight size={16}/></Link></div></div></article>;}
+
+export function WoodProductCard({ product }: { product: WoodProduct }) {
+  const cover = product.wood_product_images.find((item) => item.is_primary) ?? product.wood_product_images[0];
+  const startingPackage = product.wood_product_packages
+    .filter((item) => item.price != null)
+    .sort((a, b) => Number(a.price) - Number(b.price))[0];
+  const startingFormat = startingPackage ? getWoodPackage(startingPackage.package_code) : undefined;
+
+  return (
+    <article className="wood-product-card overflow-hidden rounded-[22px] border border-[#e6ddcf] bg-white shadow-[0_8px_22px_rgba(62,49,32,.10)]">
+      <Link href={`/catalogue/${product.slug}`} className="group relative block h-56 overflow-hidden sm:h-64" aria-label={`${woodDisplayName(product.name)} ansehen`}>
+        {cover ? (
+          <Image src={cover.url} alt={cover.alt_text ?? `Holzscheite: ${woodDisplayName(product.name)}`} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-[#eee7d9] text-[#536147]"><ImageIcon size={44} /></div>
+        )}
+        <span className="absolute left-4 top-4 rounded-full bg-[#f6f3e9] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#26442d]">{woodDisplayName(product.name)}</span>
+      </Link>
+      <div className="p-5 sm:p-6">
+        <h3 className="wood-heading text-[25px] font-semibold text-[#102b1e]">{woodDisplayName(product.name)}</h3>
+        <p className="mt-1.5 min-h-12 text-sm leading-5 text-[#645f55]">{woodDisplayText(product.short_description)}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {product.moisture_percent != null && <span className="wood-chip wood-chip-green"><Droplets size={14} />Trockenes Holz ≤ {product.moisture_percent}%</span>}
+          {product.delivery_available && <span className="wood-chip wood-chip-orange"><Truck size={14} />Lieferung verfügbar</span>}
+          {product.calorific_value_kwh != null && <span className="wood-chip wood-chip-red"><Flame size={14} />{product.calorific_value_kwh} kWh/m³</span>}
+          {product.in_stock && <span className="wood-chip wood-chip-green"><PackageCheck size={14} />{product.stock_m3 == null ? 'Auf Lager' : `${product.stock_m3} m³ auf Lager`}</span>}
+        </div>
+        <p className="mt-4 text-xs text-[#71695c]">Formate : 12,5 l · 20 l · 40 l · 1 RM</p>
+        <div className="mt-4 flex items-end justify-between border-t border-[#e5dbc9] pt-4">
+          <div>
+            <span className="block text-[10px] font-medium uppercase tracking-wide text-[#6f685b]">À partir de</span>
+            <strong className="text-xl text-[#142c20]">{startingPackage ? formatWoodPrice(Number(startingPackage.price)) : 'Sur devis'}</strong>
+            {startingFormat && <span className="ml-1 text-xs text-[#71695c]">/ {startingFormat.label}</span>}
+          </div>
+          <Link href={`/catalogue/${product.slug}`} className="inline-flex items-center gap-1.5 pb-1 text-sm font-semibold text-[#153d28] hover:underline">Ansehen <ArrowRight size={16} /></Link>
+        </div>
+      </div>
+    </article>
+  );
+}
