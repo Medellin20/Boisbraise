@@ -15,14 +15,14 @@ Boutique web de bois de chauffage : catalogue d’essences, fiches produit, tari
 2. Copier `.env.example` en `.env.local` et renseigner `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` et `ADMIN_SESSION_SECRET`. La clé `SUPABASE_SERVICE_ROLE_KEY` est réservée au serveur : ne la préfixez jamais par `NEXT_PUBLIC_` et ne la publiez pas. Le fichier `.env` n’est pas modifié par l’application.
    En production sur Netlify, renseigner ces variables dans **Site configuration > Environment variables** puis relancer un déploiement. Le fichier `.env` local est ignoré par Git et n’est pas transmis à Netlify.
    Le scan de secrets Netlify reste activé : seules les variables publiques `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_STORAGE_BUCKET` et `ADMIN_ALLOWED_ORIGIN` sont exclues. Ne jamais ajouter `ADMIN_PASSWORD` ou `SUPABASE_SERVICE_ROLE_KEY` à `SECRETS_SCAN_OMIT_KEYS`.
-3. Dans Supabase SQL Editor, exécuter `supabase/schema.sql`, puis `supabase/migrations/20260930_wood_catalog.sql`, `supabase/rls_policies.sql` et `supabase/seed.sql`. La migration crée les tables du catalogue, les règles publiques de lecture et le bucket de photos, puis ajoute les essences de départ.
+3. Dans Supabase SQL Editor, exécuter `supabase/schema.sql`, puis `supabase/migrations/20260930_wood_catalog.sql`, `supabase/migrations/20261002_wood_product_packages.sql`, `supabase/rls_policies.sql` et `supabase/seed.sql`. La migration du catalogue crée les tables et photos ; la migration `20261002_wood_product_packages.sql` ajoute les formats de vente modifiables et les trois essences Bouleau, Charme et Épicéa.
 4. Démarrer avec `npm run dev`.
 
 Le site est disponible sur `http://localhost:3000`.
 
 ## Administration
 
-Ouvrir `/admin` et se connecter avec `ADMIN_PASSWORD`. L’accueil admin mène au catalogue `/admin/bois`. Depuis cet espace, vous pouvez créer, modifier, publier ou supprimer des produits, régler les prix par longueur et gérer les photos dans Supabase Storage.
+Ouvrir `/admin` et se connecter avec `ADMIN_PASSWORD`. L’accueil admin mène au catalogue `/admin/bois`. Depuis cet espace, vous pouvez créer, modifier, publier ou supprimer des produits, régler les prix par longueur et par format (12,5 l, 20 l, 40 l et 1 RM), définir la longueur des bûches et gérer les photos dans Supabase Storage.
 
 Les actions serveur valident la session avant toute écriture avec la clé de service. Les visiteurs anonymes ne peuvent lire que les produits publiés.
 

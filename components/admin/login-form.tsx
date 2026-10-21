@@ -11,7 +11,12 @@ const initialState: AdminLoginState = { success: false, message: '' };
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" size="lg" isLoading={pending}>
+    <Button
+      type="submit"
+      className="w-full bg-[#315b3b] shadow-md hover:bg-[#274a30] active:bg-[#1d3925]"
+      size="lg"
+      isLoading={pending}
+    >
       Anmelden
     </Button>
   );
@@ -23,7 +28,7 @@ export function AdminLoginForm() {
   return (
     <form action={formAction} className="space-y-5">
       <div>
-        <Label htmlFor="password" className="text-sand-200">
+        <Label htmlFor="password" className="text-ink-700">
           Administrator-Passwort
         </Label>
         <Input
@@ -33,12 +38,12 @@ export function AdminLoginForm() {
           required
           autoFocus
           autoComplete="current-password"
-          className="border-white/10 bg-white/5 text-white placeholder:text-sand-400 focus:border-white/30"
+          className="border-ink-200 bg-white text-ink-900 placeholder:text-ink-400 focus:border-[#315b3b] focus:ring-[#315b3b]/20"
         />
       </div>
 
       {state.message && !state.success && (
-        <p className="rounded-lg bg-brick-500/15 px-3 py-2 text-sm text-brick-300">{state.message}</p>
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{state.message}</p>
       )}
 
       <SubmitButton />

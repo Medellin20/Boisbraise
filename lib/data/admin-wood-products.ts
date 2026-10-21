@@ -1,10 +1,11 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
-import type { WoodProductImageRecord, WoodProductLengthRecord, WoodProductRecord } from '@/types/database';
+import type { WoodProductImageRecord, WoodProductLengthRecord, WoodProductPackageRecord, WoodProductRecord } from '@/types/database';
 
 export type AdminWoodProduct = WoodProductRecord & {
   wood_product_images: WoodProductImageRecord[];
   wood_product_lengths: WoodProductLengthRecord[];
+  wood_product_packages: WoodProductPackageRecord[];
 };
 
 export async function getAllWoodProductsAdmin(): Promise<{
@@ -25,15 +26,17 @@ export async function getAllWoodProductsAdmin(): Promise<{
   const ids = (data ?? []).map((item) => item.id);
   if (!ids.length) return { products: [], error: null };
 
-  const [{ data: images }, { data: lengths }] = await Promise.all([
+  const [{ data: images }, { data: lengths }, { data: packages }] = await Promise.all([
     supabase.from('wood_product_images').select('*').in('product_id', ids).order('sort_order'),
     supabase.from('wood_product_lengths').select('*').in('product_id', ids).order('sort_order'),
+    supabase.from('wood_product_packages').select('*').in('product_id', ids).order('sort_order'),
   ]);
 
   const products = (data ?? []).map((product) => ({
     ...product,
     wood_product_images: images?.filter((image) => image.product_id === product.id) ?? [],
     wood_product_lengths: lengths?.filter((length) => length.product_id === product.id) ?? [],
+    wood_product_packages: packages?.filter((item) => item.product_id === product.id) ?? [],
   })) as AdminWoodProduct[];
 
   return { products, error: null };
@@ -44,14 +47,16 @@ export async function getWoodProductByIdAdmin(id: string): Promise<AdminWoodProd
   const { data, error } = await supabase.from('wood_products').select('*').eq('id', id).maybeSingle();
   if (error || !data) return null;
 
-  const [{ data: images }, { data: lengths }] = await Promise.all([
+  const [{ data: images }, { data: lengths }, { data: packages }] = await Promise.all([
     supabase.from('wood_product_images').select('*').eq('product_id', id).order('sort_order'),
     supabase.from('wood_product_lengths').select('*').eq('product_id', id).order('sort_order'),
+    supabase.from('wood_product_packages').select('*').eq('product_id', id).order('sort_order'),
   ]);
 
   return {
     ...data,
     wood_product_images: images ?? [],
     wood_product_lengths: lengths ?? [],
+    wood_product_packages: packages ?? [],
   } as AdminWoodProduct;
 }

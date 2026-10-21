@@ -13,6 +13,7 @@ export interface WoodProductRecord {
   sort_order: number; created_at: string; updated_at: string;
 }
 export interface WoodProductLengthRecord { id: string; product_id: string; length_cm: number; price_per_m3: number | null; sort_order: number; }
+export interface WoodProductPackageRecord { id: string; product_id: string; package_code: string; price: number | null; sort_order: number; }
 export interface WoodProductImageRecord { id: string; product_id: string; storage_path: string; url: string; alt_text: string | null; is_primary: boolean; sort_order: number; created_at: string; }
 export interface WoodStoreSettingsRecord { id: number; payment_method: 'rib' | 'link'; payment_url: string; bank_name: string; bank_account_holder: string; bank_iban: string; bank_bic: string; updated_at: string; }
 export interface SiteContactSettingsRecord { id: number; contact_email: string; phone_numbers: string[]; updated_at: string; }
@@ -22,6 +23,7 @@ export interface Database {
     admin_logs: { Row: AdminLog; Insert: Partial<AdminLog>; Update: Partial<AdminLog> };
     wood_products: { Row: WoodProductRecord; Insert: Partial<WoodProductRecord>; Update: Partial<WoodProductRecord> };
     wood_product_lengths: { Row: WoodProductLengthRecord; Insert: Partial<WoodProductLengthRecord>; Update: Partial<WoodProductLengthRecord> };
+    wood_product_packages: { Row: WoodProductPackageRecord; Insert: Partial<WoodProductPackageRecord>; Update: Partial<WoodProductPackageRecord> };
     wood_product_images: { Row: WoodProductImageRecord; Insert: Partial<WoodProductImageRecord>; Update: Partial<WoodProductImageRecord> };
     wood_store_settings: { Row: WoodStoreSettingsRecord; Insert: Partial<WoodStoreSettingsRecord>; Update: Partial<WoodStoreSettingsRecord> };
     site_contact_settings: { Row: SiteContactSettingsRecord; Insert: Partial<SiteContactSettingsRecord>; Update: Partial<SiteContactSettingsRecord> };

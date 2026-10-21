@@ -40,7 +40,7 @@ export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
     startTransition(async () => {
       const result = await submitWoodOrder({
         customer,
-        lines: cart.map((line) => ({ slug: line.slug, lengthCm: line.lengthCm, quantity: line.quantity })),
+        lines: cart.map((line) => ({ slug: line.slug, lengthCm: line.lengthCm, packageCode: line.packageCode, quantity: line.quantity })),
         website: String(form.get('website') ?? ''),
         acceptTerms: form.get('acceptTerms') === 'on',
       });
@@ -106,7 +106,7 @@ export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
       <aside className="rounded-3xl border border-[#e7dece] bg-[#fcfaf5] p-5 shadow-sm lg:sticky lg:top-24">
         <h2 className="font-bold text-[#173a27]">Bestellübersicht</h2>
         <ul className="mt-4 space-y-4">
-          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><span className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{line.length} · {line.quantity} m³</span></span><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
+          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><span className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{line.packageCode ? `${line.quantity} × ${line.length}` : `${line.length} · ${line.quantity} m³`}</span></span><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
         </ul>
         <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{formatWoodPrice(subtotal)}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison</span><span>{deliveryFee == null ? 'Noch einzurichten' : formatWoodPrice(deliveryFee)}</span></div></div>
         <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Total à payer</span><span>{estimatedTotal == null ? "Wird bestätigt" : formatWoodPrice(estimatedTotal)}</span></div><div className="flex justify-between text-[#21492d]"><span>Acompte (50 % du total)</span><strong>{estimatedDeposit == null ? "Wird bestätigt" : formatWoodPrice(estimatedDeposit)}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Die Anzahlung beträgt die Hälfte des Gesamtbetrags einschließlich Lieferung. Der endgültige Betrag wird beim Absenden anhand der aktuellen Katalogpreise berechnet.</p></div>

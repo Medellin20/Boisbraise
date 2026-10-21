@@ -14,12 +14,12 @@ export default function AdminLoginPage() {
           <BrandLogo className="w-40 sm:w-44" priority />
         </Link>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-lifted backdrop-blur-sm sm:p-8">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white">
+        <div className="rounded-2xl border border-[#e5ddcf] bg-white p-5 shadow-[0_24px_60px_-24px_rgba(45,55,38,0.28)] sm:p-8">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#e7ede3] text-[#315b3b]">
             <Lock className="h-5 w-5" />
           </div>
-          <h1 className="mt-4 text-center text-lg font-bold text-white">Verwaltungsbereich</h1>
-          <p className="mt-1 text-center text-sm text-sand-400">
+          <h1 className="mt-4 text-center text-lg font-bold text-ink-900">Verwaltungsbereich</h1>
+          <p className="mt-1 text-center text-sm text-ink-500">
             Melden Sie sich an, um Produkte, Preise und Fotos zu verwalten.
           </p>
 

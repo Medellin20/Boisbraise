@@ -1,3 +1,5 @@
+import { getWoodPackage, type WoodPackageCode } from '@/lib/utils/wood-packages';
+
 export const CART_STORAGE_KEY = 'bois-foret-cart-v1';
 export const ORDER_CONFIRMATION_STORAGE_KEY = 'holznest-order-confirmation-v1';
 
@@ -7,6 +9,7 @@ export type StoredCartLine = {
   name: string;
   length: string;
   lengthCm?: number;
+  packageCode?: WoodPackageCode;
   quantity: number;
   unitPrice: number;
 };
@@ -18,14 +21,17 @@ export function normalizeCartLine(value: unknown): StoredCartLine | null {
   const legacyLength = line.length?.trim().toLowerCase() === '1 m' ? 100 : line.length?.match(/\d+/)?.[0];
   const lengthCm = Number(line.lengthCm ?? legacyLength ?? 0);
   const quantity = Number(line.quantity);
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || ![25, 33, 40, 50, 100].includes(lengthCm)) return null;
+  const packageCode = typeof line.packageCode === 'string' ? getWoodPackage(line.packageCode)?.code : undefined;
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;
+  if (packageCode ? ![25, 33, 50].includes(lengthCm) : ![25, 33, 40, 50, 100].includes(lengthCm)) return null;
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) return null;
   return {
-    key: `${slug}-${lengthCm}`,
+    key: packageCode ? `${slug}-${packageCode}-${lengthCm}` : `${slug}-${lengthCm}`,
     slug,
     name: typeof line.name === 'string' ? line.name : slug,
     length: lengthCm === 100 ? '1 m' : `${lengthCm} cm`,
     lengthCm,
+    packageCode,
     quantity,
     unitPrice: Number.isFinite(Number(line.unitPrice)) ? Number(line.unitPrice) : 0,
   };

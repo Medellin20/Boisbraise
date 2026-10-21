@@ -6,6 +6,7 @@ import { ArrowRight, Check, Copy, CreditCard, Landmark } from 'lucide-react';
 import { toast } from 'sonner';
 import { ORDER_CONFIRMATION_STORAGE_KEY } from '@/lib/utils/cart';
 import { formatWoodPrice, lengthLabel } from '@/lib/utils/wood';
+import { getWoodPackage } from '@/lib/utils/wood-packages';
 import type { OrderConfirmation } from '@/lib/types/order';
 import { woodDisplayName } from '@/lib/utils/wood-display';
 
@@ -129,7 +130,7 @@ export function PaymentInstructions() {
       <section className="mt-6 rounded-3xl border border-[#e7dece] bg-white p-5 shadow-sm sm:p-7">
         <h2 className="font-bold text-[#173a27]">Ihre Bestellung</h2>
         <ul className="mt-4 divide-y divide-[#eee7dc]">
-          {order.lines.map((line, index) => <li key={`${line.slug}-${line.lengthCm}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{line.quantity} m³ · {woodDisplayName(line.name)} · {lengthLabel(line.lengthCm)}</span><strong>{formatWoodPrice(line.total)}</strong></li>)}
+          {order.lines.map((line, index) => <li key={`${line.slug}-${line.packageCode ?? line.lengthCm}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{line.packageCode ? `${line.quantity} × ${getWoodPackage(line.packageCode)?.label ?? 'Format'} · ${woodDisplayName(line.name)} · ${lengthLabel(line.lengthCm)}` : `${line.quantity} m³ · ${woodDisplayName(line.name)} · ${lengthLabel(line.lengthCm)}`}</span><strong>{formatWoodPrice(line.total)}</strong></li>)}
         </ul>
         <p className="mt-4 border-t border-[#eee7dc] pt-4 text-sm text-[#625b50]">Lieferadresse: {order.customer.address}, {order.customer.postalCode} {order.customer.city}</p>
       </section>

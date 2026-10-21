@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendAdminAlert } from '@/lib/notifications/email';
 import { lengthLabel } from '@/lib/utils/wood';
+import { getWoodPackage } from '@/lib/utils/wood-packages';
 import { woodOrderSchema } from '@/lib/validations/order';
 import type { OrderConfirmation, OrderLine, OrderPayment } from '@/lib/types/order';
 
@@ -94,11 +95,15 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
   if (!products?.length || products.length !== slugs.length) return fail('Ein Produkt im Warenkorb ist nicht mehr verfügbar. Bitte aktualisieren Sie den Katalog.');
 
   const productIds = products.map((product) => product.id);
-  const { data: lengths, error: lengthsError } = await supabase
-    .from('wood_product_lengths')
-    .select('product_id,length_cm,price_per_m3')
-    .in('product_id', productIds);
+  const [lengthsResult, packagesResult] = await Promise.all([
+    supabase.from('wood_product_lengths').select('product_id,length_cm,price_per_m3').in('product_id', productIds),
+    supabase.from('wood_product_packages').select('product_id,package_code,price').in('product_id', productIds),
+  ]);
+  const { data: lengths, error: lengthsError } = lengthsResult;
   if (lengthsError) return fail('Die Katalogpreise sind vorübergehend nicht verfügbar.');
+  if (parsed.data.lines.some((line) => line.packageCode) && packagesResult.error) {
+    return fail('Die Verkaufspakete sind nicht verfügbar. Wenden Sie die Supabase-Migration für Paketpreise an.');
+  }
 
   const orderLines: OrderLine[] = [];
   const quantitiesByProduct = new Map<string, number>();
@@ -107,17 +112,34 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
   for (const requested of parsed.data.lines) {
     const product = products.find((item) => item.slug === requested.slug);
     if (!product || !product.in_stock) return fail(`${product?.name ?? 'Ein Artikel'} ist nicht mehr verfügbar.`);
-    const selectedLength = lengths?.find((item) => item.product_id === product.id && item.length_cm === requested.lengthCm);
-    if (!selectedLength || selectedLength.price_per_m3 == null) return fail(`Der Preis für ${product.name} (${lengthLabel(requested.lengthCm)}) muss per Angebot bestätigt werden.`);
+    let unitPrice: number;
+    let stockVolumeM3: number;
+    if (requested.packageCode) {
+      const packageDetails = getWoodPackage(requested.packageCode);
+      const selectedPackage = packagesResult.data?.find(
+        (item) => item.product_id === product.id && item.package_code === requested.packageCode
+      );
+      if (!packageDetails || !selectedPackage || selectedPackage.price == null) {
+        return fail(`Der Preis für ${product.name} (${packageDetails?.label ?? 'Format'}) muss per Angebot bestätigt werden.`);
+      }
+      unitPrice = Number(selectedPackage.price);
+      stockVolumeM3 = packageDetails.volumeLitres / 1000;
+    } else {
+      const selectedLength = lengths?.find((item) => item.product_id === product.id && item.length_cm === requested.lengthCm);
+      if (!selectedLength || selectedLength.price_per_m3 == null) return fail(`Der Preis für ${product.name} (${lengthLabel(requested.lengthCm)}) muss per Angebot bestätigt werden.`);
+      unitPrice = Number(selectedLength.price_per_m3);
+      stockVolumeM3 = 1;
+    }
 
-    quantitiesByProduct.set(product.id, (quantitiesByProduct.get(product.id) ?? 0) + requested.quantity);
-    const unitPriceCents = toCents(Number(selectedLength.price_per_m3));
+    quantitiesByProduct.set(product.id, (quantitiesByProduct.get(product.id) ?? 0) + stockVolumeM3 * requested.quantity);
+    const unitPriceCents = toCents(unitPrice);
     const lineTotalCents = unitPriceCents * requested.quantity;
     subtotalCents += lineTotalCents;
     orderLines.push({
       slug: product.slug,
       name: product.name,
       lengthCm: requested.lengthCm,
+      packageCode: requested.packageCode,
       quantity: requested.quantity,
       unitPrice: euros(unitPriceCents),
       total: euros(lineTotalCents),
@@ -148,9 +170,12 @@ export async function submitWoodOrder(value: unknown): Promise<SubmitOrderResult
     payment,
   };
 
-  const itemsSummary = orderLines.map((line) =>
-    `${line.quantity} m³ — ${line.name}, ${lengthLabel(line.lengthCm)} — ${formatPrice(toCents(line.unitPrice))}/m³ — total ${formatPrice(toCents(line.total))}`
-  ).join('\n');
+  const itemsSummary = orderLines.map((line) => {
+    const packageDetails = line.packageCode ? getWoodPackage(line.packageCode) : undefined;
+    const format = packageDetails ? `${line.quantity} × ${packageDetails.label}` : `${line.quantity} m³`;
+    const priceUnit = packageDetails ? '' : '/m³';
+    return `${format} — ${line.name}, ${lengthLabel(line.lengthCm)} — ${formatPrice(toCents(line.unitPrice))}${priceUnit} — total ${formatPrice(toCents(line.total))}`;
+  }).join('\n');
   const sent = await sendAdminAlert(`Nouvelle commande HolzNest ${reference}`, {
     Référence: reference,
     Client: `${customer.firstName} ${customer.lastName}`,
