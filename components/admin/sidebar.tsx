@@ -4,13 +4,14 @@ import * as React from 'react';
 import Link from 'next/link';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Trees, LogOut, Menu, X, CreditCard, Mail } from 'lucide-react';
+import { LayoutDashboard, Trees, LogOut, Menu, X, CreditCard, Mail, Ruler } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { logoutAdmin } from '@/actions/admin-auth';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Übersicht', icon: LayoutDashboard, exact: true },
   { href: '/admin/bois', label: 'Holzkatalog', icon: Trees },
+  { href: '/admin/vente', label: 'Vente de bois', icon: Ruler },
   { href: '/admin/paiement', label: 'Zahlung & Bankverbindung', icon: CreditCard },
   { href: '/admin/kontakt', label: 'Footer-Kontaktdaten', icon: Mail },
 ];

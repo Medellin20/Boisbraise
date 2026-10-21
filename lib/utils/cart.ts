@@ -1,4 +1,4 @@
-import { getWoodPackage, type WoodPackageCode } from '@/lib/utils/wood-packages';
+import { getWoodPackage, MAX_WOOD_ORDER_QUANTITY, type WoodPackageCode } from '@/lib/utils/wood-packages';
 
 export const CART_STORAGE_KEY = 'bois-foret-cart-v1';
 export const ORDER_CONFIRMATION_STORAGE_KEY = 'holznest-order-confirmation-v1';
@@ -18,12 +18,13 @@ export function normalizeCartLine(value: unknown): StoredCartLine | null {
   if (!value || typeof value !== 'object') return null;
   const line = value as Partial<StoredCartLine>;
   const slug = typeof line.slug === 'string' ? line.slug : '';
-  const legacyLength = line.length?.trim().toLowerCase() === '1 m' ? 100 : line.length?.match(/\d+/)?.[0];
+  const lengthText = typeof line.length === 'string' ? line.length : '';
+  const legacyLength = lengthText.trim().toLowerCase() === '1 m' ? 100 : lengthText.match(/\d+/)?.[0];
   const lengthCm = Number(line.lengthCm ?? legacyLength ?? 0);
   const quantity = Number(line.quantity);
   const packageCode = typeof line.packageCode === 'string' ? getWoodPackage(line.packageCode)?.code : undefined;
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !packageCode || ![25, 33, 50].includes(lengthCm)) return null;
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) return null;
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !packageCode || !Number.isInteger(lengthCm) || lengthCm < 10 || lengthCm > 300) return null;
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_WOOD_ORDER_QUANTITY) return null;
   return {
     key: `${slug}-${packageCode}-${lengthCm}`,
     slug,

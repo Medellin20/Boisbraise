@@ -7,51 +7,31 @@ import { isValidAdminSessionToken } from '@/lib/auth/admin-session';
 import { ADMIN_SESSION_COOKIE } from '@/lib/utils/constants';
 import { logAdminAction } from '@/lib/data/history';
 
-const packagePrices = z.array(z.object({ packageCode: z.enum(['12_5_litres', '20_litres', '40_litres', '1_rm']), price: z.number().finite().nonnegative().nullable() })).length(4).superRefine((items, ctx) => {
-  if (new Set(items.map((item) => item.packageCode)).size !== 4) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Jedes Verkaufsformat darf nur einmal gespeichert werden.' });
-  }
-});
-const schema = z.object({ slug: z.string().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), name: z.string().trim().min(2).max(100), shortDescription: z.string().max(240), description: z.string().max(5000), moisturePercent: z.number().finite().min(0).max(100).nullable(), calorificValueKwh: z.number().finite().nonnegative().nullable(), deliveryAvailable: z.boolean(), inStock: z.boolean(), stockM3: z.number().finite().nonnegative().nullable(), isPublished: z.boolean(), sortOrder: z.number().int().min(0).max(9999), packagePrices });
+const schema = z.object({ slug: z.string().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/), name: z.string().trim().min(2).max(100), shortDescription: z.string().max(240), description: z.string().max(5000), moisturePercent: z.number().finite().min(0).max(100).nullable(), calorificValueKwh: z.number().finite().nonnegative().nullable(), deliveryAvailable: z.boolean(), inStock: z.boolean(), stockM3: z.number().finite().nonnegative().nullable(), isPublished: z.boolean(), sortOrder: z.number().int().min(0).max(9999) });
 export type WoodProductInput = z.infer<typeof schema>;
 const fail = (message: string) => ({ success: false as const, message });
 async function authorized() { return isValidAdminSessionToken(cookies().get(ADMIN_SESSION_COOKIE)?.value); }
 function publicRefresh(slug?: string) { revalidatePath('/'); revalidatePath('/catalogue'); revalidatePath('/admin/bois'); if (slug) revalidatePath(`/catalogue/${slug}`); }
 function dbPayload(input: WoodProductInput) { return { slug: input.slug, name: input.name, short_description: input.shortDescription, description: input.description, moisture_percent: input.moisturePercent, calorific_value_kwh: input.calorificValueKwh, delivery_available: input.deliveryAvailable, in_stock: input.inStock, stock_m3: input.stockM3, is_published: input.isPublished, sort_order: input.sortOrder }; }
-async function savePackagePrices(productId: string, input: WoodProductInput) {
-  const supabase = createAdminClient();
-  const { error } = await supabase.from('wood_product_packages').upsert(
-    input.packagePrices.map((item, sort_order) => ({
-      product_id: productId,
-      package_code: item.packageCode,
-      price: item.price,
-      sort_order,
-    })),
-    { onConflict: 'product_id,package_code' }
-  );
-  return !error;
-}
 export async function createWoodProduct(value: unknown) {
   if (!await authorized()) return fail('Ihre Administratorsitzung ist abgelaufen. Bitte melden Sie sich erneut an.');
-  const parsed = schema.safeParse(value); if (!parsed.success) return fail('Bitte überprüfen Sie die Produktfelder und Preise je Länge.');
+  const parsed = schema.safeParse(value); if (!parsed.success) return fail('Bitte überprüfen Sie die Produktfelder.');
   const supabase = createAdminClient();
   const { data, error } = await supabase.from('wood_products').insert(dbPayload(parsed.data)).select('id').single();
   if (error || !data) return fail(error?.code === '23505' ? 'Dieser URL-Slug wird bereits verwendet.' : 'Das Produkt konnte nicht gespeichert werden. Wenden Sie zuerst die Supabase-Migration für den Holzkatalog an.');
-  const packagesSaved = await savePackagePrices(data.id, parsed.data);
   await logAdminAction({ action: 'wood_product.create', entityType: 'wood_product', entityId: data.id });
   publicRefresh(parsed.data.slug);
-  return { success: true as const, message: packagesSaved ? 'Produkt hinzugefügt.' : 'Produkt erstellt. Bitte wenden Sie die Migration für Paketpreise an und prüfen Sie die Preise.', id: data.id };
+  return { success: true as const, message: 'Produkt hinzugefügt.', id: data.id };
 }
 export async function updateWoodProduct(id: string, value: unknown) {
   if (!await authorized()) return fail('Ihre Administratorsitzung ist abgelaufen. Bitte melden Sie sich erneut an.');
-  const parsed = schema.safeParse(value); if (!parsed.success) return fail('Bitte überprüfen Sie die Produktfelder und Preise je Länge.');
+  const parsed = schema.safeParse(value); if (!parsed.success) return fail('Bitte überprüfen Sie die Produktfelder.');
   const supabase = createAdminClient();
   const { data, error } = await supabase.from('wood_products').update({ ...dbPayload(parsed.data), updated_at: new Date().toISOString() }).eq('id',id).select('id').maybeSingle();
   if (error || !data) return fail(error?.code === '23505' ? 'Dieser URL-Slug wird bereits verwendet.' : 'Das Produkt konnte nicht geändert werden.');
-  const packagesSaved = await savePackagePrices(id, parsed.data);
   await logAdminAction({ action: 'wood_product.update', entityType: 'wood_product', entityId: id });
   publicRefresh(parsed.data.slug);
-  return { success: true as const, message: packagesSaved ? 'Änderungen gespeichert.' : 'Produkt geändert. Bitte wenden Sie die Migration für Paketpreise an und prüfen Sie die Preise.' };
+  return { success: true as const, message: 'Änderungen gespeichert.' };
 }
 export async function deleteWoodProduct(id: string) {
   if (!await authorized()) return fail('Ihre Administratorsitzung ist abgelaufen. Bitte melden Sie sich erneut an.');

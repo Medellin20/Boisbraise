@@ -145,7 +145,7 @@ export default async function WoodProductPage({ params }: PageProps) {
             <DetailRow label="Holzart" value={name} />
             <DetailRow label="Feuchtigkeit" value={product.moisture_percent != null ? `≤ ${product.moisture_percent} %` : 'Wird bestätigt'} />
             <DetailRow label="Heizwert" value={product.calorific_value_kwh != null ? `${product.calorific_value_kwh} kWh / m³` : 'Wird bestätigt'} />
-            <DetailRow label="Bûches" value="25 cm · 33 cm · 50 cm" />
+            <DetailRow label="Bûches" value={product.wood_sales_settings?.allowedLengthsCm.map((length) => length === 100 ? '1 m' : `${length} cm`).join(' · ') ?? 'Wird bestätigt'} />
             <DetailRow label="Verfügbarkeit" value={stock} />
             <DetailRow label="Lieferung" value={product.delivery_available ? 'Möglich, abhängig von der Lieferadresse' : 'Abhängig von der Lieferadresse'} />
           </dl>

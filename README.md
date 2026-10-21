@@ -1,6 +1,6 @@
 # HolzNest
 
-Boutique web de bois de chauffage : catalogue d’essences, fiches produit, tarifs par longueur, gestion des photos et administration sécurisée.
+Boutique web de bois de chauffage : catalogue d’essences, fiches produit, formats et tarifs communs, gestion des photos et administration sécurisée.
 
 ## Stack
 
@@ -15,14 +15,14 @@ Boutique web de bois de chauffage : catalogue d’essences, fiches produit, tari
 2. Copier `.env.example` en `.env.local` et renseigner `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` et `ADMIN_SESSION_SECRET`. La clé `SUPABASE_SERVICE_ROLE_KEY` est réservée au serveur : ne la préfixez jamais par `NEXT_PUBLIC_` et ne la publiez pas. Le fichier `.env` n’est pas modifié par l’application.
    En production sur Netlify, renseigner ces variables dans **Site configuration > Environment variables** puis relancer un déploiement. Le fichier `.env` local est ignoré par Git et n’est pas transmis à Netlify.
    Le scan de secrets Netlify reste activé : seules les variables publiques `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_STORAGE_BUCKET` et `ADMIN_ALLOWED_ORIGIN` sont exclues. Ne jamais ajouter `ADMIN_PASSWORD` ou `SUPABASE_SERVICE_ROLE_KEY` à `SECRETS_SCAN_OMIT_KEYS`.
-3. Dans Supabase SQL Editor, exécuter `supabase/schema.sql`, puis `supabase/migrations/20260930_wood_catalog.sql`, `supabase/migrations/20261002_wood_product_packages.sql`, `supabase/rls_policies.sql` et `supabase/seed.sql`. La migration du catalogue crée les tables et photos ; la migration `20261002_wood_product_packages.sql` ajoute les formats de vente modifiables et les trois essences Bouleau, Charme et Épicéa.
+3. Dans Supabase SQL Editor, exécuter `supabase/schema.sql`, puis `supabase/migrations/20260930_wood_catalog.sql`, `supabase/migrations/20261002_wood_product_packages.sql`, `supabase/migrations/20261021_uniform_wood_sales_settings.sql`, `supabase/rls_policies.sql` et `supabase/seed.sql`. La migration `20261021_uniform_wood_sales_settings.sql` crée les prix et formats communs, les longueurs configurables et la limite de quantité partagée par les six essences.
 4. Démarrer avec `npm run dev`.
 
 Le site est disponible sur `http://localhost:3000`.
 
 ## Administration
 
-Ouvrir `/admin` et se connecter avec `ADMIN_PASSWORD`. L’accueil admin mène au catalogue `/admin/bois`. Depuis cet espace, vous pouvez créer, modifier, publier ou supprimer des produits, régler les prix des formats (12,5 l, 20 l, 40 l et 1 RM), définir la longueur des bûches et gérer les photos dans Supabase Storage.
+Ouvrir `/admin` et se connecter avec `ADMIN_PASSWORD`. Dans `/admin/bois`, vous pouvez créer, modifier, publier ou supprimer les essences, gérer les photos et mettre à jour les stocks. Dans `/admin/vente`, modifiez en un seul endroit les prix et contenances des quatre formats, les longueurs de bûches et la quantité maximale par essence : ces réglages s’appliquent uniformément aux six essences.
 
 Les actions serveur valident la session avant toute écriture avec la clé de service. Les visiteurs anonymes ne peuvent lire que les produits publiés.
 
@@ -30,18 +30,19 @@ Les actions serveur valident la session avant toute écriture avec la clé de se
 
 - `/` : accueil et estimation hivernale
 - `/catalogue` : essences disponibles
-- `/catalogue/[slug]` : fiche produit, longueur, quantité et total
+- `/catalogue/[slug]` : fiche produit, format, longueur, quantité et total recalculé
 - `/commande` : coordonnées de livraison, récapitulatif et transmission de commande par e-mail
 - `/commande/paiement` : acompte à régler par RIB ou lien externe
 - `/contact` : demande de renseignements ou de devis
-- `/admin/bois` : gestion du catalogue
+- `/admin/bois` : gestion du catalogue et des stocks
+- `/admin/vente` : paramètres communs de prix, format, longueur et quantité
 
 ## Données et migration
 
-Les photos de produit acceptent JPG, PNG, WebP et AVIF jusqu’à 10 Mo. Les tarifs laissés vides dans le formulaire s’affichent « Sur devis ».
+Les photos de produit acceptent JPG, PNG, WebP et AVIF jusqu’à 10 Mo. Les prix communs laissés vides dans `/admin/vente` s’affichent « Sur devis ». Le stock reste propre à chaque essence ; le panier limite automatiquement les quantités selon le volume des formats, puis le serveur revérifie prix, limites et stock et recalcule le total avant d’accepter la commande.
 
 Les commandes revérifient les prix et les stocks dans Supabase avant l’envoi. La notification arrive à `WOOD_ORDER_EMAIL` (ou `ALERT_EMAIL` à défaut) via `GMAIL_USER` et `GMAIL_APP_PASSWORD`. Configurez `WOOD_DELIVERY_FEE_EUR` avec le montant fixe de livraison. Le moyen de paiement (RIB ou lien HTTPS) et les coordonnées se configurent depuis Administration > Paiement et RIB ; choisissez également celui qui sera affiché au client. Appliquez la migration `20260930_wood_store_settings.sql` avant d’utiliser cette page. Le formulaire demande prénom, nom, adresse, code postal, ville, téléphone et e-mail.
 
-L’acompte demandé est égal à 50 % du montant du bois plus 100 % des frais de livraison ; le solde du bois est affiché séparément. Les valeurs de configuration et les modalités de vente doivent être complétées avant d’accepter des commandes.
+L’acompte demandé est égal à 50 % du total, frais de livraison compris ; le solde restant est affiché séparément. Les valeurs de configuration et les modalités de vente doivent être complétées avant d’accepter des commandes.
 
 Les fichiers de migrations antérieurs au catalogue bois sont conservés comme historique de base de données. Ils ne sont plus utilisés par les pages publiques du site.

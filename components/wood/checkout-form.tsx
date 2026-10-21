@@ -1,32 +1,87 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, LoaderCircle, ShieldCheck } from 'lucide-react';
-import { submitWoodOrder } from '@/actions/wood-orders';
+import { ArrowLeft, ArrowRight, LoaderCircle, Minus, Plus, ShieldCheck, Trash2 } from 'lucide-react';
+import { getWoodCartQuote, submitWoodOrder } from '@/actions/wood-orders';
 import { CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, type StoredCartLine } from '@/lib/utils/cart';
 import { formatWoodPrice } from '@/lib/utils/wood';
 import { woodDisplayName } from '@/lib/utils/wood-display';
 
-export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
+type CartQuote = { subtotal: number; deliveryFee: number; total: number; deposit: number };
+
+export function CheckoutForm() {
   const router = useRouter();
   const [cart, setCart] = useState<StoredCartLine[]>([]);
+  const [quote, setQuote] = useState<CartQuote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(true);
   const [error, setError] = useState('');
   const [pending, startTransition] = useTransition();
   const [customer, setCustomer] = useState({ firstName: '', lastName: '', address: '', postalCode: '', city: '', phone: '', email: '' });
-  const subtotal = useMemo(() => cart.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0), [cart]);
-  const estimatedTotal = deliveryFee == null ? null : subtotal + deliveryFee;
-  const estimatedDeposit = estimatedTotal == null ? null : Math.round(estimatedTotal * 100 / 2) / 100;
+  const subtotal = quote?.subtotal ?? 0;
+
+  const refreshQuote = useCallback(async (lines: StoredCartLine[]) => {
+    setCart(lines);
+    setQuote(null);
+    setQuoteLoading(true);
+    setError('');
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lines));
+      if (!lines.length) {
+        setQuoteLoading(false);
+        return;
+      }
+      const result = await getWoodCartQuote(lines.map((line) => ({
+        slug: line.slug,
+        lengthCm: line.lengthCm,
+        packageCode: line.packageCode,
+        quantity: line.quantity,
+      })));
+      if (!result.success) {
+        setError(result.message);
+        setQuoteLoading(false);
+        return;
+      }
+      const refreshedCart = lines.map((line, index) => ({
+        ...line,
+        name: result.lines[index].name,
+        length: `${result.lines[index].packageLabel ?? line.length} · ${result.lines[index].lengthCm === 100 ? '1 m' : `${result.lines[index].lengthCm} cm`}`,
+        unitPrice: result.lines[index].unitPrice,
+      }));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(refreshedCart));
+      setCart(refreshedCart);
+      setQuote({
+        subtotal: result.subtotal,
+        deliveryFee: result.deliveryFee,
+        total: result.total,
+        deposit: result.deposit,
+      });
+      setQuoteLoading(false);
+    } catch {
+      setError('Le calcul du panier a échoué. Vérifiez votre connexion puis rechargez la page.');
+      setQuoteLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     try {
       const raw: unknown = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) ?? '[]');
-      setCart(Array.isArray(raw) ? raw.map(normalizeCartLine).filter((line): line is StoredCartLine => line !== null) : []);
+      const lines = Array.isArray(raw) ? raw.map(normalizeCartLine).filter((line): line is StoredCartLine => line !== null) : [];
+      void refreshQuote(lines);
     } catch {
-      setCart([]);
+      setError('Le panier n’a pas pu être lu. Retournez au catalogue et ajoutez de nouveau vos articles.');
+      setQuoteLoading(false);
     }
-  }, []);
+  }, [refreshQuote]);
+
+  function changeQuantity(line: StoredCartLine, delta: number) {
+    const quantity = line.quantity + delta;
+    const updated = quantity < 1
+      ? cart.filter((item) => item.key !== line.key)
+      : cart.map((item) => item.key === line.key ? { ...item, quantity } : item);
+    void refreshQuote(updated);
+  }
 
   function setField(field: keyof typeof customer, value: string) {
     setCustomer((current) => ({ ...current, [field]: value }));
@@ -35,7 +90,7 @@ export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
-    if (!cart.length) return;
+    if (!cart.length || !quote) return;
     const form = new FormData(event.currentTarget);
     startTransition(async () => {
       const result = await submitWoodOrder({
@@ -43,9 +98,10 @@ export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
         lines: cart.map((line) => ({ slug: line.slug, lengthCm: line.lengthCm, packageCode: line.packageCode, quantity: line.quantity })),
         website: String(form.get('website') ?? ''),
         acceptTerms: form.get('acceptTerms') === 'on',
-      });
+      }, quote.total);
       if (!result.success) {
         setError(result.message);
+        if (result.message.includes('ont changé depuis le calcul')) window.location.reload();
         return;
       }
       try {
@@ -96,9 +152,9 @@ export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
         {error && <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
           <Link href="/catalogue" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#ddd2bf] bg-white px-5 py-3 text-sm font-semibold text-[#524a3e]"><ArrowLeft size={16} /> Weiter einkaufen</Link>
-          <button type="submit" disabled={pending || cart.length === 0} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#21492d] px-6 py-3 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
+          <button type="submit" disabled={pending || quoteLoading || !quote || cart.length === 0} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#21492d] px-6 py-3 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
             {pending ? <LoaderCircle size={17} className="animate-spin" /> : <ShieldCheck size={17} />}
-            {pending ? 'Wird übermittelt …' : 'Bestätigen und Zahlung anzeigen'}
+            {pending ? 'Wird übermittelt …' : quoteLoading ? 'Prix et stock vérifiés…' : 'Bestätigen und Zahlung anzeigen'}
           </button>
         </div>
       </form>
@@ -106,10 +162,10 @@ export function CheckoutForm({ deliveryFee }: { deliveryFee: number | null }) {
       <aside className="rounded-3xl border border-[#e7dece] bg-[#fcfaf5] p-5 shadow-sm lg:sticky lg:top-24">
         <h2 className="font-bold text-[#173a27]">Bestellübersicht</h2>
         <ul className="mt-4 space-y-4">
-          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><span className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{line.packageCode ? `${line.quantity} × ${line.length}` : `${line.length} · ${line.quantity} m³`}</span></span><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
+          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{line.packageCode ? `${line.quantity} × ${line.length}` : `${line.length} · ${line.quantity} m³`}</span><div className="mt-2 flex items-center gap-1"><button type="button" aria-label={`Réduire ${line.name}`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" aria-label={`Ajouter ${line.name}`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" aria-label={`Supprimer ${line.name}`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
         </ul>
-        <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{formatWoodPrice(subtotal)}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison</span><span>{deliveryFee == null ? 'Noch einzurichten' : formatWoodPrice(deliveryFee)}</span></div></div>
-        <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Total à payer</span><span>{estimatedTotal == null ? "Wird bestätigt" : formatWoodPrice(estimatedTotal)}</span></div><div className="flex justify-between text-[#21492d]"><span>Acompte (50 % du total)</span><strong>{estimatedDeposit == null ? "Wird bestätigt" : formatWoodPrice(estimatedDeposit)}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Die Anzahlung beträgt die Hälfte des Gesamtbetrags einschließlich Lieferung. Der endgültige Betrag wird beim Absenden anhand der aktuellen Katalogpreise berechnet.</p></div>
+        <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{quote ? formatWoodPrice(subtotal) : 'Calcul en cours…'}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison</span><span>{quote ? formatWoodPrice(quote.deliveryFee) : 'Calcul en cours…'}</span></div></div>
+        <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Total à payer</span><span>{quote ? formatWoodPrice(quote.total) : 'Calcul en cours…'}</span></div><div className="flex justify-between text-[#21492d]"><span>Acompte (50 % du total)</span><strong>{quote ? formatWoodPrice(quote.deposit) : 'Calcul en cours…'}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Les tarifs, les quantités disponibles et le stock sont vérifiés avant l’envoi. L’acompte correspond à 50 % du total, livraison comprise.</p></div>
       </aside>
     </div>
   );

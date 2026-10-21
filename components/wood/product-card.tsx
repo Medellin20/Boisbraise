@@ -3,15 +3,14 @@ import Link from 'next/link';
 import { ArrowRight, Flame, PackageCheck, Truck, Droplets, Image as ImageIcon } from 'lucide-react';
 import type { WoodProduct } from '@/lib/data/wood-products';
 import { formatWoodPrice } from '@/lib/utils/wood';
-import { getWoodPackage } from '@/lib/utils/wood-packages';
 import { woodDisplayName, woodDisplayText } from '@/lib/utils/wood-display';
 
 export function WoodProductCard({ product }: { product: WoodProduct }) {
   const cover = product.wood_product_images.find((item) => item.is_primary) ?? product.wood_product_images[0];
-  const startingPackage = product.wood_product_packages
+  const packages = product.wood_sales_settings?.packages ?? [];
+  const startingPackage = packages
     .filter((item) => item.price != null)
     .sort((a, b) => Number(a.price) - Number(b.price))[0];
-  const startingFormat = startingPackage ? getWoodPackage(startingPackage.package_code) : undefined;
 
   return (
     <article className="wood-product-card overflow-hidden rounded-[22px] border border-[#e6ddcf] bg-white shadow-[0_8px_22px_rgba(62,49,32,.10)]">
@@ -32,12 +31,12 @@ export function WoodProductCard({ product }: { product: WoodProduct }) {
           {product.calorific_value_kwh != null && <span className="wood-chip wood-chip-red"><Flame size={14} />{product.calorific_value_kwh} kWh/m³</span>}
           {product.in_stock && <span className="wood-chip wood-chip-green"><PackageCheck size={14} />{product.stock_m3 == null ? 'Auf Lager' : `${product.stock_m3} m³ auf Lager`}</span>}
         </div>
-        <p className="mt-4 text-xs text-[#71695c]">Formate : 12,5 l · 20 l · 40 l · 1 RM</p>
+        <p className="mt-4 text-xs text-[#71695c]">Formats : {packages.map((item) => item.label).join(' · ')}</p>
         <div className="mt-4 flex items-end justify-between border-t border-[#e5dbc9] pt-4">
           <div>
             <span className="block text-[10px] font-medium uppercase tracking-wide text-[#6f685b]">À partir de</span>
             <strong className="text-xl text-[#142c20]">{startingPackage ? formatWoodPrice(Number(startingPackage.price)) : 'Sur devis'}</strong>
-            {startingFormat && <span className="ml-1 text-xs text-[#71695c]">/ {startingFormat.label}</span>}
+            {startingPackage && <span className="ml-1 text-xs text-[#71695c]">/ {startingPackage.label}</span>}
           </div>
           <Link href={`/catalogue/${product.slug}`} className="inline-flex items-center gap-1.5 pb-1 text-sm font-semibold text-[#153d28] hover:underline">Ansehen <ArrowRight size={16} /></Link>
         </div>

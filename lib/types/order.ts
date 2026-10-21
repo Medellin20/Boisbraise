@@ -13,6 +13,7 @@ export type OrderLine = {
   name: string;
   lengthCm: number;
   packageCode?: import('@/lib/utils/wood-packages').WoodPackageCode;
+  packageLabel?: string;
   quantity: number;
   unitPrice: number;
   total: number;

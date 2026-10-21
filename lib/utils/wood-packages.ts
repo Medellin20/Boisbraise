@@ -5,6 +5,8 @@ export const WOOD_PACKAGES = [
   { code: '1_rm', label: '1 RM', volumeLitres: 1000, defaultPrice: 199 },
 ] as const;
 
+export const MAX_WOOD_ORDER_QUANTITY = 1000;
+
 export type WoodPackageCode = (typeof WOOD_PACKAGES)[number]['code'];
 
 export function getWoodPackage(code: string) {
