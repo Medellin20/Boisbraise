@@ -83,6 +83,14 @@ export async function loginAdmin(_prevState: AdminLoginState, formData: FormData
     return { success: false, message: 'Falsches Passwort.' };
   }
 
+  const sessionSecret = process.env.ADMIN_SESSION_SECRET;
+  if (!sessionSecret || sessionSecret.length < 16) {
+    return {
+      success: false,
+      message: 'Die Anmeldung ist serverseitig nicht vollständig konfiguriert. Bitte ADMIN_SESSION_SECRET in Netlify setzen und erneut deployen.',
+    };
+  }
+
   clearRateLimit(clientKey);
 
   const token = await createAdminSessionToken();

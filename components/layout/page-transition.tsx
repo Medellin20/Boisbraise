@@ -7,6 +7,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();
 
+  if (pathname.startsWith('/admin')) {
+    return <div>{children}</div>;
+  }
+
   return (
     <motion.div
       key={pathname}
