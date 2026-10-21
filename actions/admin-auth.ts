@@ -65,7 +65,10 @@ export async function loginAdmin(_prevState: AdminLoginState, formData: FormData
     return { success: false, message: 'Bitte geben Sie das Passwort ein.' };
   }
 
-  const expectedPassword = process.env.ADMIN_PASSWORD;
+  // Read this at runtime: build-time env substitution must never embed the
+  // administrator password in generated server or client assets.
+  const passwordEnvKey: string = 'ADMIN_PASSWORD';
+  const expectedPassword = process.env[passwordEnvKey];
   if (!expectedPassword) {
     return {
       success: false,
