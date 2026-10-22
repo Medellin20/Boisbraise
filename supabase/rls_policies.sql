@@ -1,6 +1,7 @@
 -- À exécuter après schema.sql et la migration du catalogue bois.
 alter table public.contact_messages enable row level security;
 alter table public.admin_logs enable row level security;
+alter table public.wood_orders enable row level security;
 alter table public.wood_products enable row level security;
 alter table public.wood_product_lengths enable row level security;
 alter table public.wood_product_images enable row level security;

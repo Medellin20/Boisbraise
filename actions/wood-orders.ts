@@ -199,6 +199,29 @@ export async function submitWoodOrder(value: unknown, expectedTotal: number): Pr
     payment,
   };
 
+  const { error: orderSaveError } = await settingsClient.from('wood_orders').insert({
+    reference,
+    customer_first_name: customer.firstName,
+    customer_last_name: customer.lastName,
+    customer_address: customer.address,
+    customer_postal_code: customer.postalCode,
+    customer_city: customer.city,
+    customer_phone: customer.phone,
+    customer_email: customer.email,
+    lines: orderLines,
+    subtotal: order.subtotal,
+    delivery_fee: order.deliveryFee,
+    delivery_litres: order.deliveryLitres,
+    delivery_price_per_litre: order.deliveryPricePerLitre,
+    total: order.total,
+    deposit: order.deposit,
+    remaining: order.remaining,
+    payment_method: payment.method,
+  });
+  if (orderSaveError) {
+    return fail('La commande n’a pas pu être enregistrée. Vérifiez que la migration Supabase 20261022_wood_orders.sql a été appliquée, puis réessayez.');
+  }
+
   const itemsSummary = orderLines.map((line) => {
     const packageLabel = line.packageLabel ?? (line.packageCode ? getWoodPackage(line.packageCode)?.label : undefined);
     const format = packageLabel ? `${line.quantity} × ${packageLabel}` : `${line.quantity} unités`;

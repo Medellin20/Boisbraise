@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { logoutAdmin } from '@/actions/admin-auth';
 
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Übersicht', icon: LayoutDashboard, exact: true },
+  { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard, exact: true },
   { href: '/admin/bois', label: 'Holzkatalog', icon: Trees },
   { href: '/admin/vente', label: 'Vente de bois', icon: Ruler },
   { href: '/admin/paiement', label: 'Zahlung & Bankverbindung', icon: CreditCard },

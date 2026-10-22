@@ -1,3 +1,5 @@
+import type { OrderHistoryRecord } from '@/lib/types/order';
+
 export interface ContactMessage {
   id: string; name: string; email: string; phone: string | null; subject: string; message: string;
   status: 'new' | 'in_progress' | 'closed'; created_at: string;
@@ -31,5 +33,6 @@ export interface Database {
     wood_product_images: { Row: WoodProductImageRecord; Insert: Partial<WoodProductImageRecord>; Update: Partial<WoodProductImageRecord> };
     wood_store_settings: { Row: WoodStoreSettingsRecord; Insert: Partial<WoodStoreSettingsRecord>; Update: Partial<WoodStoreSettingsRecord> };
     site_contact_settings: { Row: SiteContactSettingsRecord; Insert: Partial<SiteContactSettingsRecord>; Update: Partial<SiteContactSettingsRecord> };
+    wood_orders: { Row: OrderHistoryRecord; Insert: Partial<OrderHistoryRecord>; Update: Partial<OrderHistoryRecord> };
   } };
 }

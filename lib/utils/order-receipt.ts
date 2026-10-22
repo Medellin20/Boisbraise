@@ -26,6 +26,9 @@ const COLORS = {
 /** This confirms the order details, not receipt of funds. */
 export async function downloadOrderReceipt(order: OrderConfirmation) {
   const { jsPDF } = await import('jspdf');
+  const logoResponse = await fetch('/images/holznest-logo-transparent.png');
+  if (!logoResponse.ok) throw new Error('Le logo du reçu n’a pas pu être chargé.');
+  const logo = new Uint8Array(await logoResponse.arrayBuffer());
   const doc = new jsPDF();
   const money = (value: number) => new Intl.NumberFormat('de-DE', {
     style: 'currency', currency: 'EUR', minimumFractionDigits: 2,
@@ -41,20 +44,6 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
     doc.setDrawColor(...color);
     doc.setLineWidth(0.25);
     doc.line(x1, y1, x2, y2);
-  }
-
-  function brandMark(x: number, atY: number, scale = 1) {
-    doc.setDrawColor(...COLORS.dark);
-    doc.setLineWidth(2 * scale);
-    doc.line(x, atY + 12 * scale, x + 13 * scale, atY + 3 * scale);
-    doc.line(x + 13 * scale, atY + 3 * scale, x + 26 * scale, atY + 12 * scale);
-    doc.setFillColor(218, 164, 103);
-    doc.setDrawColor(...COLORS.brown);
-    for (const [cx, cy, radius] of [[x + 9, atY + 12, 4], [x + 17, atY + 12, 4], [x + 13, atY + 7, 3.5]] as const) {
-      doc.circle(cx * scale, cy * scale, radius * scale, 'FD');
-      doc.setDrawColor(145, 91, 44);
-      doc.circle(cx * scale, cy * scale, radius * scale * 0.48, 'S');
-    }
   }
 
   function sectionBar(title: string, atY: number) {
@@ -110,7 +99,7 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
 
   doc.setFillColor(...COLORS.brown);
   doc.rect(0, 0, PAGE_WIDTH, 3, 'F');
-  brandMark(LEFT + 1, 9);
+  doc.addImage(logo, 'PNG', LEFT + 1, 5, 28, 21);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
   doc.setTextColor(...COLORS.dark);

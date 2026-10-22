@@ -8,6 +8,7 @@ const originalLoad = Module._load;
 const originalResolve = Module._resolveFilename;
 let quoteCalls = [], submitCalls = [], submitResolve, navigation = [];
 const receiptText = [];
+const receiptImages = [];
 let receiptFilename;
 const defer = () => { let resolve; const promise = new Promise(r => resolve = r); return {promise,resolve}; };
 Module._resolveFilename = function(id, ...args) { return originalResolve.call(this, id.startsWith('@/') ? root + '/' + id.slice(2) : id, ...args); };
@@ -16,6 +17,7 @@ Module._load = function(id, ...args) {
     constructor() { this.pages=1; }
     setFont() {} setFontSize() {} setTextColor() {} setFillColor() {} setDrawColor() {} setLineWidth() {}
     addPage() { this.pages++; } setPage() {} rect() {} roundedRect() {} circle() {} line() {}
+    addImage(image) { receiptImages.push(image); }
     splitTextToSize(value) { return [value]; }
     text(value) { receiptText.push(...(Array.isArray(value)?value:[value]).filter(v=>typeof v==='string')); }
     getNumberOfPages() { return this.pages; }
@@ -38,6 +40,7 @@ const {CheckoutForm} = require(root+'/components/wood/checkout-form.tsx');
 const {CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, cartLineDetails} = require(root+'/lib/utils/cart.ts');
 const storage = () => { const data = new Map(); return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)}; };
 global.localStorage=storage(); global.sessionStorage=storage(); global.window={dispatchEvent(){},location:{replace:p=>navigation.push(p)}};
+global.fetch=async()=>({ok:true,arrayBuffer:async()=>new Uint8Array([137,80,78,71]).buffer});
 global.FormData=class {get(k){return k==='acceptTerms'?'on':'';}};
 const text = tree => JSON.stringify(tree.toJSON());
 const packages=[{package_code:'12_5_litres',label:'12,5 litres',volume_litres:12.5,price:4.5},{package_code:'40_litres',label:'40 litres',volume_litres:40,price:14}];
@@ -106,6 +109,7 @@ function quote(call) {
    {...order.lines[0],packageLabel:'Kiste 40 Liter'},
    {...order.lines[0],slug:'chene',name:'Chêne',lengthCm:33,packageCode:'1_rm',packageLabel:'Palette 1 RM',quantity:2,unitPrice:199,total:398}
  ]});
+ assert.deepEqual(Array.from(receiptImages[0]),[137,80,78,71],'the supplied logo image is embedded in the receipt');
  assert.ok(receiptText.some(t=>t.includes('Buche · 1 m')));
  assert.ok(receiptText.some(t=>t.includes('Eiche · 33 cm')));
  assert.ok(receiptText.includes('5')); assert.ok(receiptText.includes('2'));
