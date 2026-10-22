@@ -14,7 +14,7 @@ export interface WoodProductRecord {
 }
 export interface WoodProductLengthRecord { id: string; product_id: string; length_cm: number; price_per_m3: number | null; sort_order: number; }
 export interface WoodProductPackageRecord { id: string; product_id: string; package_code: string; price: number | null; sort_order: number; }
-export interface WoodSalesSettingRecord { id: number; allowed_lengths_cm: number[]; max_quantity_per_product: number; updated_at: string; }
+export interface WoodSalesSettingRecord { id: number; allowed_lengths_cm: number[]; max_quantity_per_product: number; delivery_price_per_litre: number; updated_at: string; }
 export interface WoodSalesPackageRecord { package_code: string; label: string; volume_litres: number; price: number | null; sort_order: number; }
 export interface WoodProductImageRecord { id: string; product_id: string; storage_path: string; url: string; alt_text: string | null; is_primary: boolean; sort_order: number; created_at: string; }
 export interface WoodStoreSettingsRecord { id: number; payment_method: 'rib' | 'link'; payment_url: string; bank_name: string; bank_account_holder: string; bank_iban: string; bank_bic: string; updated_at: string; }

@@ -32,6 +32,8 @@ export type OrderConfirmation = {
   lines: OrderLine[];
   subtotal: number;
   deliveryFee: number;
+  deliveryLitres: number;
+  deliveryPricePerLitre: number;
   total: number;
   deposit: number;
   remaining: number;

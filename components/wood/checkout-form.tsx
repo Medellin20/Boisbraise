@@ -9,7 +9,7 @@ import { CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, ty
 import { formatWoodPrice } from '@/lib/utils/wood';
 import { woodDisplayName } from '@/lib/utils/wood-display';
 
-type CartQuote = { subtotal: number; deliveryFee: number; total: number; deposit: number };
+type CartQuote = { subtotal: number; deliveryFee: number; deliveryLitres: number; deliveryPricePerLitre: number; total: number; deposit: number };
 
 export function CheckoutForm() {
   const router = useRouter();
@@ -54,6 +54,8 @@ export function CheckoutForm() {
       setQuote({
         subtotal: result.subtotal,
         deliveryFee: result.deliveryFee,
+        deliveryLitres: result.deliveryLitres,
+        deliveryPricePerLitre: result.deliveryPricePerLitre,
         total: result.total,
         deposit: result.deposit,
       });
@@ -164,7 +166,7 @@ export function CheckoutForm() {
         <ul className="mt-4 space-y-4">
           {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{line.packageCode ? `${line.quantity} × ${line.length}` : `${line.length} · ${line.quantity} m³`}</span><div className="mt-2 flex items-center gap-1"><button type="button" aria-label={`Réduire ${line.name}`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" aria-label={`Ajouter ${line.name}`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" aria-label={`Supprimer ${line.name}`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
         </ul>
-        <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{quote ? formatWoodPrice(subtotal) : 'Calcul en cours…'}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison</span><span>{quote ? formatWoodPrice(quote.deliveryFee) : 'Calcul en cours…'}</span></div></div>
+        <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{quote ? formatWoodPrice(subtotal) : 'Calcul en cours…'}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison ({quote ? `${quote.deliveryLitres.toLocaleString('fr-FR')} l × ${formatWoodPrice(quote.deliveryPricePerLitre)}/l` : 'calcul en cours'})</span><span>{quote ? formatWoodPrice(quote.deliveryFee) : 'Calcul en cours…'}</span></div></div>
         <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Total à payer</span><span>{quote ? formatWoodPrice(quote.total) : 'Calcul en cours…'}</span></div><div className="flex justify-between text-[#21492d]"><span>Acompte (50 % du total)</span><strong>{quote ? formatWoodPrice(quote.deposit) : 'Calcul en cours…'}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Les tarifs, les quantités disponibles et le stock sont vérifiés avant l’envoi. L’acompte correspond à 50 % du total, livraison comprise.</p></div>
       </aside>
     </div>

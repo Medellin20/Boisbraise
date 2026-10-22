@@ -8,6 +8,7 @@ export { MAX_WOOD_ORDER_QUANTITY } from '@/lib/utils/wood-packages';
 export type WoodSalesSettings = {
   allowedLengthsCm: number[];
   maxQuantityPerProduct: number;
+  deliveryPricePerLitre: number;
   packages: WoodSalesPackageRecord[];
 };
 
@@ -27,10 +28,12 @@ function normalizeSettings(
   }));
   const packageCodes = normalizedPackages.map((item) => item.package_code);
   const maxQuantityPerProduct = Number(setting.max_quantity_per_product);
+  const deliveryPricePerLitre = Number(setting.delivery_price_per_litre);
   if (!allowedLengthsCm.length || new Set(allowedLengthsCm).size !== allowedLengthsCm.length
     || normalizedPackages.length !== 4 || new Set(packageCodes).size !== 4
     || packageCodes.some((code) => !['12_5_litres', '20_litres', '40_litres', '1_rm'].includes(code))
     || !Number.isInteger(maxQuantityPerProduct) || maxQuantityPerProduct < 1 || maxQuantityPerProduct > MAX_WOOD_ORDER_QUANTITY
+    || !Number.isFinite(deliveryPricePerLitre) || deliveryPricePerLitre < 0
     || normalizedPackages.some((item) => !Number.isFinite(item.volume_litres) || item.volume_litres <= 0
       || (item.price != null && (!Number.isFinite(item.price) || item.price < 0)))) {
     return null;
@@ -38,6 +41,7 @@ function normalizeSettings(
   return {
     allowedLengthsCm: [...new Set(allowedLengthsCm)].sort((a, b) => a - b),
     maxQuantityPerProduct,
+    deliveryPricePerLitre,
     packages: normalizedPackages.sort((a, b) => a.sort_order - b.sort_order),
   };
 }

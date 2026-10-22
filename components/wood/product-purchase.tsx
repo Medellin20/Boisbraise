@@ -22,6 +22,10 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
   const selectedPackage = packageOptions.find((item) => item.package_code === packageCode);
   const packageDetails = selectedPackage;
   const packageTotal = selectedPackage?.price == null ? null : selectedPackage.price * quantity;
+  const deliveryTotal = packageDetails && settings
+    ? Math.round(packageDetails.volume_litres * quantity * settings.deliveryPricePerLitre * 100) / 100
+    : null;
+  const orderTotal = packageTotal == null || deliveryTotal == null ? null : packageTotal + deliveryTotal;
   const maxQuantity = packageDetails && settings
     ? Math.min(settings.maxQuantityPerProduct, product.stock_m3 == null
       ? settings.maxQuantityPerProduct
@@ -95,7 +99,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
 
   return (
     <section className="rounded-[22px] border border-[#e6ddcf] bg-white p-5 shadow-[0_8px_22px_rgba(62,49,32,.08)] sm:p-6">
-      <h2 className="text-sm font-bold text-[#18251d]">Verkaufsformat</h2>
+      <h2 className="text-sm font-bold text-[#18251d]">Verkaufsformat · prix hors livraison</h2>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {packageOptions.map((item) => {
           const active = packageCode === item.package_code;
@@ -164,9 +168,15 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
           <Plus size={16} />
         </button>
         <span className="text-sm text-[#756e62]">
-          Gesamt : {packageTotal == null ? 'Auf Anfrage' : formatWoodPrice(packageTotal)}
+          {packageTotal == null ? 'Prix du bois : sur devis' : `Bois : ${formatWoodPrice(packageTotal)}`}
         </span>
       </div>
+      {orderTotal != null && deliveryTotal != null && settings && packageDetails && (
+        <div className="mt-3 space-y-1 rounded-xl bg-[#f7f5ef] p-3 text-sm">
+          <p className="flex justify-between gap-2 text-[#645f55]"><span>Livraison ({(packageDetails.volume_litres * quantity).toLocaleString('fr-FR')} l × {formatWoodPrice(settings.deliveryPricePerLitre)}/l)</span><span>{formatWoodPrice(deliveryTotal)}</span></p>
+          <p className="flex justify-between gap-2 font-bold text-[#173a27]"><span>Total estimé à payer</span><span>{formatWoodPrice(orderTotal)}</span></p>
+        </div>
+      )}
 
       <button
         type="button"

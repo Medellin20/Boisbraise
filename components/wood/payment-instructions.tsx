@@ -2,18 +2,20 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ArrowRight, Check, Copy, CreditCard, Landmark } from 'lucide-react';
+import { ArrowRight, Check, Copy, CreditCard, Download, Landmark } from 'lucide-react';
 import { toast } from 'sonner';
 import { ORDER_CONFIRMATION_STORAGE_KEY } from '@/lib/utils/cart';
 import { formatWoodPrice, lengthLabel } from '@/lib/utils/wood';
 import { getWoodPackage } from '@/lib/utils/wood-packages';
 import type { OrderConfirmation } from '@/lib/types/order';
 import { woodDisplayName } from '@/lib/utils/wood-display';
+import { downloadOrderReceipt } from '@/lib/utils/order-receipt';
 
 export function PaymentInstructions() {
   const [order, setOrder] = useState<OrderConfirmation | null>(null);
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'link' | 'rib' | null>(null);
 
   useEffect(() => {
@@ -39,6 +41,18 @@ export function PaymentInstructions() {
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
       toast.error('Kopieren nicht möglich. Bitte markieren Sie die IBAN und kopieren Sie sie manuell.');
+    }
+  }
+
+  async function downloadReceipt() {
+    if (!order || downloading) return;
+    setDownloading(true);
+    try {
+      await downloadOrderReceipt(order);
+    } catch {
+      toast.error('Der Beleg konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.');
+    } finally {
+      setDownloading(false);
     }
   }
 
@@ -71,17 +85,17 @@ export function PaymentInstructions() {
       <section className="mt-6 rounded-3xl border border-[#e7dece] bg-white p-5 shadow-sm sm:p-7">
         <div className="flex items-center gap-2 text-[#21492d]">{method === 'link' ? <CreditCard size={19} /> : <Landmark size={19} />}<h2 className="font-bold">Anzahlung begleichen</h2></div>
         <p className="mt-4 rounded-xl bg-[#fbf6eb] p-4 text-sm leading-6 text-[#514b42]">
-          Zur Bestätigung Ihrer Bestellung zahlen Sie bitte eine Anzahlung in Höhe von <strong>50 % des Gesamtbetrags einschließlich Lieferung</strong>. Der Restbetrag wird gemäß den von HolzNest bestätigten Bedingungen fällig.
+          Die Zahlung erfolgt in zwei Schritten: <strong>50 % des Gesamtbetrags einschließlich Lieferung zur Bestätigung Ihrer Bestellung</strong>. Die <strong>restlichen 50 % zahlen Sie bei Lieferung</strong>.
         </p>
 
         <div className="mt-5 rounded-2xl border border-[#e8dfd1] p-4 sm:p-5">
           <dl className="space-y-2.5 text-sm">
             <Row label="Holzwarenwert" value={formatWoodPrice(order.subtotal)} />
-            <Row label="Lieferkosten" value={formatWoodPrice(order.deliveryFee)} />
+            <Row label={`Livraison (${order.deliveryLitres.toLocaleString('fr-FR')} l × ${formatWoodPrice(order.deliveryPricePerLitre)}/l)`} value={formatWoodPrice(order.deliveryFee)} />
             <Row label="Gesamtbetrag" value={formatWoodPrice(order.total)} />
             <div className="my-3 border-t border-[#e8dfd1]" />
             <Row label="Jetzt fällige Anzahlung" value={formatWoodPrice(order.deposit)} emphasis />
-            <Row label="Restbetrag" value={formatWoodPrice(order.remaining)} />
+            <Row label="Restbetrag bei Lieferung" value={formatWoodPrice(order.remaining)} />
           </dl>
         </div>
 
@@ -133,6 +147,10 @@ export function PaymentInstructions() {
           {order.lines.map((line, index) => <li key={`${line.slug}-${line.packageCode ?? line.lengthCm}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{line.packageCode ? `${line.quantity} × ${line.packageLabel ?? getWoodPackage(line.packageCode)?.label ?? 'Format'} · ${woodDisplayName(line.name)} · ${lengthLabel(line.lengthCm)}` : `${line.quantity} m³ · ${woodDisplayName(line.name)} · ${lengthLabel(line.lengthCm)}`}</span><strong>{formatWoodPrice(line.total)}</strong></li>)}
         </ul>
         <p className="mt-4 border-t border-[#eee7dc] pt-4 text-sm text-[#625b50]">Lieferadresse: {order.customer.address}, {order.customer.postalCode} {order.customer.city}</p>
+        <button type="button" onClick={() => void downloadReceipt()} disabled={downloading} aria-busy={downloading} className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#21492d] px-5 py-3 text-sm font-semibold text-[#21492d] transition hover:bg-[#f1f7ef] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#21492d] disabled:cursor-wait disabled:opacity-60">
+          <Download size={17} aria-hidden="true" />{downloading ? 'Beleg wird erstellt…' : 'Bestellbeleg herunterladen (PDF)'}
+        </button>
+        <p className="mt-2 text-xs leading-5 text-[#766e62]">Der Beleg enthält Ihre Bestellung und die Zahlungsaufteilung. Er bestätigt keinen Zahlungseingang.</p>
       </section>
       <p className="mt-5 text-center text-xs leading-5 text-[#766e62]">HolzNest kontaktiert Sie zur Bestätigung der Verfügbarkeit, des Lieferzeitfensters und weiterer Einzelheiten.</p>
     </div>

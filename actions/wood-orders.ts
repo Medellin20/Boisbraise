@@ -21,7 +21,7 @@ const formatPrice = (cents: number) => new Intl.NumberFormat('fr-FR', { style: '
 
 type PricedCartResult =
   | { success: false; message: string }
-  | { success: true; lines: OrderLine[]; subtotalCents: number };
+  | { success: true; lines: OrderLine[]; subtotalCents: number; deliveryCents: number; deliveryLitres: number; deliveryPricePerLitre: number };
 
 async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCartResult> {
   const supabase = createClient();
@@ -49,6 +49,7 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
   const orderLines: OrderLine[] = [];
   const volumesByProduct = new Map<string, number>();
   const unitsByProduct = new Map<string, number>();
+  let deliveryLitres = 0;
   let subtotalCents = 0;
   for (const requested of lines) {
     const product = products.find((item) => item.slug === requested.slug);
@@ -63,8 +64,9 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
       return { success: false, message: `Le prix de ${product.name} (${packageDetails?.label ?? 'ce format'}) doit être confirmé par devis.` };
     }
 
-    volumesByProduct.set(product.id, (volumesByProduct.get(product.id) ?? 0)
-      + packageDetails.volume_litres / 1000 * requested.quantity);
+    const lineVolumeLitres = packageDetails.volume_litres * requested.quantity;
+    volumesByProduct.set(product.id, (volumesByProduct.get(product.id) ?? 0) + lineVolumeLitres / 1000);
+    deliveryLitres += lineVolumeLitres;
     unitsByProduct.set(product.id, (unitsByProduct.get(product.id) ?? 0) + requested.quantity);
     const unitPriceCents = toCents(Number(packageDetails.price));
     const lineTotalCents = unitPriceCents * requested.quantity;
@@ -91,34 +93,33 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
       return { success: false, message: `Le stock de ${product.name} est limité à ${product.stock_m3} m³.` };
     }
   }
-  return { success: true, lines: orderLines, subtotalCents };
+  const deliveryCents = toCents(deliveryLitres * salesSettings.deliveryPricePerLitre);
+  return {
+    success: true,
+    lines: orderLines,
+    subtotalCents,
+    deliveryCents,
+    deliveryLitres,
+    deliveryPricePerLitre: salesSettings.deliveryPricePerLitre,
+  };
 }
 
 export async function getWoodCartQuote(value: unknown) {
   const parsed = woodOrderLinesSchema.safeParse(value);
   if (!parsed.success) return { success: false as const, message: parsed.error.issues[0]?.message ?? 'Vérifiez les articles du panier.' };
-  const deliveryFeeCents = getDeliveryFeeCents();
-  if (deliveryFeeCents == null) {
-    return { success: false as const, message: 'Les frais de livraison ne sont pas configurés.' };
-  }
   const priced = await priceWoodCart(parsed.data);
   if (!priced.success) return priced;
-  const totalCents = priced.subtotalCents + deliveryFeeCents;
+  const totalCents = priced.subtotalCents + priced.deliveryCents;
   return {
     success: true as const,
     lines: priced.lines,
     subtotal: euros(priced.subtotalCents),
-    deliveryFee: euros(deliveryFeeCents),
+    deliveryFee: euros(priced.deliveryCents),
+    deliveryLitres: priced.deliveryLitres,
+    deliveryPricePerLitre: priced.deliveryPricePerLitre,
     total: euros(totalCents),
     deposit: euros(Math.round(totalCents / 2)),
   };
-}
-
-function getDeliveryFeeCents(): number | null {
-  const value = process.env.WOOD_DELIVERY_FEE_EUR?.trim();
-  if (!value) return null;
-  const fee = Number(value);
-  return Number.isFinite(fee) && fee >= 0 ? toCents(fee) : null;
 }
 
 function getPaymentDetails(settings: {
@@ -157,15 +158,11 @@ function getPaymentDetails(settings: {
   return null;
 }
 
-export async function submitWoodOrder(value: unknown, expectedTotal?: number): Promise<SubmitOrderResult> {
+export async function submitWoodOrder(value: unknown, expectedTotal: number): Promise<SubmitOrderResult> {
   const parsed = woodOrderSchema.safeParse(value);
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? 'Bitte überprüfen Sie Ihre Bestelldaten.');
   if (parsed.data.website) return fail('Die Bestellung konnte nicht übermittelt werden.');
 
-  const deliveryFeeCents = getDeliveryFeeCents();
-  if (deliveryFeeCents == null) {
-    return fail('Die Lieferkosten sind nicht eingerichtet. Bitte konfigurieren Sie WOOD_DELIVERY_FEE_EUR in .env.');
-  }
   let settingsClient: ReturnType<typeof createAdminClient>;
   try { settingsClient = createAdminClient(); }
   catch { return fail('Die Supabase-Administratorkonfiguration ist unvollständig.'); }
@@ -184,8 +181,8 @@ export async function submitWoodOrder(value: unknown, expectedTotal?: number): P
   if (!priced.success) return fail(priced.message);
   const subtotalCents = priced.subtotalCents;
   const orderLines = priced.lines;
-  const totalCents = subtotalCents + deliveryFeeCents;
-  if (expectedTotal != null && (!Number.isFinite(expectedTotal) || toCents(expectedTotal) !== totalCents)) {
+  const totalCents = subtotalCents + priced.deliveryCents;
+  if (!Number.isFinite(expectedTotal) || toCents(expectedTotal) !== totalCents) {
     return fail('Le prix ou les frais de livraison ont changé depuis le calcul du panier. Actualisez la page pour vérifier le nouveau total avant de commander.');
   }
   // L’acompte représente exactement 50 % du montant total, livraison comprise.
@@ -197,7 +194,9 @@ export async function submitWoodOrder(value: unknown, expectedTotal?: number): P
     customer,
     lines: orderLines,
     subtotal: euros(subtotalCents),
-    deliveryFee: euros(deliveryFeeCents),
+    deliveryFee: euros(priced.deliveryCents),
+    deliveryLitres: priced.deliveryLitres,
+    deliveryPricePerLitre: priced.deliveryPricePerLitre,
     total: euros(totalCents),
     deposit: euros(depositCents),
     remaining: euros(totalCents - depositCents),
@@ -217,7 +216,8 @@ export async function submitWoodOrder(value: unknown, expectedTotal?: number): P
     Email: customer.email,
     Articles: itemsSummary,
     'Sous-total bois': formatPrice(subtotalCents),
-    Livraison: formatPrice(deliveryFeeCents),
+    'Volume livré': `${priced.deliveryLitres.toLocaleString('fr-FR')} litres`,
+    Livraison: `${formatPrice(priced.deliveryCents)} · ${priced.deliveryLitres.toLocaleString('fr-FR')} l × ${formatPrice(toCents(priced.deliveryPricePerLitre))}/l`,
     'Total commande': formatPrice(totalCents),
     'Acompte à recevoir (50 % du total)': formatPrice(depositCents),
     'Solde restant': formatPrice(totalCents - depositCents),

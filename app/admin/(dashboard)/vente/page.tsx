@@ -19,7 +19,7 @@ export default async function WoodSalesSettingsPage() {
       <header className="mb-6">
         <p className="text-xs font-bold uppercase tracking-widest text-[#806344]">HolzNest · paramètres communs</p>
         <h1 className="mt-1 text-2xl font-extrabold text-ink-900">Vente de bois</h1>
-        <p className="mt-1 text-sm text-ink-500">Modifiez ici les prix, contenances, longueurs et quantités appliqués de la même façon aux six essences.</p>
+        <p className="mt-1 text-sm text-ink-500">Modifiez ici les prix, contenances, longueurs, quantités et tarif de livraison communs aux six essences.</p>
       </header>
       {!initial ? (
         <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-5 text-sm text-amber-900">

@@ -13,6 +13,7 @@ const packageCodes = ['12_5_litres', '20_litres', '40_litres', '1_rm'] as const;
 const settingsSchema = z.object({
   allowedLengthsCm: z.array(z.number().int().min(10).max(300)).min(1).max(12),
   maxQuantityPerProduct: z.number().int().min(1).max(MAX_WOOD_ORDER_QUANTITY),
+  deliveryPricePerLitre: z.number().finite().nonnegative().max(100000),
   packages: z.array(z.object({
     packageCode: z.enum(packageCodes),
     label: z.string().trim().min(1).max(80),
@@ -61,10 +62,11 @@ export async function saveAdminWoodSalesSettings(value: unknown): Promise<WoodSa
     id: 1,
     allowed_lengths_cm: [...new Set(parsed.data.allowedLengthsCm)].sort((a, b) => a - b),
     max_quantity_per_product: parsed.data.maxQuantityPerProduct,
+    delivery_price_per_litre: parsed.data.deliveryPricePerLitre,
     updated_at: new Date().toISOString(),
   }, { onConflict: 'id' });
   if (settingsError) {
-    return { success: false, message: 'Les formats et prix sont enregistrés, mais les quantités et longueurs n’ont pas été enregistrées. Veuillez réessayer.' };
+    return { success: false, message: 'Les formats et prix sont enregistrés, mais les réglages de livraison n’ont pas été enregistrés. Veuillez réessayer.' };
   }
 
   await logAdminAction({ action: 'store.wood_sales_settings.update', entityType: 'wood_sales_settings', entityId: '1' });

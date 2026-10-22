@@ -14,6 +14,7 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
   const [pending, setPending] = useState(false);
   const [allowedLengthsCm, setAllowedLengthsCm] = useState(initial.allowedLengthsCm);
   const [maxQuantity, setMaxQuantity] = useState(String(initial.maxQuantityPerProduct));
+  const [deliveryPricePerLitre, setDeliveryPricePerLitre] = useState(String(initial.deliveryPricePerLitre));
   const [packages, setPackages] = useState(initial.packages.map((item, sortOrder) => ({
     packageCode: item.package_code as WoodSalesSettingsInput['packages'][number]['packageCode'],
     label: item.label,
@@ -28,6 +29,7 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
     const value: WoodSalesSettingsInput = {
       allowedLengthsCm,
       maxQuantityPerProduct: Number(maxQuantity),
+      deliveryPricePerLitre: Number(deliveryPricePerLitre),
       packages: packages.map((item) => ({
         packageCode: item.packageCode,
         label: item.label.trim(),
@@ -121,6 +123,16 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
           Quantité maximale
           <input required type="number" min="1" max="1000" step="1" value={maxQuantity} onChange={(event) => setMaxQuantity(event.target.value)} className={inputClass} />
         </label>
+      </section>
+
+      <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6">
+        <h2 className="font-bold text-ink-900">Livraison standard</h2>
+        <p className="mt-1 text-sm text-ink-500">Le coût est calculé selon le nombre total de litres commandés, tous formats et essences confondus.</p>
+        <label className="mt-4 block max-w-xs text-sm font-medium text-ink-700">
+          Tarif de livraison par litre (€)
+          <input required type="number" min="0" max="100000" step="0.01" value={deliveryPricePerLitre} onChange={(event) => setDeliveryPricePerLitre(event.target.value)} className={inputClass} />
+        </label>
+        <p className="mt-2 text-xs text-ink-500">Tarif actuel : {Number(deliveryPricePerLitre || 0).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} / litre. Ce montant est ajouté au prix du bois.</p>
       </section>
 
       <button type="submit" disabled={pending || allowedLengthsCm.length === 0 || new Set(allowedLengthsCm).size !== allowedLengthsCm.length || allowedLengthsCm.some((length) => !Number.isInteger(length) || length < 10 || length > 300)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#21492d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
