@@ -11,6 +11,12 @@ export async function middleware(request: NextRequest) {
 
   const isLoginPage = pathname === '/admin/login';
   const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+
+  if (!token || !process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET.length < 16) {
+    if (isLoginPage) return NextResponse.next();
+    return NextResponse.redirect(new URL('/admin/login', request.url));
+  }
+
   const isAuthenticated = await isValidAdminSessionToken(token);
 
   if (!isAuthenticated && !isLoginPage) {

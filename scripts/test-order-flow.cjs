@@ -34,7 +34,7 @@ const {ProductPurchase} = require(root+'/components/wood/product-purchase.tsx');
 const {CheckoutForm} = require(root+'/components/wood/checkout-form.tsx');
 const {CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, cartLineDetails} = require(root+'/lib/utils/cart.ts');
 const storage = () => { const data = new Map(); return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)}; };
-global.localStorage=storage(); global.sessionStorage=storage(); global.window={dispatchEvent(){}};
+global.localStorage=storage(); global.sessionStorage=storage(); global.window={dispatchEvent(){},location:{replace:p=>navigation.push(p)}};
 global.FormData=class {get(k){return k==='acceptTerms'?'on':'';}};
 const text = tree => JSON.stringify(tree.toJSON());
 const packages=[{package_code:'12_5_litres',label:'12,5 litres',volume_litres:12.5,price:4.5},{package_code:'40_litres',label:'40 litres',volume_litres:40,price:14}];
@@ -63,6 +63,7 @@ function quote(call) {
  assert.equal(quoteCalls.length,1);
  await act(async()=>quoteCalls[0].resolve(quote(quoteCalls[0])));
  assert.ok(text(checkout).includes('3 × 40 litres · 1 m'));
+ assert.equal(checkout.root.findAllByProps({translate:'no'}).length,1);
  const plus=()=>checkout.root.findAllByType('button').find(b=>b.props['aria-label']==='Ajouter Hêtre');
  act(()=>plus().props.onClick()); act(()=>plus().props.onClick());
  assert.equal(quoteCalls.length,3);
@@ -90,6 +91,7 @@ function quote(call) {
  const {PaymentInstructions}=require(root+'/components/wood/payment-instructions.tsx');
  let payment; await act(async()=>{payment=create(React.createElement(PaymentInstructions));});
  assert.ok(text(payment).includes('5 × 40 litres'));
+ assert.equal(payment.root.findAllByProps({translate:'no'}).length,1);
  assert.ok(text(payment).includes('HN-TEST')); payment.unmount();
  await act(async()=>{payment=create(React.createElement(PaymentInstructions,{initialOrder:{...order,adminNotified:false}}));});
  assert.ok(text(payment).includes('Bestellung vorbereitet'));

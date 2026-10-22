@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: 'Zahlungsinformationen', robots: { in
 
 export default function PaymentPage() {
   return (
-    <main className="wood-catalog min-h-screen">
+    <main translate="no" className="notranslate wood-catalog min-h-screen">
       <section className="container-app py-10 sm:py-14"><PaymentInstructions /></section>
     </main>
   );

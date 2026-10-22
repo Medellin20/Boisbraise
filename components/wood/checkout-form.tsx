@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, LoaderCircle, Minus, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { getWoodCartQuote, submitWoodOrder } from '@/actions/wood-orders';
 import { CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, cartLineDetails, type StoredCartLine } from '@/lib/utils/cart';
@@ -14,7 +13,6 @@ import { woodDisplayName } from '@/lib/utils/wood-display';
 type CartQuote = { subtotal: number; deliveryFee: number; deliveryLitres: number; deliveryPricePerLitre: number; total: number; deposit: number };
 
 export function CheckoutForm() {
-  const router = useRouter();
   const [cart, setCart] = useState<StoredCartLine[]>([]);
   const [quote, setQuote] = useState<CartQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
@@ -134,7 +132,8 @@ export function CheckoutForm() {
         window.dispatchEvent(new Event('wood-cart-updated'));
       } catch { /* The order has already been sent successfully. */ }
       if (!confirmationStored) return;
-      router.replace('/commande/paiement');
+      // Start with a fresh document: translated DOM nodes can break React navigation.
+      window.location.replace('/commande/paiement');
     } catch {
       setError('Die Bestellung konnte nicht übermittelt werden. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.');
     } finally {
@@ -157,7 +156,7 @@ export function CheckoutForm() {
   }
 
   return (
-    <div className="grid items-start gap-8 lg:grid-cols-[1fr_360px]">
+    <div translate="no" className="notranslate grid items-start gap-8 lg:grid-cols-[1fr_360px]">
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="rounded-3xl border border-[#e7dece] bg-white p-5 shadow-sm sm:p-7">
           <p className="text-xs font-bold uppercase tracking-[.16em] text-[#bd682b]">Schritt 1 · Lieferung</p>

@@ -74,7 +74,7 @@ export function PaymentInstructions({ initialOrder }: { initialOrder?: OrderConf
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div translate="no" className="notranslate mx-auto max-w-3xl">
       <div className="rounded-3xl border border-[#dbe6d9] bg-[#f1f7ef] p-5 sm:p-7">
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#21492d] text-white"><Check size={22} /></span>
         <p className="mt-4 text-xs font-bold uppercase tracking-[.16em] text-[#527452]">{order.adminNotified === false ? 'Bestellung vorbereitet' : 'Anfrage gesendet'}</p>

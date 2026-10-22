@@ -57,8 +57,11 @@ export async function createAdminSessionToken(): Promise<string> {
 /** Vérifie la validité (signature + expiration) d'un cookie de session admin. */
 export async function isValidAdminSessionToken(token: string | undefined | null): Promise<boolean> {
   if (!token) return false;
-  const [expiry, signature] = token.split('.');
-  if (!expiry || !signature) return false;
+  const separator = token.indexOf('.');
+  if (separator <= 0 || separator !== token.lastIndexOf('.')) return false;
+  const expiry = token.slice(0, separator);
+  const signature = token.slice(separator + 1);
+  if (!/^\d+$/.test(expiry) || !/^[A-Za-z0-9_-]{43}$/.test(signature)) return false;
 
   const expectedSignature = await sign(expiry);
   if (expectedSignature.length !== signature.length) return false;
