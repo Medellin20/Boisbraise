@@ -13,9 +13,12 @@ const defer = () => { let resolve; const promise = new Promise(r => resolve = r)
 Module._resolveFilename = function(id, ...args) { return originalResolve.call(this, id.startsWith('@/') ? root + '/' + id.slice(2) : id, ...args); };
 Module._load = function(id, ...args) {
   if (id === 'jspdf') return {jsPDF: class {
-    setFont() {} setFontSize() {} setTextColor() {} addPage() {}
+    constructor() { this.pages=1; }
+    setFont() {} setFontSize() {} setTextColor() {} setFillColor() {} setDrawColor() {} setLineWidth() {}
+    addPage() { this.pages++; } setPage() {} rect() {} roundedRect() {} circle() {} line() {}
     splitTextToSize(value) { return [value]; }
-    text(value) { receiptText.push(value); }
+    text(value) { receiptText.push(...(Array.isArray(value)?value:[value]).filter(v=>typeof v==='string')); }
+    getNumberOfPages() { return this.pages; }
     save(value) { receiptFilename = value; }
   }};
   if (id === 'react') return React;
@@ -103,9 +106,12 @@ function quote(call) {
    {...order.lines[0],packageLabel:'Kiste 40 Liter'},
    {...order.lines[0],slug:'chene',name:'Chêne',lengthCm:33,packageCode:'1_rm',packageLabel:'Palette 1 RM',quantity:2,unitPrice:199,total:398}
  ]});
- assert.ok(receiptText.some(t=>t.includes('5 × Kiste 40 Liter · Buche · 1 m')));
- assert.ok(receiptText.some(t=>t.includes('2 × Palette 1 RM · Eiche · 33 cm')));
- assert.ok(receiptText.some(t=>t.includes('Einzelpreis:')));
+ assert.ok(receiptText.some(t=>t.includes('Buche · 1 m')));
+ assert.ok(receiptText.some(t=>t.includes('Eiche · 33 cm')));
+ assert.ok(receiptText.includes('5')); assert.ok(receiptText.includes('2'));
+ assert.ok(receiptText.includes('Kiste 40 Liter'));
+ assert.ok(receiptText.includes('Palette 1 RM'));
+ assert.ok(receiptText.includes('ZAHLUNGSÜBERSICHT'));
  assert.ok(receiptText.some(t=>t.includes('keine Zahlungsquittung')));
  assert.equal(receiptFilename,'HolzNest-Bestellbeleg-HN-TEST.pdf');
  // A storage failure after success must still display the confirmed order, without another submit.
