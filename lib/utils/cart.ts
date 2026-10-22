@@ -10,6 +10,7 @@ export type StoredCartLine = {
   length: string;
   lengthCm?: number;
   packageCode?: WoodPackageCode;
+  packageLabel?: string;
   quantity: number;
   unitPrice: number;
 };
@@ -32,7 +33,14 @@ export function normalizeCartLine(value: unknown): StoredCartLine | null {
     length: lengthCm === 100 ? '1 m' : `${lengthCm} cm`,
     lengthCm,
     packageCode,
+    packageLabel: typeof line.packageLabel === 'string' ? line.packageLabel : getWoodPackage(packageCode)?.label,
     quantity,
     unitPrice: Number.isFinite(Number(line.unitPrice)) ? Number(line.unitPrice) : 0,
   };
+}
+
+export function cartLineDetails(line: StoredCartLine): string {
+  const length = line.lengthCm === 100 ? '1 m' : `${line.lengthCm} cm`;
+  const label = line.packageLabel ?? getWoodPackage(line.packageCode ?? '')?.label;
+  return `${line.quantity} × ${label ?? 'Format'} · ${length}`;
 }

@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState, useTransition } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, LoaderCircle, Minus, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 import { getWoodCartQuote, submitWoodOrder } from '@/actions/wood-orders';
-import { CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, type StoredCartLine } from '@/lib/utils/cart';
+import { CART_STORAGE_KEY, ORDER_CONFIRMATION_STORAGE_KEY, normalizeCartLine, cartLineDetails, type StoredCartLine } from '@/lib/utils/cart';
 import { formatWoodPrice } from '@/lib/utils/wood';
+import type { OrderConfirmation } from '@/lib/types/order';
+import { PaymentInstructions } from '@/components/wood/payment-instructions';
 import { woodDisplayName } from '@/lib/utils/wood-display';
 
 type CartQuote = { subtotal: number; deliveryFee: number; deliveryLitres: number; deliveryPricePerLitre: number; total: number; deposit: number };
@@ -17,11 +19,15 @@ export function CheckoutForm() {
   const [quote, setQuote] = useState<CartQuote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
   const [error, setError] = useState('');
-  const [pending, startTransition] = useTransition();
+  const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
+  const quoteRequest = useRef(0);
+  const [completedOrder, setCompletedOrder] = useState<OrderConfirmation | null>(null);
   const [customer, setCustomer] = useState({ firstName: '', lastName: '', address: '', postalCode: '', city: '', phone: '', email: '' });
   const subtotal = quote?.subtotal ?? 0;
 
   const refreshQuote = useCallback(async (lines: StoredCartLine[]) => {
+    const request = ++quoteRequest.current;
     setCart(lines);
     setQuote(null);
     setQuoteLoading(true);
@@ -38,19 +44,21 @@ export function CheckoutForm() {
         packageCode: line.packageCode,
         quantity: line.quantity,
       })));
+      if (request !== quoteRequest.current) return;
       if (!result.success) {
         setError(result.message);
         setQuoteLoading(false);
         return;
       }
-      const refreshedCart = lines.map((line, index) => ({
-        ...line,
-        name: result.lines[index].name,
-        length: `${result.lines[index].packageLabel ?? line.length} · ${result.lines[index].lengthCm === 100 ? '1 m' : `${result.lines[index].lengthCm} cm`}`,
-        unitPrice: result.lines[index].unitPrice,
-      }));
+      const refreshedCart = lines.map((line) => {
+        const priced = result.lines.find((item) => item.slug === line.slug
+          && item.packageCode === line.packageCode && item.lengthCm === line.lengthCm);
+        if (!priced || priced.quantity !== line.quantity) throw new Error('Cart quote mismatch');
+        return { ...line, name: priced.name, packageLabel: priced.packageLabel, unitPrice: priced.unitPrice };
+      });
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(refreshedCart));
       setCart(refreshedCart);
+      window.dispatchEvent(new Event('wood-cart-updated'));
       setQuote({
         subtotal: result.subtotal,
         deliveryFee: result.deliveryFee,
@@ -61,6 +69,7 @@ export function CheckoutForm() {
       });
       setQuoteLoading(false);
     } catch {
+      if (request !== quoteRequest.current) return;
       setError('Le calcul du panier a échoué. Vérifiez votre connexion puis rechargez la page.');
       setQuoteLoading(false);
     }
@@ -78,6 +87,7 @@ export function CheckoutForm() {
   }, [refreshQuote]);
 
   function changeQuantity(line: StoredCartLine, delta: number) {
+    if (submitting.current) return;
     const quantity = line.quantity + delta;
     const updated = quantity < 1
       ? cart.filter((item) => item.key !== line.key)
@@ -89,12 +99,14 @@ export function CheckoutForm() {
     setCustomer((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current || quoteLoading || !cart.length || !quote) return;
     setError('');
-    if (!cart.length || !quote) return;
-    const form = new FormData(event.currentTarget);
-    startTransition(async () => {
+    submitting.current = true;
+    setPending(true);
+    try {
+      const form = new FormData(event.currentTarget);
       const result = await submitWoodOrder({
         customer,
         lines: cart.map((line) => ({ slug: line.slug, lengthCm: line.lengthCm, packageCode: line.packageCode, quantity: line.quantity })),
@@ -103,21 +115,36 @@ export function CheckoutForm() {
       }, quote.total);
       if (!result.success) {
         setError(result.message);
-        if (result.message.includes('ont changé depuis le calcul')) window.location.reload();
+        if (result.message.includes('ont changé depuis le calcul')) {
+          await refreshQuote(cart);
+          setError(result.message);
+        }
         return;
       }
+      setCompletedOrder(result.order);
+      let confirmationStored = false;
       try {
         sessionStorage.setItem(ORDER_CONFIRMATION_STORAGE_KEY, JSON.stringify(result.order));
+        confirmationStored = true;
+      } catch {
+        // Keep the successful confirmation visible even if session storage is unavailable.
+      }
+      try {
         localStorage.removeItem(CART_STORAGE_KEY);
         window.dispatchEvent(new Event('wood-cart-updated'));
-      } catch {
-        setError('Die Bestellung wurde gesendet, aber die Zahlungsinformationen konnten nicht gespeichert werden. Bitte lassen Sie diese Übersicht geöffnet.');
-        return;
-      }
-      router.push('/commande/paiement');
-      router.refresh();
-    });
+      } catch { /* The order has already been sent successfully. */ }
+      if (!confirmationStored) return;
+      router.replace('/commande/paiement');
+    } catch {
+      setError('Die Bestellung konnte nicht übermittelt werden. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.');
+    } finally {
+      submitting.current = false;
+      setPending(false);
+    }
   }
+
+  if (completedOrder) return <PaymentInstructions initialOrder={completedOrder} />;
+  if (quoteLoading && cart.length === 0) return <p role="status" className="py-12 text-center">Warenkorb wird geladen…</p>;
 
   if (cart.length === 0) {
     return (
@@ -164,7 +191,7 @@ export function CheckoutForm() {
       <aside className="rounded-3xl border border-[#e7dece] bg-[#fcfaf5] p-5 shadow-sm lg:sticky lg:top-24">
         <h2 className="font-bold text-[#173a27]">Bestellübersicht</h2>
         <ul className="mt-4 space-y-4">
-          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{line.packageCode ? `${line.quantity} × ${line.length}` : `${line.length} · ${line.quantity} m³`}</span><div className="mt-2 flex items-center gap-1"><button type="button" aria-label={`Réduire ${line.name}`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" aria-label={`Ajouter ${line.name}`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" aria-label={`Supprimer ${line.name}`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
+          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{cartLineDetails(line)}</span><div className="mt-2 flex items-center gap-1"><button type="button" disabled={pending} aria-label={`Réduire ${line.name}`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" disabled={pending} aria-label={`Ajouter ${line.name}`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" disabled={pending} aria-label={`Supprimer ${line.name}`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
         </ul>
         <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{quote ? formatWoodPrice(subtotal) : 'Calcul en cours…'}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison ({quote ? `${quote.deliveryLitres.toLocaleString('fr-FR')} l × ${formatWoodPrice(quote.deliveryPricePerLitre)}/l` : 'calcul en cours'})</span><span>{quote ? formatWoodPrice(quote.deliveryFee) : 'Calcul en cours…'}</span></div></div>
         <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Total à payer</span><span>{quote ? formatWoodPrice(quote.total) : 'Calcul en cours…'}</span></div><div className="flex justify-between text-[#21492d]"><span>Acompte (50 % du total)</span><strong>{quote ? formatWoodPrice(quote.deposit) : 'Calcul en cours…'}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Les tarifs, les quantités disponibles et le stock sont vérifiés avant l’envoi. L’acompte correspond à 50 % du total, livraison comprise.</p></div>

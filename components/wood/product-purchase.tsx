@@ -53,6 +53,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
       length: `${packageDetails.label} · ${packageLength === 100 ? '1 m' : `${packageLength} cm`}`,
       lengthCm: packageLength,
       packageCode: packageDetails.package_code as WoodPackageCode,
+      packageLabel: packageDetails.label,
       quantity,
       unitPrice: selectedPackage.price,
     };
@@ -111,6 +112,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
               key={item.package_code}
               type="button"
               onClick={() => {
+                setAdded(false);
                 setPackageCode(item.package_code as WoodPackageCode);
                 setQuantity((value) => Math.max(1, Math.min(value, optionMax)));
               }}
@@ -132,7 +134,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
           <button
             key={cm}
             type="button"
-            onClick={() => setPackageLength(cm)}
+            onClick={() => { setAdded(false); setPackageLength(cm); }}
             aria-pressed={packageLength === cm}
             className={`rounded-lg border px-3 py-2 text-sm ${packageLength === cm ? 'border-[#285535] bg-[#f1f6f1] font-semibold text-[#21492d]' : 'border-[#e6ddcf] text-[#514b42]'}`}
           >
@@ -145,7 +147,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
         <button
           type="button"
           aria-label="Anzahl verringern"
-          onClick={() => setQuantity((value) => Math.max(1, value - 1))}
+          onClick={() => { setAdded(false); setQuantity((value) => Math.max(1, value - 1)); }}
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e6ddcf] bg-[#faf8f3]"
         >
           <Minus size={16} />
@@ -156,13 +158,13 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
           min={1}
           max={maxQuantity}
           value={quantity}
-          onChange={(event) => setQuantity(Math.max(1, Math.min(maxQuantity || 1, Number(event.target.value) || 1)))}
+          onChange={(event) => { setAdded(false); setQuantity(Math.max(1, Math.min(maxQuantity || 1, Math.floor(Number(event.target.value)) || 1))); }}
           className="h-10 w-20 rounded-xl border border-[#e6ddcf] text-center text-sm"
         />
         <button
           type="button"
           aria-label="Anzahl erhöhen"
-          onClick={() => setQuantity((value) => Math.min(maxQuantity, value + 1))}
+          onClick={() => { setAdded(false); setQuantity((value) => Math.max(1, Math.min(maxQuantity, value + 1))); }}
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e6ddcf] bg-[#faf8f3]"
         >
           <Plus size={16} />

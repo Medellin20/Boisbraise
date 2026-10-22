@@ -5,20 +5,20 @@ import { useEffect, useState } from 'react';
 import { ArrowRight, Check, Copy, CreditCard, Download, Landmark } from 'lucide-react';
 import { toast } from 'sonner';
 import { ORDER_CONFIRMATION_STORAGE_KEY } from '@/lib/utils/cart';
-import { formatWoodPrice, lengthLabel } from '@/lib/utils/wood';
-import { getWoodPackage } from '@/lib/utils/wood-packages';
+import { formatWoodPrice } from '@/lib/utils/wood';
+import { orderLineDescription } from '@/lib/utils/order-line';
 import type { OrderConfirmation } from '@/lib/types/order';
-import { woodDisplayName } from '@/lib/utils/wood-display';
 import { downloadOrderReceipt } from '@/lib/utils/order-receipt';
 
-export function PaymentInstructions() {
-  const [order, setOrder] = useState<OrderConfirmation | null>(null);
-  const [ready, setReady] = useState(false);
+export function PaymentInstructions({ initialOrder }: { initialOrder?: OrderConfirmation } = {}) {
+  const [order, setOrder] = useState<OrderConfirmation | null>(initialOrder ?? null);
+  const [ready, setReady] = useState(Boolean(initialOrder));
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<'link' | 'rib' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<'link' | 'rib' | null>(initialOrder?.payment.method ?? null);
 
   useEffect(() => {
+    if (initialOrder) return;
     try {
       const value = sessionStorage.getItem(ORDER_CONFIRMATION_STORAGE_KEY);
       if (value) {
@@ -31,7 +31,7 @@ export function PaymentInstructions() {
     } finally {
       setReady(true);
     }
-  }, []);
+  }, [initialOrder]);
 
   async function copyIban(iban: string) {
     try {
@@ -144,7 +144,7 @@ export function PaymentInstructions() {
       <section className="mt-6 rounded-3xl border border-[#e7dece] bg-white p-5 shadow-sm sm:p-7">
         <h2 className="font-bold text-[#173a27]">Ihre Bestellung</h2>
         <ul className="mt-4 divide-y divide-[#eee7dc]">
-          {order.lines.map((line, index) => <li key={`${line.slug}-${line.packageCode ?? line.lengthCm}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{line.packageCode ? `${line.quantity} × ${line.packageLabel ?? getWoodPackage(line.packageCode)?.label ?? 'Format'} · ${woodDisplayName(line.name)} · ${lengthLabel(line.lengthCm)}` : `${line.quantity} m³ · ${woodDisplayName(line.name)} · ${lengthLabel(line.lengthCm)}`}</span><strong>{formatWoodPrice(line.total)}</strong></li>)}
+          {order.lines.map((line, index) => <li key={`${line.slug}-${line.packageCode ?? line.lengthCm}-${index}`} className="flex justify-between gap-4 py-3 text-sm"><span>{orderLineDescription(line)}</span><strong>{formatWoodPrice(line.total)}</strong></li>)}
         </ul>
         <p className="mt-4 border-t border-[#eee7dc] pt-4 text-sm text-[#625b50]">Lieferadresse: {order.customer.address}, {order.customer.postalCode} {order.customer.city}</p>
         <button type="button" onClick={() => void downloadReceipt()} disabled={downloading} aria-busy={downloading} className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#21492d] px-5 py-3 text-sm font-semibold text-[#21492d] transition hover:bg-[#f1f7ef] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#21492d] disabled:cursor-wait disabled:opacity-60">

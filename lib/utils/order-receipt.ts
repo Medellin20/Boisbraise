@@ -1,7 +1,5 @@
 import type { OrderConfirmation } from '@/lib/types/order';
-import { lengthLabel } from '@/lib/utils/wood';
-import { woodDisplayName } from '@/lib/utils/wood-display';
-import { getWoodPackage } from '@/lib/utils/wood-packages';
+import { orderLineDescription } from '@/lib/utils/order-line';
 
 /** This confirms the order details, not receipt of funds. */
 export async function downloadOrderReceipt(order: OrderConfirmation) {
@@ -33,13 +31,11 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
   paragraph(`Lieferadresse: ${order.customer.address}, ${order.customer.postalCode} ${order.customer.city}`);
   paragraph('Ihre Bestellung', true, 13);
   for (const line of order.lines) {
-    const quantity = line.packageCode
-      ? `${line.quantity} x ${line.packageLabel ?? getWoodPackage(line.packageCode)?.label ?? 'Format'}`
-      : `${line.quantity} m³`;
-    paragraph(`${quantity} - ${woodDisplayName(line.name)} - ${lengthLabel(line.lengthCm)}: ${money(line.total)}`);
+    paragraph(`${orderLineDescription(line)}: ${money(line.total)}`);
+    paragraph(`Einzelpreis: ${money(line.unitPrice)}`, false, 10);
   }
   paragraph(`Holzwarenwert: ${money(order.subtotal)}`);
-  paragraph(`Lieferung: ${money(order.deliveryFee)}`);
+  paragraph(`Lieferung (${order.deliveryLitres.toLocaleString('de-DE')} l): ${money(order.deliveryFee)}`);
   paragraph(`Gesamtbetrag: ${money(order.total)}`, true);
   paragraph(`Anzahlung zur Bestätigung (50 %): ${money(order.deposit)}`, true);
   paragraph(`Restbetrag bei Lieferung: ${money(order.remaining)}`, true);
