@@ -173,10 +173,6 @@ export async function submitWoodOrder(value: unknown, expectedTotal: number): Pr
   if (!payment) return fail('Die ausgewählte Zahlungsart ist unvollständig. Richten Sie sie unter Verwaltung > Zahlung & Bankverbindung ein.');
 
   const emailRecipient = process.env.WOOD_ORDER_EMAIL?.trim() || process.env.ALERT_EMAIL?.trim();
-  if (!process.env.GMAIL_USER?.trim() || !process.env.GMAIL_APP_PASSWORD?.trim() || !emailRecipient) {
-    return fail('Der Bestellversand ist nicht eingerichtet. Bitte konfigurieren Sie GMAIL_USER, GMAIL_APP_PASSWORD und WOOD_ORDER_EMAIL in .env.');
-  }
-
   const priced = await priceWoodCart(parsed.data.lines);
   if (!priced.success) return fail(priced.message);
   const subtotalCents = priced.subtotalCents;
@@ -226,6 +222,6 @@ export async function submitWoodOrder(value: unknown, expectedTotal: number): Pr
       : `RIB · ${payment.rib.accountHolder} · ${payment.rib.iban}`,
   }, emailRecipient);
 
-  if (!sent) return fail('Die Bestell-E-Mail konnte nicht gesendet werden. Bitte überprüfen Sie Ihre Gmail-Einstellungen in .env.');
-  return { success: true, message: 'Bestellung übermittelt. Die Zahlungsinformationen stehen bereit.', order };
+  order.adminNotified = sent;
+  return { success: true, message: 'Die Bestellübersicht und Zahlungsinformationen stehen bereit.', order };
 }

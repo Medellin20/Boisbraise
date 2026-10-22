@@ -27,6 +27,7 @@ export type OrderPayment =
   | { method: 'rib'; rib: BankPayment; link?: PaymentLink };
 
 export type OrderConfirmation = {
+  adminNotified?: boolean;
   reference: string;
   customer: CheckoutCustomer;
   lines: OrderLine[];

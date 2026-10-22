@@ -26,6 +26,9 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
   paragraph('Bestellbeleg', true, 17);
   doc.setTextColor(55, 55, 55);
   paragraph(`Bestellnummer: ${order.reference}`, true);
+  if (order.adminNotified === false) {
+    paragraph('Bestellung vorbereitet, aber noch nicht an unser Team übermittelt. Bitte kontaktieren Sie HolzNest vor der Zahlung.');
+  }
   paragraph(`Beleg erstellt am: ${new Date().toLocaleDateString('de-DE')}`);
   paragraph(`${order.customer.firstName} ${order.customer.lastName}`);
   paragraph(`Lieferadresse: ${order.customer.address}, ${order.customer.postalCode} ${order.customer.city}`);

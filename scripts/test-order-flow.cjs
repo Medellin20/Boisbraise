@@ -91,6 +91,11 @@ function quote(call) {
  let payment; await act(async()=>{payment=create(React.createElement(PaymentInstructions));});
  assert.ok(text(payment).includes('5 × 40 litres'));
  assert.ok(text(payment).includes('HN-TEST')); payment.unmount();
+ await act(async()=>{payment=create(React.createElement(PaymentInstructions,{initialOrder:{...order,adminNotified:false}}));});
+ assert.ok(text(payment).includes('Bestellung vorbereitet'));
+ assert.ok(text(payment).includes('bevor Sie bezahlen'));
+ assert.ok(!text(payment).includes('Anfrage gesendet'));
+ payment.unmount();
  const {downloadOrderReceipt}=require(root+'/lib/utils/order-receipt.ts');
  await downloadOrderReceipt({...order,lines:[
    {...order.lines[0],packageLabel:'Kiste 40 Liter'},

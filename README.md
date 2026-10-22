@@ -45,4 +45,6 @@ Les commandes revérifient les prix et les stocks dans Supabase avant l’envoi.
 
 L’acompte demandé est égal à 50 % du total, frais de livraison compris ; le solde restant est affiché séparément. Les valeurs de configuration et les modalités de vente doivent être complétées avant d’accepter des commandes. Le tarif standard de livraison est de 0,34 €/litre et peut être modifié dans `/admin/vente`.
 
+Une configuration Gmail absente ou un échec d’envoi ne bloque pas l’affichage du récapitulatif de paiement. Dans ce cas, la commande est seulement préparée dans la session du navigateur : la page et le PDF indiquent qu’elle n’a pas été transmise à l’équipe et demandent de contacter HolzNest avant de payer.
+
 Les fichiers de migrations antérieurs au catalogue bois sont conservés comme historique de base de données. Ils ne sont plus utilisés par les pages publiques du site.

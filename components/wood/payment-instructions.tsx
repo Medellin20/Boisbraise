@@ -77,9 +77,13 @@ export function PaymentInstructions({ initialOrder }: { initialOrder?: OrderConf
     <div className="mx-auto max-w-3xl">
       <div className="rounded-3xl border border-[#dbe6d9] bg-[#f1f7ef] p-5 sm:p-7">
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#21492d] text-white"><Check size={22} /></span>
-        <p className="mt-4 text-xs font-bold uppercase tracking-[.16em] text-[#527452]">Anfrage gesendet</p>
+        <p className="mt-4 text-xs font-bold uppercase tracking-[.16em] text-[#527452]">{order.adminNotified === false ? 'Bestellung vorbereitet' : 'Anfrage gesendet'}</p>
         <h1 className="wood-heading mt-2 text-3xl font-semibold text-[#173a27] sm:text-4xl">Vielen Dank, {order.customer.firstName}.</h1>
-        <p className="mt-2 text-sm leading-6 text-[#5f675c]">Ihre Bestellung <strong>{order.reference}</strong> wurde an HolzNest gesendet. Eine Zusammenfassung wurde per E-Mail an unser Team übermittelt.</p>
+        {order.adminNotified === false ? (
+          <p role="alert" className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">Ihre Bestellung <strong>{order.reference}</strong> wurde vorbereitet, konnte aber noch nicht an unser Team übermittelt werden. Bitte laden Sie den Bestellbeleg herunter und <Link href="/contact" className="font-semibold underline">kontaktieren Sie uns</Link>, bevor Sie bezahlen.</p>
+        ) : (
+          <p className="mt-2 text-sm leading-6 text-[#5f675c]">Ihre Bestellung <strong>{order.reference}</strong> wurde an HolzNest gesendet. Eine Zusammenfassung wurde per E-Mail an unser Team übermittelt.</p>
+        )}
       </div>
 
       <section className="mt-6 rounded-3xl border border-[#e7dece] bg-white p-5 shadow-sm sm:p-7">
