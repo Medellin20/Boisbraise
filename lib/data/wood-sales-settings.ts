@@ -8,7 +8,6 @@ export { MAX_WOOD_ORDER_QUANTITY } from '@/lib/utils/wood-packages';
 export type WoodSalesSettings = {
   allowedLengthsCm: number[];
   maxQuantityPerProduct: number;
-  deliveryPricePerLitre: number;
   packages: WoodSalesPackageRecord[];
 };
 
@@ -21,27 +20,27 @@ function normalizeSettings(
   const allowedLengthsCm = setting.allowed_lengths_cm
     .map(Number)
     .filter((length) => Number.isInteger(length) && length >= 10 && length <= 300);
-  const normalizedPackages = packages.map((item) => ({
+  const allPackages = packages.some((item) => item.package_code === 'format_5')
+    ? packages
+    : [...packages, { package_code: 'format_5', label: 'Format 5', volume_litres: null, price: null, sort_order: 5 }];
+  const normalizedPackages = allPackages.map((item) => ({
     ...item,
-    volume_litres: Number(item.volume_litres),
+    volume_litres: item.volume_litres == null ? null : Number(item.volume_litres),
     price: item.price == null ? null : Number(item.price),
   }));
   const packageCodes = normalizedPackages.map((item) => item.package_code);
   const maxQuantityPerProduct = Number(setting.max_quantity_per_product);
-  const deliveryPricePerLitre = Number(setting.delivery_price_per_litre);
   if (!allowedLengthsCm.length || new Set(allowedLengthsCm).size !== allowedLengthsCm.length
-    || normalizedPackages.length !== 4 || new Set(packageCodes).size !== 4
-    || packageCodes.some((code) => !['12_5_litres', '20_litres', '40_litres', '1_rm'].includes(code))
+    || normalizedPackages.length !== 5 || new Set(packageCodes).size !== 5
+    || packageCodes.some((code) => !['12_5_litres', '20_litres', '40_litres', '1_rm', 'format_5'].includes(code))
     || !Number.isInteger(maxQuantityPerProduct) || maxQuantityPerProduct < 1 || maxQuantityPerProduct > MAX_WOOD_ORDER_QUANTITY
-    || !Number.isFinite(deliveryPricePerLitre) || deliveryPricePerLitre < 0
-    || normalizedPackages.some((item) => !Number.isFinite(item.volume_litres) || item.volume_litres <= 0
+    || normalizedPackages.some((item) => (item.volume_litres != null && (!Number.isFinite(item.volume_litres) || item.volume_litres <= 0))
       || (item.price != null && (!Number.isFinite(item.price) || item.price < 0)))) {
     return null;
   }
   return {
     allowedLengthsCm: [...new Set(allowedLengthsCm)].sort((a, b) => a - b),
     maxQuantityPerProduct,
-    deliveryPricePerLitre,
     packages: normalizedPackages.sort((a, b) => a.sort_order - b.sort_order),
   };
 }

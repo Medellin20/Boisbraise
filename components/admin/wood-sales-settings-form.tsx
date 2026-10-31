@@ -14,11 +14,9 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
   const [pending, setPending] = useState(false);
   const [allowedLengthsCm, setAllowedLengthsCm] = useState(initial.allowedLengthsCm);
   const [maxQuantity, setMaxQuantity] = useState(String(initial.maxQuantityPerProduct));
-  const [deliveryPricePerLitre, setDeliveryPricePerLitre] = useState(String(initial.deliveryPricePerLitre));
   const [packages, setPackages] = useState(initial.packages.map((item, sortOrder) => ({
     packageCode: item.package_code as WoodSalesSettingsInput['packages'][number]['packageCode'],
     label: item.label,
-    volumeLitres: String(item.volume_litres),
     price: item.price == null ? '' : String(item.price),
     sortOrder,
   })));
@@ -29,11 +27,9 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
     const value: WoodSalesSettingsInput = {
       allowedLengthsCm,
       maxQuantityPerProduct: Number(maxQuantity),
-      deliveryPricePerLitre: Number(deliveryPricePerLitre),
       packages: packages.map((item) => ({
         packageCode: item.packageCode,
         label: item.label.trim(),
-        volumeLitres: Number(item.volumeLitres),
         price: item.price.trim() === '' ? null : Number(item.price),
         sortOrder: item.sortOrder,
       })),
@@ -65,7 +61,7 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
     <form onSubmit={submit} className="space-y-6">
       <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6">
         <h2 className="font-bold text-ink-900">Formats, tailles et prix communs</h2>
-        <p className="mt-1 text-sm text-ink-500">Ces quatre tarifs et contenances s’appliquent uniformément aux six essences.</p>
+        <p className="mt-1 text-sm text-ink-500">Ces cinq formats et tarifs s’appliquent uniformément aux six essences.</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {packages.map((item, index) => (
             <fieldset key={item.packageCode} className="rounded-xl border border-ink-100 p-4">
@@ -75,10 +71,6 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
                 <input required maxLength={80} value={item.label} onChange={(event) => setPackages((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, label: event.target.value } : entry))} className={inputClass} />
               </label>
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <label className="text-sm font-medium text-ink-700">
-                  Contenance (litres)
-                  <input required type="number" min="0.01" max="100000" step="0.01" value={item.volumeLitres} onChange={(event) => setPackages((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, volumeLitres: event.target.value } : entry))} className={inputClass} />
-                </label>
                 <label className="text-sm font-medium text-ink-700">
                   Prix (€)
                   <input type="number" min="0" step="0.01" value={item.price} placeholder="Sur devis" onChange={(event) => setPackages((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, price: event.target.value } : entry))} className={inputClass} />
@@ -127,12 +119,7 @@ export function WoodSalesSettingsForm({ initial }: { initial: WoodSalesSettings 
 
       <section className="rounded-2xl border border-ink-100 bg-white p-5 sm:p-6">
         <h2 className="font-bold text-ink-900">Livraison standard</h2>
-        <p className="mt-1 text-sm text-ink-500">Le coût est calculé selon le nombre total de litres commandés, tous formats et essences confondus.</p>
-        <label className="mt-4 block max-w-xs text-sm font-medium text-ink-700">
-          Tarif de livraison par litre (€)
-          <input required type="number" min="0" max="100000" step="0.01" value={deliveryPricePerLitre} onChange={(event) => setDeliveryPricePerLitre(event.target.value)} className={inputClass} />
-        </label>
-        <p className="mt-2 text-xs text-ink-500">Tarif actuel : {Number(deliveryPricePerLitre || 0).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} / litre. Ce montant est ajouté au prix du bois.</p>
+        <p className="mt-1 text-sm text-ink-500">La livraison représente 30 % du montant des produits commandés. Pour 100 € de bois, la livraison coûte 30 €, soit 130 € au total.</p>
       </section>
 
       <button type="submit" disabled={pending || allowedLengthsCm.length === 0 || new Set(allowedLengthsCm).size !== allowedLengthsCm.length || allowedLengthsCm.some((length) => !Number.isInteger(length) || length < 10 || length > 300)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#21492d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">

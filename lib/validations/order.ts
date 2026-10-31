@@ -3,7 +3,7 @@ import { MAX_WOOD_ORDER_QUANTITY } from '@/lib/utils/wood-packages';
 
 export const woodOrderLinesSchema = z.array(z.object({
     slug: z.string({ required_error: 'Das Produkt im Warenkorb ist ungültig.', invalid_type_error: 'Das Produkt im Warenkorb ist ungültig.' }).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Das Produkt im Warenkorb ist ungültig.'),
-    packageCode: z.enum(['12_5_litres', '20_litres', '40_litres', '1_rm']),
+    packageCode: z.enum(['12_5_litres', '20_litres', '40_litres', '1_rm', 'format_5']),
     lengthCm: z.number().int().min(10).max(300, 'La longueur des bûches doit être comprise entre 10 et 300 cm.'),
     quantity: z.number({ invalid_type_error: 'Bitte geben Sie eine gültige Menge ein.' }).int('Die Menge muss eine ganze Zahl sein.').min(1, 'Die Menge muss mindestens 1 betragen.').max(MAX_WOOD_ORDER_QUANTITY, `La quantité maximale est ${MAX_WOOD_ORDER_QUANTITY}.`),
   }, { required_error: 'Die Bestellposition ist ungültig.', invalid_type_error: 'Die Bestellposition ist ungültig.' }), { required_error: 'Bitte wählen Sie mindestens ein Produkt aus.', invalid_type_error: 'Bitte überprüfen Sie die Produkte im Warenkorb.' }).min(1, 'Bitte wählen Sie mindestens ein Produkt aus.').max(20, 'Sie können höchstens 20 Produkte gleichzeitig bestellen.');

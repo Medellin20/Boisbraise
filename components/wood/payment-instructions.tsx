@@ -95,7 +95,7 @@ export function PaymentInstructions({ initialOrder }: { initialOrder?: OrderConf
         <div className="mt-5 rounded-2xl border border-[#e8dfd1] p-4 sm:p-5">
           <dl className="space-y-2.5 text-sm">
             <Row label="Holzwarenwert" value={formatWoodPrice(order.subtotal)} />
-            <Row label={`Livraison (${order.deliveryLitres.toLocaleString('fr-FR')} l × ${formatWoodPrice(order.deliveryPricePerLitre)}/l)`} value={formatWoodPrice(order.deliveryFee)} />
+            <Row label="Livraison (30 %)" value={formatWoodPrice(order.deliveryFee)} />
             <Row label="Gesamtbetrag" value={formatWoodPrice(order.total)} />
             <div className="my-3 border-t border-[#e8dfd1]" />
             <Row label="Jetzt fällige Anzahlung" value={formatWoodPrice(order.deposit)} emphasis />

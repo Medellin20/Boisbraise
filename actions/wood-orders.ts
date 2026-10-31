@@ -64,7 +64,7 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
       return { success: false, message: `Le prix de ${product.name} (${packageDetails?.label ?? 'ce format'}) doit être confirmé par devis.` };
     }
 
-    const lineVolumeLitres = packageDetails.volume_litres * requested.quantity;
+    const lineVolumeLitres = (packageDetails.volume_litres ?? 0) * requested.quantity;
     volumesByProduct.set(product.id, (volumesByProduct.get(product.id) ?? 0) + lineVolumeLitres / 1000);
     deliveryLitres += lineVolumeLitres;
     unitsByProduct.set(product.id, (unitsByProduct.get(product.id) ?? 0) + requested.quantity);
@@ -93,14 +93,14 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
       return { success: false, message: `Le stock de ${product.name} est limité à ${product.stock_m3} m³.` };
     }
   }
-  const deliveryCents = toCents(deliveryLitres * salesSettings.deliveryPricePerLitre);
+  const deliveryCents = Math.round(subtotalCents * 0.30);
   return {
     success: true,
     lines: orderLines,
     subtotalCents,
     deliveryCents,
     deliveryLitres,
-    deliveryPricePerLitre: salesSettings.deliveryPricePerLitre,
+    deliveryPricePerLitre: 0,
   };
 }
 
@@ -235,8 +235,7 @@ export async function submitWoodOrder(value: unknown, expectedTotal: number): Pr
     Email: customer.email,
     Articles: itemsSummary,
     'Sous-total bois': formatPrice(subtotalCents),
-    'Volume livré': `${priced.deliveryLitres.toLocaleString('fr-FR')} litres`,
-    Livraison: `${formatPrice(priced.deliveryCents)} · ${priced.deliveryLitres.toLocaleString('fr-FR')} l × ${formatPrice(toCents(priced.deliveryPricePerLitre))}/l`,
+    'Livraison (30 % du montant des produits)': formatPrice(priced.deliveryCents),
     'Total commande': formatPrice(totalCents),
     'Acompte à recevoir (50 % du total)': formatPrice(depositCents),
     'Solde restant': formatPrice(totalCents - depositCents),

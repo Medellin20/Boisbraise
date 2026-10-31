@@ -3,6 +3,7 @@ export const WOOD_PACKAGES = [
   { code: '20_litres', label: '20 litres', volumeLitres: 20, defaultPrice: 7 },
   { code: '40_litres', label: '40 litres', volumeLitres: 40, defaultPrice: 14 },
   { code: '1_rm', label: '1 RM', volumeLitres: 1000, defaultPrice: 199 },
+  { code: 'format_5', label: 'Format 5', volumeLitres: null, defaultPrice: null },
 ] as const;
 
 export const MAX_WOOD_ORDER_QUANTITY = 1000;

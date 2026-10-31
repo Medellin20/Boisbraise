@@ -201,7 +201,7 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
   doc.setTextColor(...COLORS.dark);
   text('Holzwarenwert', summaryX + 4, y + 7);
   text(money(order.subtotal), RIGHT - 4, y + 7, { align: 'right' });
-  text(`Lieferung (${order.deliveryLitres.toLocaleString('de-DE')} l)`, summaryX + 4, y + 14);
+  text('Lieferung', summaryX + 4, y + 14);
   text(money(order.deliveryFee), RIGHT - 4, y + 14, { align: 'right' });
   line(summaryX, y + 18, RIGHT, y + 18);
   doc.setFillColor(...COLORS.paleBrown);

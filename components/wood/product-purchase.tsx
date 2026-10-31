@@ -21,12 +21,12 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
   const selectedPackage = packageOptions.find((item) => item.package_code === packageCode);
   const packageDetails = selectedPackage;
   const packageTotal = selectedPackage?.price == null ? null : selectedPackage.price * quantity;
-  const deliveryTotal = packageDetails && settings
-    ? Math.round(packageDetails.volume_litres * quantity * settings.deliveryPricePerLitre * 100) / 100
+  const deliveryTotal = packageTotal != null
+    ? Math.round(Math.round((selectedPackage?.price ?? 0) * 100) * quantity * 0.30) / 100
     : null;
   const orderTotal = packageTotal == null || deliveryTotal == null ? null : packageTotal + deliveryTotal;
   const maxQuantity = packageDetails && settings
-    ? Math.min(settings.maxQuantityPerProduct, product.stock_m3 == null
+    ? Math.min(settings.maxQuantityPerProduct, product.stock_m3 == null || packageDetails?.volume_litres == null
       ? settings.maxQuantityPerProduct
       : Math.floor(product.stock_m3 / (packageDetails.volume_litres / 1000) + 1e-9))
     : 0;
@@ -67,10 +67,10 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
       const existingUnits = existingForProduct.reduce((sum, item) => sum + item.quantity, 0);
       const existingVolumeM3 = existingForProduct.reduce((sum, item) => {
         const packageItem = packageOptions.find((option) => option.package_code === item.packageCode);
-        return sum + (packageItem ? packageItem.volume_litres / 1000 * item.quantity : 0);
+        return sum + (packageItem ? (packageItem.volume_litres ?? 0) / 1000 * item.quantity : 0);
       }, 0);
       const remainingByQuantity = settings.maxQuantityPerProduct - existingUnits;
-      const remainingByStock = product.stock_m3 == null
+      const remainingByStock = product.stock_m3 == null || packageDetails?.volume_litres == null
         ? settings.maxQuantityPerProduct
         : Math.floor(Math.max(0, product.stock_m3 - existingVolumeM3) / (packageDetails.volume_litres / 1000) + 1e-9);
       const allowedToAdd = Math.min(remainingByQuantity, remainingByStock);
@@ -103,9 +103,9 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
       <div className="mt-3 grid grid-cols-2 gap-2">
         {packageOptions.map((item) => {
           const active = packageCode === item.package_code;
-          const optionMax = Math.min(settings.maxQuantityPerProduct, product.stock_m3 == null
+          const optionMax = Math.min(settings.maxQuantityPerProduct, product.stock_m3 == null || item.volume_litres == null
             ? settings.maxQuantityPerProduct
-            : Math.floor(product.stock_m3 / (item.volume_litres / 1000) + 1e-9));
+            : Math.floor(product.stock_m3 / ((item.volume_litres ?? 0) / 1000) + 1e-9));
           return (
             <button
               key={item.package_code}
@@ -174,7 +174,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
       </div>
       {orderTotal != null && deliveryTotal != null && settings && packageDetails && (
         <div className="mt-3 space-y-1 rounded-xl bg-[#f7f5ef] p-3 text-sm">
-          <p className="flex justify-between gap-2 text-[#645f55]"><span>Livraison ({(packageDetails.volume_litres * quantity).toLocaleString('fr-FR')} l × {formatWoodPrice(settings.deliveryPricePerLitre)}/l)</span><span>{formatWoodPrice(deliveryTotal)}</span></p>
+          <p className="flex justify-between gap-2 text-[#645f55]"><span>Livraison (30 %)</span><span>{formatWoodPrice(deliveryTotal)}</span></p>
           <p className="flex justify-between gap-2 font-bold text-[#173a27]"><span>Total estimé à payer</span><span>{formatWoodPrice(orderTotal)}</span></p>
         </div>
       )}

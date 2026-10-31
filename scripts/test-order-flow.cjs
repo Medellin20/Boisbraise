@@ -47,7 +47,7 @@ const packages=[{package_code:'12_5_litres',label:'12,5 litres',volume_litres:12
 const product={slug:'hetre',name:'Hêtre',in_stock:true,stock_m3:100,wood_sales_settings:{packages,allowedLengthsCm:[25,33,100],maxQuantityPerProduct:1000,deliveryPricePerLitre:0.1}};
 function quote(call) {
  const lines=call.lines.map(l=>({...l,name:'Hêtre',packageLabel:packages.find(p=>p.package_code===l.packageCode).label,unitPrice:14,total:14*l.quantity}));
- const subtotal=lines.reduce((s,l)=>s+l.total,0); const deliveryLitres=lines.reduce((s,l)=>s+40*l.quantity,0); const deliveryFee=deliveryLitres*0.1;
+ const subtotal=lines.reduce((s,l)=>s+l.total,0); const deliveryLitres=lines.reduce((s,l)=>s+40*l.quantity,0); const deliveryFee=Math.round(subtotal*100*0.30)/100;
  return {success:true,lines,subtotal,deliveryFee,deliveryLitres,deliveryPricePerLitre:0.1,total:subtotal+deliveryFee,deposit:(subtotal+deliveryFee)/2};
 }
 (async()=>{
@@ -84,8 +84,8 @@ function quote(call) {
  assert.equal(submitCalls.length,1,'no duplicate submissions');
  assert.equal(plus().props.disabled,true);
  assert.deepEqual(submitCalls[0].value.lines,[{slug:'hetre',lengthCm:100,packageCode:'40_litres',quantity:5}]);
- assert.equal(submitCalls[0].total,90);
- const q=quote(quoteCalls[2]); const order={...q,reference:'HN-TEST',remaining:45,customer:{firstName:'Test',lastName:'Client',address:'Teststraße 1',postalCode:'12345',city:'Berlin'},payment:{method:'link',link:{url:'https://example.com/pay'}}}; delete order.success;
+ assert.equal(submitCalls[0].total,91);
+ const q=quote(quoteCalls[2]); const order={...q,reference:'HN-TEST',remaining:45.5,customer:{firstName:'Test',lastName:'Client',address:'Teststraße 1',postalCode:'12345',city:'Berlin'},payment:{method:'link',link:{url:'https://example.com/pay'}}}; delete order.success;
  await act(async()=>{submitResolve({success:true,order}); await submitPromise;});
  assert.deepEqual(JSON.parse(sessionStorage.getItem(ORDER_CONFIRMATION_STORAGE_KEY)),order);
  assert.equal(localStorage.getItem(CART_STORAGE_KEY),null);
