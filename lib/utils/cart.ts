@@ -1,4 +1,4 @@
-import { getWoodPackage, MAX_WOOD_ORDER_QUANTITY, type WoodPackageCode } from '@/lib/utils/wood-packages';
+import { getWoodPackage, MAX_WOOD_ORDER_QUANTITY, woodPackageLabel, type WoodPackageCode } from '@/lib/utils/wood-packages';
 
 export const CART_STORAGE_KEY = 'bois-foret-cart-v1';
 export const ORDER_CONFIRMATION_STORAGE_KEY = 'holznest-order-confirmation-v1';
@@ -42,5 +42,5 @@ export function normalizeCartLine(value: unknown): StoredCartLine | null {
 export function cartLineDetails(line: StoredCartLine): string {
   const length = line.lengthCm === 100 ? '1 m' : `${line.lengthCm} cm`;
   const label = line.packageLabel ?? getWoodPackage(line.packageCode ?? '')?.label;
-  return `${line.quantity} × ${label ?? 'Format'} · ${length}`;
+  return `${line.quantity} × ${woodPackageLabel(label ?? 'Format')} · ${length}`;
 }

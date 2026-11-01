@@ -1,5 +1,5 @@
 export function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('fr-FR', {
+  return new Intl.NumberFormat('de-DE', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 0,
@@ -9,7 +9,7 @@ export function formatPrice(amount: number): string {
 
 export function formatDate(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('de-DE', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -18,7 +18,7 @@ export function formatDate(date: string | Date): string {
 
 export function formatDateShort(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('de-DE', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -27,7 +27,7 @@ export function formatDateShort(date: string | Date): string {
 
 export function formatDateTime(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('fr-FR', {
+  return new Intl.DateTimeFormat('de-DE', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -37,7 +37,7 @@ export function formatDateTime(date: string | Date): string {
 }
 
 export function formatSurface(m2: number): string {
-  return `${m2.toLocaleString('fr-FR')} m²`;
+  return `${m2.toLocaleString('de-DE')} m²`;
 }
 
 export function slugify(input: string): string {

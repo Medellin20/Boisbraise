@@ -68,7 +68,7 @@ export function CheckoutForm() {
       setQuoteLoading(false);
     } catch {
       if (request !== quoteRequest.current) return;
-      setError('Le calcul du panier a échoué. Vérifiez votre connexion puis rechargez la page.');
+      setError('Der Warenkorb konnte nicht berechnet werden. Prüfen Sie Ihre Verbindung und laden Sie die Seite neu.');
       setQuoteLoading(false);
     }
   }, []);
@@ -79,7 +79,7 @@ export function CheckoutForm() {
       const lines = Array.isArray(raw) ? raw.map(normalizeCartLine).filter((line): line is StoredCartLine => line !== null) : [];
       void refreshQuote(lines);
     } catch {
-      setError('Le panier n’a pas pu être lu. Retournez au catalogue et ajoutez de nouveau vos articles.');
+      setError('Der Warenkorb konnte nicht geladen werden. Kehren Sie zum Katalog zurück und fügen Sie Ihre Artikel erneut hinzu.');
       setQuoteLoading(false);
     }
   }, [refreshQuote]);
@@ -113,7 +113,7 @@ export function CheckoutForm() {
       }, quote.total);
       if (!result.success) {
         setError(result.message);
-        if (result.message.includes('ont changé depuis le calcul')) {
+        if (result.message.includes('haben sich seit der Warenkorbberechnung geändert')) {
           await refreshQuote(cart);
           setError(result.message);
         }
@@ -182,7 +182,7 @@ export function CheckoutForm() {
           <Link href="/catalogue" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#ddd2bf] bg-white px-5 py-3 text-sm font-semibold text-[#524a3e]"><ArrowLeft size={16} /> Weiter einkaufen</Link>
           <button type="submit" disabled={pending || quoteLoading || !quote || cart.length === 0} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#21492d] px-6 py-3 text-sm font-semibold text-white shadow-sm disabled:opacity-60">
             {pending ? <LoaderCircle size={17} className="animate-spin" /> : <ShieldCheck size={17} />}
-            {pending ? 'Wird übermittelt …' : quoteLoading ? 'Prix et stock vérifiés…' : 'Bestätigen und Zahlung anzeigen'}
+            {pending ? 'Wird übermittelt …' : quoteLoading ? 'Preise und Bestand werden geprüft…' : 'Bestätigen und Zahlung anzeigen'}
           </button>
         </div>
       </form>
@@ -195,10 +195,10 @@ export function CheckoutForm() {
           </Link>
         )}
         <ul className="mt-4 space-y-4">
-          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{cartLineDetails(line)}</span><div className="mt-2 flex items-center gap-1"><button type="button" disabled={pending} aria-label={`Réduire ${line.name}`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" disabled={pending} aria-label={`Ajouter ${line.name}`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" disabled={pending} aria-label={`Supprimer ${line.name}`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
+          {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{cartLineDetails(line)}</span><div className="mt-2 flex items-center gap-1"><button type="button" disabled={pending} aria-label={`Menge für ${woodDisplayName(line.name)} verringern`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" disabled={pending} aria-label={`Menge für ${woodDisplayName(line.name)} erhöhen`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" disabled={pending} aria-label={`${woodDisplayName(line.name)} entfernen`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
         </ul>
-        <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Bois</span><span>{quote ? formatWoodPrice(subtotal) : 'Calcul en cours…'}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Livraison (30 %)</span><span>{quote ? formatWoodPrice(quote.deliveryFee) : 'Calcul en cours…'}</span></div></div>
-        <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Total à payer</span><span>{quote ? formatWoodPrice(quote.total) : 'Calcul en cours…'}</span></div><div className="flex justify-between text-[#21492d]"><span>Acompte (50 % du total)</span><strong>{quote ? formatWoodPrice(quote.deposit) : 'Calcul en cours…'}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Les tarifs, les quantités disponibles et le stock sont vérifiés avant l’envoi. L’acompte correspond à 50 % du total, livraison comprise.</p></div>
+        <div className="mt-4 space-y-2 text-sm"><div className="flex justify-between"><span className="text-[#71695d]">Holz</span><span>{quote ? formatWoodPrice(subtotal) : 'Wird berechnet…'}</span></div><div className="flex justify-between"><span className="text-[#71695d]">Lieferung (30 %)</span><span>{quote ? formatWoodPrice(quote.deliveryFee) : 'Wird berechnet…'}</span></div></div>
+        <div className="mt-4 space-y-2 border-t border-[#ded3c1] pt-4 text-sm"><div className="flex justify-between font-semibold text-[#173a27]"><span>Gesamtbetrag</span><span>{quote ? formatWoodPrice(quote.total) : 'Wird berechnet…'}</span></div><div className="flex justify-between text-[#21492d]"><span>Anzahlung (50 % des Gesamtbetrags)</span><strong>{quote ? formatWoodPrice(quote.deposit) : 'Wird berechnet…'}</strong></div><p className="pt-1 text-xs leading-5 text-[#766e62]">Preise, verfügbare Mengen und Lagerbestand werden vor dem Absenden geprüft. Die Anzahlung beträgt 50 % des Gesamtbetrags einschließlich Lieferung.</p></div>
       </aside>
     </div>
   );

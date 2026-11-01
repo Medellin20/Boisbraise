@@ -1,7 +1,7 @@
 import type { OrderConfirmation } from '@/lib/types/order';
 import { lengthLabel } from '@/lib/utils/wood';
 import { woodDisplayName } from '@/lib/utils/wood-display';
-import { getWoodPackage } from '@/lib/utils/wood-packages';
+import { getWoodPackage, woodPackageLabel } from '@/lib/utils/wood-packages';
 
 type Color = readonly [number, number, number];
 
@@ -27,7 +27,7 @@ const COLORS = {
 export async function downloadOrderReceipt(order: OrderConfirmation) {
   const { jsPDF } = await import('jspdf');
   const logoResponse = await fetch('/images/holznest-logo-transparent.png');
-  if (!logoResponse.ok) throw new Error('Le logo du reçu n’a pas pu être chargé.');
+  if (!logoResponse.ok) throw new Error('Das Logo des Bestellbelegs konnte nicht geladen werden.');
   const logo = new Uint8Array(await logoResponse.arrayBuffer());
   const doc = new jsPDF();
   const money = (value: number) => new Intl.NumberFormat('de-DE', {
@@ -166,7 +166,7 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
 
   for (const orderLine of order.lines) {
     const item = `${woodDisplayName(orderLine.name)} · ${lengthLabel(orderLine.lengthCm)}`;
-    const unit = orderLine.packageLabel ?? (orderLine.packageCode ? getWoodPackage(orderLine.packageCode)?.label : undefined) ?? 'Einheit';
+    const unit = woodPackageLabel(orderLine.packageLabel ?? (orderLine.packageCode ? getWoodPackage(orderLine.packageCode)?.label : undefined) ?? 'Einheit');
     const itemLines: string[] = doc.splitTextToSize(item, 66);
     const unitLines: string[] = doc.splitTextToSize(unit, 28);
     const rowHeight = Math.max(11, Math.max(itemLines.length, unitLines.length) * 4 + 4);

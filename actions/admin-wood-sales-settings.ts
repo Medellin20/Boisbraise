@@ -62,7 +62,7 @@ export async function saveAdminWoodSalesSettings(value: unknown): Promise<WoodSa
     updated_at: new Date().toISOString(),
   }, { onConflict: 'id' });
   if (settingsError) {
-    return { success: false, message: 'Les formats et prix sont enregistrés, mais les réglages de livraison n’ont pas été enregistrés. Veuillez réessayer.' };
+    return { success: false, message: 'Formate und Preise wurden gespeichert, die Liefereinstellungen jedoch nicht. Bitte versuchen Sie es erneut.' };
   }
 
   await logAdminAction({ action: 'store.wood_sales_settings.update', entityType: 'wood_sales_settings', entityId: '1' });

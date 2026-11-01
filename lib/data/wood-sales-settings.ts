@@ -1,7 +1,7 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import type { WoodSalesPackageRecord, WoodSalesSettingRecord } from '@/types/database';
-import { MAX_WOOD_ORDER_QUANTITY } from '@/lib/utils/wood-packages';
+import { MAX_WOOD_ORDER_QUANTITY, woodPackageLabel } from '@/lib/utils/wood-packages';
 
 export { MAX_WOOD_ORDER_QUANTITY } from '@/lib/utils/wood-packages';
 
@@ -25,6 +25,7 @@ function normalizeSettings(
     : [...packages, { package_code: 'format_5', label: 'Format 5', volume_litres: null, price: null, sort_order: 5 }];
   const normalizedPackages = allPackages.map((item) => ({
     ...item,
+    label: woodPackageLabel(item.label),
     volume_litres: item.volume_litres == null ? null : Number(item.volume_litres),
     price: item.price == null ? null : Number(item.price),
   }));

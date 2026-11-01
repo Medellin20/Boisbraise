@@ -32,12 +32,12 @@ export async function submitContactMessage(input: ContactInput): Promise<ActionR
     return { success: false, message: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.' };
   }
 
-  await sendAdminAlert(`Nouveau message de contact — ${parsed.data.subject}`, {
-    Nom: parsed.data.name,
-    Email: parsed.data.email,
-    Téléphone: parsed.data.phone || null,
-    Sujet: parsed.data.subject,
-    Message: parsed.data.message,
+  await sendAdminAlert(`Neue Kontaktanfrage — ${parsed.data.subject}`, {
+    Name: parsed.data.name,
+    'E-Mail': parsed.data.email,
+    Telefon: parsed.data.phone || null,
+    Betreff: parsed.data.subject,
+    Nachricht: parsed.data.message,
   });
 
   return { success: true, message: 'Ihre Nachricht wurde gesendet. Wir melden uns schnellstmöglich bei Ihnen.' };

@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendAdminAlert } from '@/lib/notifications/email';
+import { woodDisplayName } from '@/lib/utils/wood-display';
 import { lengthLabel } from '@/lib/utils/wood';
 import { getWoodPackage } from '@/lib/utils/wood-packages';
 import { woodOrderLinesSchema, woodOrderSchema, type WoodOrderInput } from '@/lib/validations/order';
@@ -17,7 +18,7 @@ type SubmitOrderResult =
 const fail = (message: string): SubmitOrderResult => ({ success: false, message });
 const toCents = (value: number) => Math.round(value * 100);
 const euros = (cents: number) => cents / 100;
-const formatPrice = (cents: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(euros(cents));
+const formatPrice = (cents: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(euros(cents));
 
 type PricedCartResult =
   | { success: false; message: string }
@@ -31,9 +32,9 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
     .select('id,slug,name,in_stock,stock_m3')
     .in('slug', slugs)
     .eq('is_published', true);
-  if (productsError) return { success: false, message: 'Le catalogue est temporairement indisponible. Réessayez dans quelques instants.' };
+  if (productsError) return { success: false, message: 'Der Katalog ist vorübergehend nicht verfügbar. Versuchen Sie es in Kürze erneut.' };
   if (!products?.length || products.length !== slugs.length) {
-    return { success: false, message: 'Un produit du panier n’est plus disponible. Actualisez le catalogue.' };
+    return { success: false, message: 'Ein Artikel im Warenkorb ist nicht mehr verfügbar. Aktualisieren Sie den Katalog.' };
   }
 
   const [{ data: salesSetting, error: salesSettingError }, { data: packages, error: packagesError }] = await Promise.all([
@@ -41,10 +42,10 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
     supabase.from('wood_sales_packages').select('*').order('sort_order'),
   ]);
   if (salesSettingError || packagesError) {
-    return { success: false, message: 'Les paramètres de vente sont indisponibles. Appliquez la migration des paramètres communs du bois.' };
+    return { success: false, message: 'Die Verkaufseinstellungen sind nicht verfügbar. Bitte kontaktieren Sie uns.' };
   }
   const salesSettings = normalizeWoodSalesSettings(salesSetting, packages);
-  if (!salesSettings) return { success: false, message: 'Les paramètres de vente sont incomplets. Contactez-nous avant de commander.' };
+  if (!salesSettings) return { success: false, message: 'Die Verkaufseinstellungen sind unvollständig. Kontaktieren Sie uns vor der Bestellung.' };
 
   const orderLines: OrderLine[] = [];
   const volumesByProduct = new Map<string, number>();
@@ -54,14 +55,14 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
   for (const requested of lines) {
     const product = products.find((item) => item.slug === requested.slug);
     if (!product || !product.in_stock) {
-      return { success: false, message: `${product?.name ?? 'Un article'} n’est plus disponible.` };
+      return { success: false, message: `${product ? woodDisplayName(product.name) : 'Ein Artikel'} ist nicht mehr verfügbar.` };
     }
     if (!salesSettings.allowedLengthsCm.includes(requested.lengthCm)) {
-      return { success: false, message: `La longueur ${lengthLabel(requested.lengthCm)} n’est plus proposée. Actualisez votre panier.` };
+      return { success: false, message: `Die Länge ${lengthLabel(requested.lengthCm)} wird nicht mehr angeboten. Aktualisieren Sie Ihren Warenkorb.` };
     }
     const packageDetails = salesSettings.packages.find((item) => item.package_code === requested.packageCode);
     if (!packageDetails || packageDetails.price == null) {
-      return { success: false, message: `Le prix de ${product.name} (${packageDetails?.label ?? 'ce format'}) doit être confirmé par devis.` };
+      return { success: false, message: `Der Preis für ${woodDisplayName(product.name)} (${packageDetails?.label ?? 'dieses Format'}) muss auf Anfrage bestätigt werden.` };
     }
 
     const lineVolumeLitres = (packageDetails.volume_litres ?? 0) * requested.quantity;
@@ -86,11 +87,11 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
   for (const product of products) {
     const requestedUnits = unitsByProduct.get(product.id) ?? 0;
     if (requestedUnits > salesSettings.maxQuantityPerProduct) {
-      return { success: false, message: `La quantité maximale pour ${product.name} est de ${salesSettings.maxQuantityPerProduct} unité(s) par commande.` };
+      return { success: false, message: `Die Höchstmenge für ${woodDisplayName(product.name)} beträgt ${salesSettings.maxQuantityPerProduct} Einheiten pro Bestellung.` };
     }
     const requestedVolume = volumesByProduct.get(product.id) ?? 0;
     if (product.stock_m3 != null && requestedVolume > product.stock_m3 + 1e-9) {
-      return { success: false, message: `Le stock de ${product.name} est limité à ${product.stock_m3} m³.` };
+      return { success: false, message: `Der Lagerbestand für ${woodDisplayName(product.name)} ist auf ${product.stock_m3} m³ begrenzt.` };
     }
   }
   const deliveryCents = Math.round(subtotalCents * 0.30);
@@ -106,7 +107,7 @@ async function priceWoodCart(lines: WoodOrderInput['lines']): Promise<PricedCart
 
 export async function getWoodCartQuote(value: unknown) {
   const parsed = woodOrderLinesSchema.safeParse(value);
-  if (!parsed.success) return { success: false as const, message: parsed.error.issues[0]?.message ?? 'Vérifiez les articles du panier.' };
+  if (!parsed.success) return { success: false as const, message: parsed.error.issues[0]?.message ?? 'Bitte prüfen Sie die Artikel im Warenkorb.' };
   const priced = await priceWoodCart(parsed.data);
   if (!priced.success) return priced;
   const totalCents = priced.subtotalCents + priced.deliveryCents;
@@ -179,7 +180,7 @@ export async function submitWoodOrder(value: unknown, expectedTotal: number): Pr
   const orderLines = priced.lines;
   const totalCents = subtotalCents + priced.deliveryCents;
   if (!Number.isFinite(expectedTotal) || toCents(expectedTotal) !== totalCents) {
-    return fail('Le prix ou les frais de livraison ont changé depuis le calcul du panier. Actualisez la page pour vérifier le nouveau total avant de commander.');
+    return fail('Der Preis oder die Lieferkosten haben sich seit der Warenkorbberechnung geändert. Aktualisieren Sie die Seite und prüfen Sie den neuen Gesamtbetrag vor der Bestellung.');
   }
   // L’acompte représente exactement 50 % du montant total, livraison comprise.
   const depositCents = Math.round(totalCents / 2);
@@ -219,27 +220,27 @@ export async function submitWoodOrder(value: unknown, expectedTotal: number): Pr
     payment_method: payment.method,
   });
   if (orderSaveError) {
-    return fail('La commande n’a pas pu être enregistrée. Vérifiez que la migration Supabase 20261022_wood_orders.sql a été appliquée, puis réessayez.');
+    return fail('Die Bestellung konnte nicht gespeichert werden. Bitte kontaktieren Sie uns oder versuchen Sie es später erneut.');
   }
 
   const itemsSummary = orderLines.map((line) => {
     const packageLabel = line.packageLabel ?? (line.packageCode ? getWoodPackage(line.packageCode)?.label : undefined);
-    const format = packageLabel ? `${line.quantity} × ${packageLabel}` : `${line.quantity} unités`;
-    return `${format} — ${line.name}, ${lengthLabel(line.lengthCm)} — ${formatPrice(toCents(line.unitPrice))} — total ${formatPrice(toCents(line.total))}`;
+    const format = packageLabel ? `${line.quantity} × ${packageLabel}` : `${line.quantity} Einheiten`;
+    return `${format} — ${woodDisplayName(line.name)}, ${lengthLabel(line.lengthCm)} — ${formatPrice(toCents(line.unitPrice))} — Gesamt ${formatPrice(toCents(line.total))}`;
   }).join('\n');
-  const sent = await sendAdminAlert(`Nouvelle commande HolzNest ${reference}`, {
-    Référence: reference,
-    Client: `${customer.firstName} ${customer.lastName}`,
-    Adresse: `${customer.address}, ${customer.postalCode} ${customer.city}`,
-    Téléphone: customer.phone,
-    Email: customer.email,
-    Articles: itemsSummary,
-    'Sous-total bois': formatPrice(subtotalCents),
-    'Livraison (30 % du montant des produits)': formatPrice(priced.deliveryCents),
-    'Total commande': formatPrice(totalCents),
-    'Acompte à recevoir (50 % du total)': formatPrice(depositCents),
-    'Solde restant': formatPrice(totalCents - depositCents),
-    Paiement: payment.method === 'link'
+  const sent = await sendAdminAlert(`Neue HolzNest-Bestellung ${reference}`, {
+    Referenz: reference,
+    Kunde: `${customer.firstName} ${customer.lastName}`,
+    Anschrift: `${customer.address}, ${customer.postalCode} ${customer.city}`,
+    Telefon: customer.phone,
+    'E-Mail': customer.email,
+    Artikel: itemsSummary,
+    'Zwischensumme Holz': formatPrice(subtotalCents),
+    'Lieferung (30 % des Warenwerts)': formatPrice(priced.deliveryCents),
+    'Gesamtbetrag': formatPrice(totalCents),
+    'Anzahlung (50 % des Gesamtbetrags)': formatPrice(depositCents),
+    'Restbetrag': formatPrice(totalCents - depositCents),
+    Zahlung: payment.method === 'link'
       ? payment.link.url
       : `RIB · ${payment.rib.accountHolder} · ${payment.rib.iban}`,
   }, emailRecipient);

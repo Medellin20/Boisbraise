@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const benefits = [
   { icon: Droplets, title: 'Garantiert trockenes Holz', text: 'Natürlich unter Dach getrocknet; die Feuchtigkeit wird vor jeder Lieferung geprüft und liegt unter 20 %.' },
-  { icon: Ruler, title: 'Flexible Scheitlängen', text: 'Choisissez la longueur de bûche qui convient à votre foyer.' },
+  { icon: Ruler, title: 'Flexible Scheitlängen', text: 'Wählen Sie die passende Scheitlänge für Ihre Feuerstelle.' },
   { icon: Flame, title: 'Hohe Heizleistung', text: 'Ausgewählte Harthölzer mit hohem Heizwert und lang anhaltender Glut.' },
   { icon: Truck, title: 'Organisierte Lieferung', text: 'Lieferung nach Hause je nach Region, mit bestätigtem Zeitfenster vor der Abfahrt.' },
 ];
@@ -23,7 +23,7 @@ const benefits = [
 export default async function HomePage() {
   const products = await getPublishedWoodProducts();
   const availableLengths = products[0]?.wood_sales_settings?.allowedLengthsCm
-    .map((length) => length === 100 ? '1 m' : `${length} cm`).join(' · ') ?? 'Selon disponibilité';
+    .map((length) => length === 100 ? '1 m' : `${length} cm`).join(' · ') ?? 'Je nach Verfügbarkeit';
   const heroProduct = products.find((product) => product.wood_product_images.some((image) => image.storage_path));
   const heroPhoto = heroProduct?.wood_product_images.find((image) => image.is_primary && image.storage_path)
     ?? heroProduct?.wood_product_images.find((image) => image.storage_path);

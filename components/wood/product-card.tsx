@@ -31,11 +31,11 @@ export function WoodProductCard({ product }: { product: WoodProduct }) {
           {product.calorific_value_kwh != null && <span className="wood-chip wood-chip-red"><Flame size={14} />{product.calorific_value_kwh} kWh/m³</span>}
           {product.in_stock && <span className="wood-chip wood-chip-green"><PackageCheck size={14} />{product.stock_m3 == null ? 'Auf Lager' : `${product.stock_m3} m³ auf Lager`}</span>}
         </div>
-        <p className="mt-4 text-xs text-[#71695c]">Formats : {packages.map((item) => item.label).join(' · ')}</p>
+        <p className="mt-4 text-xs text-[#71695c]">Formate: {packages.map((item) => item.label).join(' · ')}</p>
         <div className="mt-4 flex items-end justify-between border-t border-[#e5dbc9] pt-4">
           <div>
             <span className="block text-[10px] font-medium uppercase tracking-wide text-[#6f685b]">À partir de</span>
-            <strong className="text-xl text-[#142c20]">{startingPackage ? formatWoodPrice(Number(startingPackage.price)) : 'Sur devis'}</strong>
+            <strong className="text-xl text-[#142c20]">{startingPackage ? formatWoodPrice(Number(startingPackage.price)) : 'Auf Anfrage'}</strong>
             {startingPackage && <span className="ml-1 text-xs text-[#71695c]">/ {startingPackage.label}</span>}
           </div>
           <Link href={`/catalogue/${product.slug}`} className="inline-flex items-center gap-1.5 pb-1 text-sm font-semibold text-[#153d28] hover:underline">Ansehen <ArrowRight size={16} /></Link>

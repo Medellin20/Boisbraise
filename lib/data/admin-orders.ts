@@ -18,7 +18,7 @@ export async function getAdminOrderHistory(page: number): Promise<{
     .range(start, start + ADMIN_ORDER_PAGE_SIZE - 1);
 
   if (error) {
-    return { orders: [], totalCount: 0, error: 'L’historique des commandes est indisponible. Appliquez la migration Supabase 20261022_wood_orders.sql.' };
+    return { orders: [], totalCount: 0, error: 'Der Bestellverlauf ist nicht verfügbar. Wenden Sie die Supabase-Migration 20261022_wood_orders.sql an.' };
   }
 
   return { orders: data ?? [], totalCount: count ?? 0, error: null };

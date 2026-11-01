@@ -1,5 +1,6 @@
 'use client';
 
+import { woodDisplayName } from '@/lib/utils/wood-display';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ArrowRight, Minus, Plus, ShoppingCart } from 'lucide-react';
@@ -75,7 +76,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
         : Math.floor(Math.max(0, product.stock_m3 - existingVolumeM3) / (packageDetails.volume_litres / 1000) + 1e-9);
       const allowedToAdd = Math.min(remainingByQuantity, remainingByStock);
       if (quantity > allowedToAdd) {
-        toast.error(`La quantité dépasse la limite restante pour ${product.name} (${Math.max(0, allowedToAdd)} unité(s)).`);
+        toast.error(`Die Menge überschreitet die verbleibende Höchstmenge für ${woodDisplayName(product.name)} (${Math.max(0, allowedToAdd)} Einheiten).`);
         return;
       }
       if (index >= 0) cart[index] = { ...line, quantity: Math.min(maxQuantity, cart[index].quantity + quantity) };
@@ -83,7 +84,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
       window.dispatchEvent(new Event('wood-cart-updated'));
       setAdded(true);
-      toast.success(`${quantity} × ${packageDetails.label} ${product.name} (${lengthLabel(packageLength)}) zum Warenkorb hinzugefügt.`);
+      toast.success(`${quantity} × ${packageDetails.label} ${woodDisplayName(product.name)} (${lengthLabel(packageLength)}) zum Warenkorb hinzugefügt.`);
     } catch {
       toast.error('Der Warenkorb konnte nicht aktualisiert werden.');
     }
@@ -99,7 +100,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
 
   return (
     <section className="rounded-[22px] border border-[#e6ddcf] bg-white p-5 shadow-[0_8px_22px_rgba(62,49,32,.08)] sm:p-6">
-      <h2 className="text-sm font-bold text-[#18251d]">Verkaufsformat · prix hors livraison</h2>
+      <h2 className="text-sm font-bold text-[#18251d]">Verkaufsformat · Preise ohne Lieferung</h2>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {packageOptions.map((item) => {
           const active = packageCode === item.package_code;
@@ -127,7 +128,7 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
         })}
       </div>
 
-      <p className="mt-3 text-xs text-[#746d62]">Bûches disponibles : {settings.allowedLengthsCm.map((length) => lengthLabel(length)).join(' · ')}.</p>
+      <p className="mt-3 text-xs text-[#746d62]">Verfügbare Scheitlängen: {settings.allowedLengthsCm.map((length) => lengthLabel(length)).join(' · ')}.</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {settings.allowedLengthsCm.map((cm) => (
           <button
@@ -169,13 +170,13 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
           <Plus size={16} />
         </button>
         <span className="text-sm text-[#756e62]">
-          {packageTotal == null ? 'Prix du bois : sur devis' : `Bois : ${formatWoodPrice(packageTotal)}`}
+          {packageTotal == null ? 'Holzpreis: auf Anfrage' : `Holz: ${formatWoodPrice(packageTotal)}`}
         </span>
       </div>
       {orderTotal != null && deliveryTotal != null && settings && packageDetails && (
         <div className="mt-3 space-y-1 rounded-xl bg-[#f7f5ef] p-3 text-sm">
-          <p className="flex justify-between gap-2 text-[#645f55]"><span>Livraison (30 %)</span><span>{formatWoodPrice(deliveryTotal)}</span></p>
-          <p className="flex justify-between gap-2 font-bold text-[#173a27]"><span>Total estimé à payer</span><span>{formatWoodPrice(orderTotal)}</span></p>
+          <p className="flex justify-between gap-2 text-[#645f55]"><span>Lieferung (30 %)</span><span>{formatWoodPrice(deliveryTotal)}</span></p>
+          <p className="flex justify-between gap-2 font-bold text-[#173a27]"><span>Voraussichtlicher Gesamtbetrag</span><span>{formatWoodPrice(orderTotal)}</span></p>
         </div>
       )}
 

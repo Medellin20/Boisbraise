@@ -125,7 +125,7 @@ export async function uploadWoodProductImage(productId: string, formData: FormDa
     product_id: productId,
     storage_path: path,
     url: url.publicUrl,
-    alt_text: `Bois ${product.slug}`,
+    alt_text: `Holz ${product.slug}`,
     is_primary: (count ?? 0) === 0,
     sort_order: count ?? 0,
   }).select('*').single();

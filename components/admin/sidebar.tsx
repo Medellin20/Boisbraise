@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils/cn';
 import { logoutAdmin } from '@/actions/admin-auth';
 
 const NAV_ITEMS = [
-  { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard, exact: true },
+  { href: '/admin', label: 'Übersicht', icon: LayoutDashboard, exact: true },
   { href: '/admin/bois', label: 'Holzkatalog', icon: Trees },
-  { href: '/admin/vente', label: 'Vente de bois', icon: Ruler },
+  { href: '/admin/vente', label: 'Holzverkauf', icon: Ruler },
   { href: '/admin/paiement', label: 'Zahlung & Bankverbindung', icon: CreditCard },
   { href: '/admin/kontakt', label: 'Footer-Kontaktdaten', icon: Mail },
 ];
@@ -113,7 +113,7 @@ export function AdminSidebar() {
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-sand-300 hover:bg-white/10"
-                aria-label="Fermer le menu"
+                aria-label="Menü schließen"
               >
                 <X className="h-5 w-5" />
               </button>

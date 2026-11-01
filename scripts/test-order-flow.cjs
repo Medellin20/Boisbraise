@@ -59,7 +59,7 @@ function quote(call) {
  act(()=>purchase.root.findAllByType('button').find(b=>JSON.stringify(b.props.children, (k,v)=>k === '_owner' ? undefined : v).includes('Format in den Warenkorb')).props.onClick());
  let cart=JSON.parse(localStorage.getItem(CART_STORAGE_KEY));
  assert.equal(cart[0].packageCode,'40_litres'); assert.equal(cart[0].lengthCm,100); assert.equal(cart[0].quantity,3);
- assert.equal(cartLineDetails(normalizeCartLine(cart[0])),'3 × 40 litres · 1 m');
+ assert.equal(cartLineDetails(normalizeCartLine(cart[0])),'3 × 40 Liter · 1 m');
  assert.ok(purchase.root.findAllByType('a').some(a=>a.props.href==='/commande'));
  act(()=>purchase.root.findByType('input').props.onChange({target:{value:'4'}}));
  assert.equal(purchase.root.findAllByType('a').length,0,'changed choices must be added before checkout');
@@ -68,14 +68,14 @@ function quote(call) {
  await act(async()=>{checkout=create(React.createElement(CheckoutForm));});
  assert.equal(quoteCalls.length,1);
  await act(async()=>quoteCalls[0].resolve(quote(quoteCalls[0])));
- assert.ok(text(checkout).includes('3 × 40 litres · 1 m'));
+ assert.ok(text(checkout).includes('3 × 40 Liter · 1 m'));
  assert.equal(checkout.root.findAllByProps({translate:'no'}).length,1);
- const plus=()=>checkout.root.findAllByType('button').find(b=>b.props['aria-label']==='Ajouter Hêtre');
+ const plus=()=>checkout.root.findAllByType('button').find(b=>b.props['aria-label']==='Menge für Buche erhöhen');
  act(()=>plus().props.onClick()); act(()=>plus().props.onClick());
  assert.equal(quoteCalls.length,3);
  await act(async()=>quoteCalls[2].resolve(quote(quoteCalls[2])));
  await act(async()=>quoteCalls[1].resolve(quote(quoteCalls[1])));
- assert.ok(text(checkout).includes('5 × 40 litres · 1 m'),'late quote must not revert quantity');
+ assert.ok(text(checkout).includes('5 × 40 Liter · 1 m'),'late quote must not revert quantity');
  assert.equal(JSON.parse(localStorage.getItem(CART_STORAGE_KEY))[0].quantity,5);
  const form=checkout.root.findByType('form');
  let submitPromise;
@@ -90,13 +90,13 @@ function quote(call) {
  assert.deepEqual(JSON.parse(sessionStorage.getItem(ORDER_CONFIRMATION_STORAGE_KEY)),order);
  assert.equal(localStorage.getItem(CART_STORAGE_KEY),null);
  assert.deepEqual(navigation,['/commande/paiement']);
- assert.ok(text(checkout).includes('5 × 40 litres'));
+ assert.ok(text(checkout).includes('5 × 40 Liter'));
  assert.ok(text(checkout).includes('1 m'));
  checkout.unmount();
  // Reload the actual payment component from the stored server confirmation.
  const {PaymentInstructions}=require(root+'/components/wood/payment-instructions.tsx');
  let payment; await act(async()=>{payment=create(React.createElement(PaymentInstructions));});
- assert.ok(text(payment).includes('5 × 40 litres'));
+ assert.ok(text(payment).includes('5 × 40 Liter'));
  assert.equal(payment.root.findAllByProps({translate:'no'}).length,1);
  assert.ok(text(payment).includes('HN-TEST')); payment.unmount();
  await act(async()=>{payment=create(React.createElement(PaymentInstructions,{initialOrder:{...order,adminNotified:false}}));});

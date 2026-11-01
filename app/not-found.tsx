@@ -10,7 +10,7 @@ export default function NotFound() {
       <Navbar />
       <main className="flex flex-1 items-center justify-center py-20">
         <div className="container-app text-center">
-          <p className="text-eyebrow text-canal-600">Erreur 404</p>
+          <p className="text-eyebrow text-canal-600">Fehler 404</p>
           <h1 className="mt-3 text-display-md font-extrabold text-ink-900 sm:text-display-lg">
             Seite nicht gefunden
           </h1>

@@ -40,7 +40,7 @@ export async function sendAdminAlert(subject: string, details: AlertDetails, rec
       to: recipient,
       subject,
       text: Object.entries(details).map(([label, value]) => `${label}: ${value ?? '—'}`).join('\n'),
-      html: `<div style="font-family:Arial,sans-serif;color:#263238"><h2>${escapeHtml(subject)}</h2><table>${rows}</table><p style="margin-top:20px">Connectez-vous à l’espace administrateur pour traiter cette demande.</p></div>`,
+      html: `<div style="font-family:Arial,sans-serif;color:#263238"><h2>${escapeHtml(subject)}</h2><table>${rows}</table><p style="margin-top:20px">Melden Sie sich im Verwaltungsbereich an, um diese Anfrage zu bearbeiten.</p></div>`,
     });
     return true;
   } catch (error) {

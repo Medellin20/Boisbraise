@@ -4,7 +4,7 @@ import { ContactForm } from '@/components/forms/contact-form';
 import { FadeIn } from '@/components/ui/fade-in';
 
 export const metadata: Metadata = {
-  title: 'Contact',
+  title: 'Kontakt',
   description: "Kontaktieren Sie uns bei Fragen zu Holz, Angeboten oder Lieferung.",
 };
 
