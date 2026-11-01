@@ -188,12 +188,21 @@ export function ProductPurchase({ product }: { product: WoodProduct }) {
         <ShoppingCart size={16} /> {product.in_stock ? 'Format in den Warenkorb' : 'Nicht verfügbar'}
       </button>
       {added && (
-        <a
+        <div className="mt-3 space-y-3">
+          <p role="status" className="text-sm font-medium text-[#21492d]">Das Holz wurde Ihrem Warenkorb hinzugefügt.</p>
+          <a
+            href="/catalogue"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#cbd6c8] bg-white px-5 py-2.5 text-sm font-semibold text-[#21492d] transition hover:bg-[#f3f7f1]"
+          >
+            <Plus size={16} /> Weitere Holzart hinzufügen
+          </a>
+          <a
           href="/commande"
-          className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#cbd6c8] bg-[#f3f7f1] px-5 py-2.5 text-sm font-semibold text-[#21492d] transition hover:bg-[#e7efe5]"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#cbd6c8] bg-[#f3f7f1] px-5 py-2.5 text-sm font-semibold text-[#21492d] transition hover:bg-[#e7efe5]"
         >
           Bestellung abschließen <ArrowRight size={16} />
         </a>
+        </div>
       )}
     </section>
   );

@@ -189,6 +189,11 @@ export function CheckoutForm() {
 
       <aside className="rounded-3xl border border-[#e7dece] bg-[#fcfaf5] p-5 shadow-sm lg:sticky lg:top-24">
         <h2 className="font-bold text-[#173a27]">Bestellübersicht</h2>
+        {!pending && (
+          <Link href="/catalogue" className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#cbd6c8] bg-white px-4 py-2.5 text-sm font-semibold text-[#21492d] transition hover:bg-[#f3f7f1]">
+            <Plus size={16} /> Weitere Holzart hinzufügen
+          </Link>
+        )}
         <ul className="mt-4 space-y-4">
           {cart.map((line) => <li key={line.key} className="flex justify-between gap-3 border-b border-[#e9e1d4] pb-3 text-sm"><div className="min-w-0"><strong className="block text-[#343c33]">{woodDisplayName(line.name)}</strong><span className="text-xs text-[#71695d]">{cartLineDetails(line)}</span><div className="mt-2 flex items-center gap-1"><button type="button" disabled={pending} aria-label={`Réduire ${line.name}`} onClick={() => changeQuantity(line, -1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Minus size={14}/></button><button type="button" disabled={pending} aria-label={`Ajouter ${line.name}`} onClick={() => changeQuantity(line, 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white"><Plus size={14}/></button><button type="button" disabled={pending} aria-label={`Supprimer ${line.name}`} onClick={() => changeQuantity(line, -line.quantity)} className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg border border-[#ddd2bf] bg-white text-[#8c3d31]"><Trash2 size={14}/></button></div></div><strong className="shrink-0 text-[#173a27]">{formatWoodPrice(line.unitPrice * line.quantity)}</strong></li>)}
         </ul>

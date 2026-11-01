@@ -63,10 +63,6 @@ export function GermanReviewCarousel() {
         </div>
       </div>
 
-      <p className="mb-5 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">
-        Demo: Die folgenden 30 Mustertexte sind fiktiv und keine echten Kundenbewertungen. Bitte vor der Veröffentlichung durch verifizierte Rückmeldungen ersetzen.
-      </p>
-
       <div className="grid gap-4 md:grid-cols-3" aria-live="polite">
         {visibleReviews.map((review, index) => (
           <figure key={page * PAGE_SIZE + index} className="flex min-h-44 flex-col rounded-2xl border border-[#e6ddcf] bg-white p-5 shadow-[0_6px_18px_rgba(62,49,32,.07)]">
