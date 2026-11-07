@@ -70,7 +70,6 @@ export function GermanReviewCarousel() {
               {Array.from({ length: 5 }, (_, star) => <Star key={star} size={14} fill="currentColor" strokeWidth={1.5} />)}
             </div>
             <blockquote lang="de" className="mt-3 flex-1 text-sm leading-6 text-[#514b42]">„{review}“</blockquote>
-            <figcaption className="mt-4 border-t border-[#eee7dc] pt-3 text-xs font-semibold text-[#21492d]">Musterbewertung · Deutschland</figcaption>
           </figure>
         ))}
       </div>

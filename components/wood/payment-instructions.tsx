@@ -145,6 +145,13 @@ export function PaymentInstructions({ initialOrder }: { initialOrder?: OrderConf
         ) : null}
       </section>
 
+      <section aria-label="Zahlungsnachweis per WhatsApp senden" className="mt-6 rounded-3xl border-2 border-red-600 bg-red-50 p-5 text-center sm:p-7">
+        <p className="text-2xl font-bold leading-snug text-red-700 sm:text-3xl">
+          Bitte senden Sie den Zahlungsbeleg oder einen Screenshot Ihrer Zahlung per WhatsApp an folgende Nummer:
+          <a href="https://wa.me/4915236935285" target="_blank" rel="noopener noreferrer" className="mt-3 block underline decoration-2 underline-offset-4 hover:text-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-700">+4915236935285</a>
+        </p>
+      </section>
+
       <section className="mt-6 rounded-3xl border border-[#e7dece] bg-white p-5 shadow-sm sm:p-7">
         <h2 className="font-bold text-[#173a27]">Ihre Bestellung</h2>
         <ul className="mt-4 divide-y divide-[#eee7dc]">
