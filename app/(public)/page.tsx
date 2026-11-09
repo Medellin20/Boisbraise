@@ -1,11 +1,10 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ArrowRight, BadgeCheck, Droplets, Flame, Ruler, Truck } from 'lucide-react';
+import { ArrowRight, Droplets, Flame, Ruler, Truck } from 'lucide-react';
 import { getPublishedWoodProducts } from '@/lib/data/wood-products';
 import { WoodProductCard } from '@/components/wood/product-card';
 import { FadeIn } from '@/components/ui/fade-in';
-import { woodDisplayName } from '@/lib/utils/wood-display';
+import { ForestHero } from '@/components/wood/forest-hero';
 
 export const metadata: Metadata = {
   title: 'HolzNest — Brennholz und Lieferung',
@@ -22,57 +21,10 @@ const benefits = [
 
 export default async function HomePage() {
   const products = await getPublishedWoodProducts();
-  const availableLengths = products[0]?.wood_sales_settings?.allowedLengthsCm
-    .map((length) => length === 100 ? '1 m' : `${length} cm`).join(' · ') ?? 'Je nach Verfügbarkeit';
-  const heroProduct = products.find((product) => product.wood_product_images.some((image) => image.storage_path));
-  const heroPhoto = heroProduct?.wood_product_images.find((image) => image.is_primary && image.storage_path)
-    ?? heroProduct?.wood_product_images.find((image) => image.storage_path);
 
   return (
     <main className="wood-home">
-      <section className="wood-hero">
-        <div className="container-app grid items-center gap-10 py-10 sm:py-14 lg:min-h-[570px] lg:grid-cols-[1fr_0.95fr] lg:gap-12 lg:py-16">
-          <FadeIn className="relative z-10">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#d7c6a8] bg-white/80 px-4 py-2 text-[11px] font-bold uppercase tracking-[.15em] text-[#70522f]">
-              <span className="h-2 w-2 rounded-full bg-[#527452]" /> HolzNest · die richtige Holzwahl
-            </span>
-            <h1 className="wood-heading mt-6 max-w-2xl text-4xl font-semibold leading-[1.08] tracking-[-.04em] text-[#102b1e] sm:text-5xl lg:text-6xl">
-              Wärme aus Holz. Ganz einfach.
-            </h1>
-            <p className="mt-5 max-w-xl text-base leading-7 text-[#625b50] sm:text-lg sm:leading-8">
-              Finden Sie die passende Holzart und das richtige Verkaufsformat. Wir bereiten Ihre Bestellung vor und organisieren die Lieferung zu Ihnen nach Hause.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/catalogue" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#21492d] px-6 py-3 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(33,73,45,.2)] transition hover:-translate-y-0.5 hover:bg-[#173a22]">
-                Katalog entdecken <ArrowRight size={17} />
-              </Link>
-              <Link href="/contact" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#d9cebd] bg-white/80 px-6 py-3 text-sm font-semibold text-[#24442e] transition hover:bg-white">
-                Beratung anfragen
-              </Link>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-xs font-medium text-[#5c6656]">
-              <span className="inline-flex items-center gap-1.5"><BadgeCheck size={15} /> Kontrollierte Feuchtigkeit</span>
-              <span className="inline-flex items-center gap-1.5"><Ruler size={15} /> 3 Scheitlängen verfügbar</span>
-              <span className="inline-flex items-center gap-1.5"><Truck size={15} /> Lieferung nach Termin</span>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.12} className="relative mx-auto w-full max-w-[620px] lg:max-w-none">
-            <div className="wood-hero-image relative aspect-[1.18] overflow-hidden rounded-[30px] border border-white/70 shadow-[0_24px_65px_rgba(49,56,36,.2)]">
-              <Image src={heroPhoto?.url ?? "/images/wood/logs-oak.svg"} alt={heroPhoto?.alt_text || (heroProduct ? `Brennholzscheite aus ${woodDisplayName(heroProduct.name)}` : "Lieferfertige Eichenholzscheite")} fill priority sizes="(max-width: 1023px) 100vw, 48vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#15291f]/65 via-transparent to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5 text-white sm:p-7">
-                <div><p className="text-xs font-semibold uppercase tracking-[.18em] text-white/75">Unsere Auswahl</p><p className="mt-1 text-2xl font-semibold">{heroProduct ? woodDisplayName(heroProduct.name) : "Eiche, Buche, Esche"}</p></div>
-                <span className="hidden rounded-full border border-white/40 bg-white/15 px-3 py-2 text-xs font-medium backdrop-blur sm:inline-flex">Bereit für Ihr Zuhause</span>
-              </div>
-            </div>
-            <div className="wood-hero-note absolute -bottom-5 left-4 rounded-2xl border border-[#e5dac8] bg-[#fffdf8] px-4 py-3 shadow-lg sm:-left-5 sm:px-5">
-              <p className="text-xs text-[#777064]">Die passenden Scheitlängen</p>
-              <p className="mt-1 font-semibold text-[#24442e]">{availableLengths}</p>
-            </div>
-          </FadeIn>
-        </div>
-      </section>
+      <ForestHero />
 
       <section className="wood-benefits" aria-label="Ihre Vorteile mit HolzNest">
         <div className="container-app grid gap-4 py-12 sm:grid-cols-2 xl:grid-cols-4">

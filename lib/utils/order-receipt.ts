@@ -18,8 +18,6 @@ const COLORS = {
   paleGreen: [240, 247, 237] as const,
   paleBrown: [250, 242, 230] as const,
   border: [222, 218, 210] as const,
-  red: [177, 35, 25] as const,
-  paleRed: [255, 241, 237] as const,
   white: [255, 255, 255] as const,
 };
 
@@ -119,21 +117,7 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
   text(`Bestelldatum:  ${date}`, RIGHT, 28, { align: 'right' });
   line(LEFT, 34, RIGHT, 34, COLORS.brown);
 
-  doc.setFillColor(...COLORS.paleRed);
-  doc.roundedRect(LEFT, 38, CONTENT_WIDTH, 18, 2.5, 2.5, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...COLORS.red);
-  text('ZAHLUNG AUSSTEHEND', LEFT + 5, 45);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(...COLORS.dark);
-  text(order.adminNotified === false
-    ? 'Bestellung vorbereitet, aber noch nicht an unser Team übermittelt. Bitte kontaktieren Sie HolzNest vor der Zahlung.'
-    : 'Zahlungseingang noch nicht bestätigt. Dieser Bestellbeleg ist keine Zahlungsquittung.',
-  LEFT + 5, 51, { maxWidth: CONTENT_WIDTH - 10 });
-
-  const cardY = 61;
+  const cardY = 39;
   const cardHeight = 43;
   const cardGap = 4;
   const cardWidth = (CONTENT_WIDTH - cardGap) / 2;
