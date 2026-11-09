@@ -36,6 +36,39 @@ const REVIEWS = [
   'Gute Ware und ein verlässlicher Lieferservice. Klare Empfehlung!',
 ];
 
+const REVIEW_NAMES = [
+  'Friedrich von Steinbeck',
+  'Wilhelm Brandtner',
+  'Heinrich Albrecht',
+  'Gustav Hartmann',
+  'Otto Dietrich von Falkenrath',
+  'Adelheid Rosenbaum',
+  'Gertrud Lindemann',
+  'Klaus Wagner',
+  'Matthias Fischer',
+  'Lukas Braun',
+  'Wolfgang von Adlersfeld',
+  'Ernst Schwarzwälder',
+  'Karl-Theodor Greifenstein',
+  'Ludwig Brenner',
+  'Albrecht von Wolfenstein',
+  'Emil Hartwich',
+  'Gottfried Stahlbaum',
+  'Reinhold Ehrenberg',
+  'Siegfried Falkenhorst',
+  'Konrad Lindenmayer',
+  'Mathilde von Hohenberg',
+  'Elisabeth Winterscheid',
+  'Charlotte Eichendorff',
+  'Gisela Brandenstein',
+  'Margarethe von Rabenau',
+  'Irmgard Seewald',
+  'Helene Trautmann',
+  'Bertha Wieland',
+  'Waltraud von Arenberg',
+  'Rosalinde Steigerwald',
+];
+
 const PAGE_SIZE = 3;
 
 export function GermanReviewCarousel() {
@@ -70,6 +103,11 @@ export function GermanReviewCarousel() {
               {Array.from({ length: 5 }, (_, star) => <Star key={star} size={14} fill="currentColor" strokeWidth={1.5} />)}
             </div>
             <blockquote lang="de" className="mt-3 flex-1 text-sm leading-6 text-[#514b42]">„{review}“</blockquote>
+            {REVIEW_NAMES[page * PAGE_SIZE + index] && (
+              <figcaption className="mt-4 text-sm font-semibold text-[#21492d]">
+                {REVIEW_NAMES[page * PAGE_SIZE + index]}
+              </figcaption>
+            )}
           </figure>
         ))}
       </div>
