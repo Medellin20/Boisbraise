@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { ArrowRight, Droplets, Flame, Ruler, Truck } from 'lucide-react';
 import { getPublishedWoodProducts } from '@/lib/data/wood-products';
@@ -42,10 +43,10 @@ export default async function HomePage() {
 
       <section id="essences" className="wood-catalog">
         <div className="container-app py-12 sm:py-16">
-          <div className="flex items-end justify-between gap-5">
-            <div><p className="text-xs font-bold uppercase tracking-[.16em] text-[#bd682b]">Unsere Holzarten</p><h2 className="wood-heading mt-2 text-4xl font-medium text-[#102b1e] sm:text-5xl">Wählen Sie Ihr Holz</h2></div>
+          <FadeIn className="flex items-end justify-between gap-5">
+            <div><p className="text-xs font-bold uppercase tracking-[.16em] text-[#8a693b]">Unsere Holzarten</p><h2 className="wood-heading mt-2 text-4xl font-medium text-[#102b1e] sm:text-5xl">Wählen Sie Ihr Holz</h2></div>
             <Link href="/catalogue" className="hidden items-center gap-2 rounded-xl border border-[#e3d9c8] bg-white px-4 py-2.5 text-sm font-medium shadow-sm transition hover:bg-[#f9f5ed] sm:inline-flex">Zum gesamten Katalog <ArrowRight size={16} /></Link>
-          </div>
+          </FadeIn>
           {products.length ? (
             <div className="mt-9 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {products.slice(0, 3).map((product, index) => <FadeIn key={product.id} delay={index * 0.1}><WoodProductCard product={product} /></FadeIn>)}
@@ -58,7 +59,8 @@ export default async function HomePage() {
       </section>
 
       <section className="wood-winter-section relative overflow-hidden py-14 sm:py-20">
-        <div className="wood-winter-glow" aria-hidden="true" />
+        <Image src="/images/wood/fireplace-photo.webp" alt="" fill sizes="100vw" className="wood-winter-photo object-cover" />
+        <div className="wood-winter-shade" aria-hidden="true" />
         <FadeIn className="container-app relative">
           <div className="mx-auto max-w-4xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#d6c7ad] bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-[.16em] text-[#765633]"><Flame size={15} /> Bereiten Sie sich auf die kalte Jahreszeit vor</span>
@@ -71,10 +73,10 @@ export default async function HomePage() {
       </section>
 
       <section className="border-t border-[#e7ddca] bg-[#f8f4ea] py-12 sm:py-16">
-        <div className="container-app flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <div><p className="text-xs font-bold uppercase tracking-[.16em] text-[#bd682b]">Sie brauchen Beratung?</p><h2 className="wood-heading mt-2 text-3xl font-medium text-[#102b1e]">Finden Sie die richtige Scheitlänge für Ihren Ofen.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#645f55]">Kontaktieren Sie uns, um Verfügbarkeit, Preis und Lieferung an Ihren Wohnort zu klären.</p></div>
+        <FadeIn className="container-app flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div><p className="text-xs font-bold uppercase tracking-[.16em] text-[#8a693b]">Sie brauchen Beratung?</p><h2 className="wood-heading mt-2 text-3xl font-medium text-[#102b1e]">Finden Sie die richtige Scheitlänge für Ihren Ofen.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#645f55]">Kontaktieren Sie uns, um Verfügbarkeit, Preis und Lieferung an Ihren Wohnort zu klären.</p></div>
           <Link href="/contact" className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-[#21492d] px-5 py-3 text-sm font-semibold text-white hover:bg-[#173a22]">Angebot anfragen <ArrowRight size={17} /></Link>
-        </div>
+        </FadeIn>
       </section>
     </main>
   );

@@ -1,29 +1,41 @@
 'use client';
 
-import * as React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 
-// Apparition progressive utilisée pour les sections de la page d'accueil,
-// déclenchée lorsque l'élément entre dans le viewport.
-export function FadeIn({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: React.ReactNode;
+// Server-rendered content stays visible without JavaScript. Only elements below
+// the viewport are prepared for a single reveal; no scroll listeners are needed.
+export function FadeIn({ children, delay = 0, className }: {
+  children: ReactNode;
   delay?: number;
   className?: string;
 }) {
-  const reduceMotion = useReducedMotion();
-  return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !('IntersectionObserver' in window)) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const show = () => { delete element.dataset.reveal; };
+    if (preference.matches) return;
+    if (element.getBoundingClientRect().top >= window.innerHeight) {
+      element.dataset.reveal = 'pending';
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      element.dataset.reveal = 'visible';
+      observer.disconnect();
+    }, { threshold: 0, rootMargin: '0px 0px -24px 0px' });
+    const onPreferenceChange = () => {
+      if (preference.matches) { observer.disconnect(); show(); }
+    };
+    observer.observe(element);
+    preference.addEventListener('change', onPreferenceChange);
+    return () => {
+      observer.disconnect();
+      preference.removeEventListener('change', onPreferenceChange);
+      show();
+    };
+  }, []);
+
+  return <div ref={ref} className={className} style={{ '--reveal-delay': `${Math.min(Math.max(delay, 0), 0.2)}s` } as CSSProperties}>{children}</div>;
 }

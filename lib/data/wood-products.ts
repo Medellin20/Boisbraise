@@ -7,7 +7,7 @@ export type WoodProduct = WoodProductRecord & {
   wood_product_images: WoodProductImageRecord[];
   wood_sales_settings: WoodSalesSettings | null;
 };
-function fallbackImage(slug: string) { return ({ chene: '/images/wood/logs-oak.svg', hetre: '/images/wood/logs-beech.svg', frene: '/images/wood/logs-ash.svg' } as Record<string, string>)[slug] ?? null; }
+function fallbackImage(slug: string) { return ({ chene: '/images/wood/logs-oak-photo.webp', hetre: '/images/wood/logs-beech-photo.webp', frene: '/images/wood/logs-ash-photo.webp' } as Record<string, string>)[slug] ?? null; }
 async function attachRelations(rows: WoodProductRecord[]): Promise<WoodProduct[]> {
   if (!rows.length) return [];
   const supabase = createClient();

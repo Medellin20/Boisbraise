@@ -14,9 +14,9 @@ export function WoodProductCard({ product }: { product: WoodProduct }) {
 
   return (
     <article className="wood-product-card overflow-hidden rounded-[22px] border border-[#e6ddcf] bg-white shadow-[0_8px_22px_rgba(62,49,32,.10)]">
-      <Link href={`/catalogue/${product.slug}`} className="group relative block h-56 overflow-hidden sm:h-64" aria-label={`${woodDisplayName(product.name)} ansehen`}>
+      <Link href={`/catalogue/${product.slug}`} className="wood-photo-link group relative block h-56 overflow-hidden sm:h-64" aria-label={`${woodDisplayName(product.name)} ansehen`}>
         {cover ? (
-          <Image src={cover.url} alt={cover.alt_text ?? `Holzscheite: ${woodDisplayName(product.name)}`} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+          <Image src={cover.url} alt={cover.alt_text ?? `Holzscheite: ${woodDisplayName(product.name)}`} fill sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
         ) : (
           <div className="flex h-full items-center justify-center bg-[#eee7d9] text-[#536147]"><ImageIcon size={44} /></div>
         )}
@@ -34,7 +34,7 @@ export function WoodProductCard({ product }: { product: WoodProduct }) {
         <p className="mt-4 text-xs text-[#71695c]">Formate: {packages.map((item) => item.label).join(' · ')}</p>
         <div className="mt-4 flex items-end justify-between border-t border-[#e5dbc9] pt-4">
           <div>
-            <span className="block text-[10px] font-medium uppercase tracking-wide text-[#6f685b]">À partir de</span>
+            <span className="block text-[10px] font-medium uppercase tracking-wide text-[#6f685b]">Ab</span>
             <strong className="text-xl text-[#142c20]">{startingPackage ? formatWoodPrice(Number(startingPackage.price)) : 'Auf Anfrage'}</strong>
             {startingPackage && <span className="ml-1 text-xs text-[#71695c]">/ {startingPackage.label}</span>}
           </div>

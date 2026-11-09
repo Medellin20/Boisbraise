@@ -76,7 +76,7 @@ export default async function WoodProductPage({ params }: PageProps) {
       </Link>
 
       <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] bg-[#e6ddcf]">
+        <div className="wood-detail-photo relative aspect-[4/3] overflow-hidden rounded-[22px] bg-[#e6ddcf]">
           {cover ? (
             <Image
               src={cover.url}
