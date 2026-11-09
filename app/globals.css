@@ -307,27 +307,47 @@ input[type='number'] {
 @keyframes forest-reveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes forest-logs-enter { from { opacity: 0; translate: 0 35px; } to { opacity: 1; translate: 0 0; } }
 @keyframes forest-pollen { 0% { opacity: 0; transform: translate3d(-15px,25px,0); } 20%,70% { opacity: .5; } 100% { opacity: 0; transform: translate3d(65px,-90px,0) rotate(110deg); } }
-@keyframes forest-delivery { 0%,5% { opacity: 0; transform: translate(0,5px) scale(1); } 10% { opacity: 1; } 73% { opacity: 1; } 82%,100% { opacity: 0; transform: translate(28vw,-14px) scale(.68); } }
-@media (max-width: 767px) {
-  .forest-hero { min-height: 870px; }
-  .forest-landscape { inset: auto -10% 0; height: 520px; }
-  .forest-photo { object-position: 85% center; }
-  .forest-tree-canopy { background-position: 85% center; }
-  .forest-shade { background: linear-gradient(180deg,#102319 0%,#102319f2 35%,#1023197a 54%,transparent 76%,#0b1a1166 100%); }
-  .forest-content { padding-top: 60px; padding-bottom: 380px; }
-  .forest-description { max-width: 350px; font-size: 14px; }
-  .forest-actions { gap: 10px; margin-top: 24px; }
-  .forest-button { font-size: 12px; padding: 13px 17px; }
+@keyframes forest-delivery { 0%,5% { opacity: 1; transform: translate(0,5px) scale(1); } 10% { opacity: 1; } 73% { opacity: 1; } 82%,100% { opacity: 0; transform: translate(28vw,-14px) scale(.68); } }
+/* On compact screens, reserve a separate scene below the copy. Its height
+   follows the viewport width, keeping the house and sun in the frame. */
+@media (max-width: 1023px) {
+  .forest-hero { --scene-height: clamp(280px, 58vw, 440px); min-height: 0; }
+  .forest-landscape { inset: auto -8px 48px; height: var(--scene-height); }
+  .forest-photo { object-position: 65% center; }
+  .forest-tree-canopy { background-position: 65% center; }
+  .forest-shade { background: linear-gradient(180deg,#102319 0%,#102319f5 37%,#10231980 56%,transparent 74%,#0b1a1166 100%); }
+  .forest-content { padding-top: 48px; padding-bottom: calc(var(--scene-height) + 78px); }
+  .wood-home .forest-hero h1 { font-size: clamp(38px, 7.8vw, 64px); margin-top: 22px; }
+  .forest-description { max-width: 470px; font-size: 15px; line-height: 1.75; margin-top: 18px; }
+  .forest-actions { gap: 12px; margin-top: 24px; }
+  .forest-button { font-size: 13px; min-height: 50px; padding: 13px 20px; }
   .forest-signature { margin-top: 24px; }
-  .forest-logs { width: 190px; right: -15px; bottom: 45px; }
-  .forest-truck { top: 69%; left: 22%; width: 150px; }
+  .forest-logs { width: clamp(140px,25vw,240px); right: 8px; bottom: 65px; }
+  .forest-truck { top: 70%; left: 16%; width: clamp(110px,19vw,170px); animation-name: forest-delivery-compact; }
+  .forest-bottom { bottom: 10px; }
   .forest-bottom > span { font-size: 8px; letter-spacing: .12em; }
 }
-@media (max-width: 389px) { .forest-actions { flex-direction: column; align-items: stretch; max-width: 300px; } .forest-motion-toggle span { display: none; } .forest-hero { min-height: 930px; } }
+@keyframes forest-delivery-compact {
+  0%,5% { opacity: 1; transform: translate(0,5px) scale(1); }
+  10%,73% { opacity: 1; }
+  82%,100% { opacity: 0; transform: translate(48vw,-12px) scale(.72); }
+}
+@media (max-width: 479px) {
+  .forest-content { padding-top: 36px; }
+  .forest-eyebrow { font-size: 9px; letter-spacing: .17em; }
+  .forest-description { font-size: 14px; }
+  .forest-actions { display: grid; grid-template-columns: minmax(0,1fr); }
+  .forest-button { width: 100%; justify-content: space-between; }
+  .forest-motion-toggle { min-width: 44px; justify-content: center; }
+  .forest-motion-toggle span { display: none; }
+}
+@media (hover: none) {
+  .forest-button:hover, .forest-button:hover svg { transform: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   .forest-hero *, .forest-hero *::before { animation: none !important; transition: none !important; }
   .forest-landscape, .forest-logs { transform: none; }
   .forest-pollen, .forest-motion-toggle { display: none; }
-  .forest-truck { opacity: 1; left: 65%; }
+  .forest-truck { opacity: 1; left: 50%; }
   .forest-button:hover, .forest-button:hover svg { transform: none; }
 }
