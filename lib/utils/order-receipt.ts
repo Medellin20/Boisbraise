@@ -155,9 +155,6 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
   text(`Bestellnummer:  ${order.reference}`, infoX, cardY + 15, { maxWidth: cardWidth - 10 });
   text(`Bestelldatum:  ${date}`, infoX, cardY + 22);
   text(`Zahlungsart:  ${order.payment.method === 'rib' ? 'Banküberweisung' : 'Online-Zahlungslink'}`, infoX, cardY + 29);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...COLORS.red);
-  text('Zahlungsstatus:  Zahlung ausstehend', infoX, cardY + 36, { maxWidth: cardWidth - 10 });
 
   y = cardY + cardHeight + 5;
   sectionBar('IHRE BESTELLUNG', y);
@@ -273,19 +270,6 @@ export async function downloadOrderReceipt(order: OrderConfirmation) {
     doc.text(linkLines, LEFT + 5, y + 6);
     y += linkHeight + 3;
   }
-
-  ensureSpace(16);
-  doc.setFillColor(...COLORS.paleRed);
-  doc.roundedRect(LEFT, y, CONTENT_WIDTH, 13, 2, 2, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(...COLORS.red);
-  text('Zahlungsstatus: Zahlungseingang noch nicht bestätigt.', LEFT + 4, y + 5);
-  doc.setFont('helvetica', 'normal');
-  text(order.adminNotified === false
-    ? 'Die Bestellung wurde noch nicht an unser Team übermittelt. Bitte kontaktieren Sie HolzNest vor der Zahlung.'
-    : 'Dieser Bestellbeleg ist keine Zahlungsquittung.',
-  LEFT + 4, y + 10);
 
   const pageCount = doc.getNumberOfPages();
   for (let page = 1; page <= pageCount; page += 1) {
