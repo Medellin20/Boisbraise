@@ -44,7 +44,7 @@ export function ForestHero() {
           <Link href="/catalogue" className="forest-button forest-button-primary">Holz entdecken <ArrowRight size={18} /></Link>
           <Link href="/comment-ca-marche" className="forest-button forest-button-secondary">Mehr erfahren <ArrowRight size={16} /></Link>
         </div>
-        <p className="forest-signature"><span /> Aus der Natur. Für Ihr Zuhause.</p>
+        <p className="forest-signature">Aus der Natur. Für Ihr Zuhause.</p>
       </div>
       <div className="forest-bottom container-app">
         <span>NATUR. HOLZ. ZUHAUSE.</span>

@@ -60,8 +60,8 @@ export function PaymentSettingsForm({ initial }: { initial: PaymentSettingsInput
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium text-ink-700">Name der Bank<input name="bankName" maxLength={120} defaultValue={initial.bankName} className={field} /></label>
         <label className="text-sm font-medium text-ink-700">Kontoinhaber<input name="bankAccountHolder" maxLength={160} defaultValue={initial.bankAccountHolder} className={field} /></label>
-        <label className="text-sm font-medium text-ink-700 sm:col-span-2">IBAN<input name="bankIban" autoComplete="off" maxLength={50} defaultValue={initial.bankIban} className={`${field} font-mono uppercase`} /></label>
-        <label className="text-sm font-medium text-ink-700">BIC (optional)<input name="bankBic" maxLength={20} defaultValue={initial.bankBic} className={`${field} font-mono uppercase`} /></label>
+        <label className="text-sm font-medium text-ink-700 sm:col-span-2">IBAN<input name="bankIban" autoComplete="off" maxLength={50} defaultValue={initial.bankIban} className={`${field} uppercase`} /></label>
+        <label className="text-sm font-medium text-ink-700">BIC (optional)<input name="bankBic" maxLength={20} defaultValue={initial.bankBic} className={`${field} uppercase`} /></label>
       </div>
     </section>
     <button type="submit" disabled={pending} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#21492d] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"><Save size={16} />{pending ? 'Wird gespeichert …' : 'Einstellungen speichern'}</button>

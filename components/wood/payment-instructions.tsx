@@ -134,12 +134,12 @@ export function PaymentInstructions({ initialOrder }: { initialOrder?: OrderConf
             {order.payment.rib.bankName && <p className="mt-2 text-sm text-[#645f55]">Bank: {order.payment.rib.bankName}</p>}
             <p className="mt-2 text-sm text-[#645f55]">Kontoinhaber: <strong className="text-[#343c33]">{order.payment.rib.accountHolder}</strong></p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="min-w-0 flex-1"><p className="text-xs text-[#766e62]">IBAN</p><p className="mt-1 break-all font-mono text-sm font-semibold tracking-wide text-[#26372a]">{order.payment.rib.iban}</p></div>
+              <div className="min-w-0 flex-1"><p className="text-xs text-[#766e62]">IBAN</p><p className="mt-1 break-all text-sm font-semibold tracking-wide text-[#26372a]">{order.payment.rib.iban}</p></div>
               <button type="button" onClick={() => void copyIban(order.payment.rib?.iban ?? '')} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#cbd6c8] bg-white px-4 py-2 text-sm font-semibold text-[#21492d] hover:bg-[#f3f7f1]">
                 {copied ? <Check size={16} /> : <Copy size={16} />}{copied ? 'Kopiert' : 'IBAN kopieren'}
               </button>
             </div>
-            {order.payment.rib.bic && <p className="mt-3 text-sm text-[#645f55]">BIC : <strong className="font-mono text-[#343c33]">{order.payment.rib.bic}</strong></p>}
+            {order.payment.rib.bic && <p className="mt-3 text-sm text-[#645f55]">BIC : <strong className="text-[#343c33]">{order.payment.rib.bic}</strong></p>}
             <p className="mt-4 text-xs leading-5 text-[#766e62]">Geben Sie die Bestellnummer <strong>{order.reference}</strong> als Verwendungszweck an und überweisen Sie den oben angezeigten Anzahlungsbetrag.</p>
           </div>
         ) : null}
