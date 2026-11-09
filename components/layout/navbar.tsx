@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   Trees,
   CircleHelp,
@@ -32,6 +32,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 export function Navbar() {
+  const reduceMotion = useReducedMotion();
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [tabletOpen, setTabletOpen] = React.useState(false);
@@ -136,7 +137,7 @@ export function Navbar() {
             </button>
             <AnimatePresence>
               {tabletOpen && (
-                <motion.div id="main-dropdown-menu" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="absolute right-0 top-full mt-2 max-h-[calc(100dvh-6rem)] w-64 overflow-y-auto overscroll-contain rounded-2xl border border-ink-100 bg-white p-2 shadow-lifted">
+                <motion.div id="main-dropdown-menu" initial={reduceMotion ? false : { opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }} transition={{ duration: reduceMotion ? 0 : 0.18 }} className="absolute right-0 top-full mt-2 max-h-[calc(100dvh-6rem)] w-64 overflow-y-auto overscroll-contain rounded-2xl border border-ink-100 bg-white p-2 shadow-lifted">
                   {NAV_LINKS.map((link) => (
                     <Link key={link.href} href={link.href} className={cn('flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-sand-100', isActivePath(pathname, link.href) ? 'bg-sand-100 text-ink-900' : 'text-ink-600')}>
                       <link.icon className="h-4.5 w-4.5 text-canal-600" /> {link.label}
@@ -165,10 +166,10 @@ export function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-              initial={{ opacity: 0, y: -12 }}
+              initial={reduceMotion ? false : { opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.2 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -12 }}
+              transition={{ duration: reduceMotion ? 0 : 0.2 }}
               id="mobile-navigation"
               aria-label="Hauptnavigation"
               className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-ink-100 bg-white shadow-lifted md:hidden"
@@ -177,9 +178,9 @@ export function Navbar() {
                 {NAV_LINKS.map((link, i) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, y: -4 }}
+                    initial={reduceMotion ? false : { opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.02 + i * 0.025 }}
+                    transition={{ duration: reduceMotion ? 0 : 0.2, delay: reduceMotion ? 0 : 0.02 + i * 0.025 }}
                   >
                     <Link
                       href={link.href}

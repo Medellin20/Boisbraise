@@ -24,7 +24,7 @@ export function FadeIn({ children, delay = 0, className }: {
       if (!entry.isIntersecting) return;
       element.dataset.reveal = 'visible';
       observer.disconnect();
-    }, { threshold: 0, rootMargin: '0px 0px -24px 0px' });
+    }, { threshold: 0, rootMargin: '0px' });
     const onPreferenceChange = () => {
       if (preference.matches) { observer.disconnect(); show(); }
     };

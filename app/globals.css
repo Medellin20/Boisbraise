@@ -282,9 +282,9 @@ input[type='number'] {
 .forest-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 680px; background: #142b20; color: #fff8ea; }
 .forest-landscape { position: absolute; inset: 0; z-index: -3; pointer-events: none; }
 .forest-scenery { position: absolute; inset: 0; }
-.forest-photo { object-fit: cover; object-position: center; animation: wood-photo-breathe 18s ease-in-out infinite alternate; }
+.forest-photo { object-fit: cover; object-position: center; animation: wood-photo-breathe 4.8s cubic-bezier(.2,.65,.3,1) both; }
 .forest-shade { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg,#10251cf5 0%,#10251cdb 33%,#10251c65 67%,#10251c20),linear-gradient(0deg,#10251c66,transparent 40%); }
-.forest-content { position: relative; z-index: 2; padding-top: clamp(80px,8vw,120px); padding-bottom: 110px; }
+.forest-content { position: relative; z-index: 2; padding-top: clamp(80px,8vw,120px); padding-bottom: 90px; }
 .forest-eyebrow { display: flex; align-items: center; gap: 10px; color: #dfcfaa; font-size: 10px; font-weight: 600; letter-spacing: .24em; animation: forest-reveal .8s .1s both; }
 .wood-home .forest-hero h1 { margin: 28px 0 0; max-width: 750px; color: #fff8ea; font-family: var(--font-roboto), Arial, sans-serif !important; font-size: clamp(48px,6.3vw,86px); font-weight: 400; line-height: 1.12; letter-spacing: -.045em; }
 .forest-title-line { display: block; overflow: hidden; padding-bottom: .1em; }
@@ -297,30 +297,29 @@ input[type='number'] {
 .forest-button svg { transition: transform .25s; }
 .forest-button-primary { background: #dec18c; color: #172e21; box-shadow: 0 5px 24px #0002; }
 .forest-button-secondary { border-color: #e9dfcc80; background: #142b2080; color: #fff8ea; }
-.forest-button:focus-visible, .forest-motion-toggle:focus-visible { outline: 2px solid #f6cf94; outline-offset: 5px; --tw-ring-color: transparent; }
+.forest-button:focus-visible { outline: 2px solid #f6cf94; outline-offset: 5px; --tw-ring-color: transparent; }
 .forest-signature { display: flex; align-items: center; gap: 10px; margin-top: 30px; font-size: 11px; color: #d0d7c5; animation: forest-reveal 1s .6s both; }
 .forest-bottom { position: absolute; z-index: 3; bottom: 18px; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #e0dcc9; }
 .forest-bottom > span { font-size: 9px; letter-spacing: .23em; }
-.forest-motion-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid #e8dfc555; border-radius: 6px; background: #10251c99; font-size: 10px; }
-.forest-hero[data-paused='true'] *, .forest-hero[data-paused='true'] *::before { animation-play-state: paused !important; }
-@keyframes wood-photo-breathe { from { transform: scale(1); } to { transform: scale(1.045); } }
+.forest-hero[data-paused='true'] .forest-photo { animation-play-state: paused !important; }
+@keyframes wood-photo-breathe { from { transform: scale(1); } to { transform: scale(1.025); } }
 @keyframes forest-reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-[data-reveal='pending'] { opacity: 0; transform: translateY(16px); }
-[data-reveal='visible'] { animation: wood-scroll-reveal .65s var(--reveal-delay,0s) cubic-bezier(.16,1,.3,1) both; }
-@keyframes wood-scroll-reveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+[data-reveal='pending'] { opacity: 0; transform: translateY(12px); }
+[data-reveal='visible'] { animation: wood-scroll-reveal .5s var(--reveal-delay,0s) cubic-bezier(.16,1,.3,1) both; }
+@keyframes wood-scroll-reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @media (hover: hover) and (pointer: fine) {
   .wood-product-card:hover { transform: none; border-color: #baa574; box-shadow: 0 18px 36px #203b2920; }
   .wood-detail-photo:hover img { transform: scale(1.035); }
   .forest-button:hover { transform: translateY(-2px); }
   .forest-button:hover svg { transform: translateX(3px); }
   .forest-button-primary:hover, .wood-winter-section .wood-cta:hover { background: #ecd3a5; box-shadow: 0 8px 26px #0003; }
-  .forest-button-secondary:hover, .forest-motion-toggle:hover { background: #284332; }
+  .forest-button-secondary:hover { background: #284332; }
   .site-background a[class*="bg-\[\#21492d\]"]:hover { transform: translateY(-2px); box-shadow: 0 8px 20px #203b2924; }
 }
 @media (max-width: 767px) {
   .forest-hero { min-height: 0; }
-  .forest-content { padding-top: 64px; padding-bottom: 106px; }
-  .wood-home .forest-hero h1 { font-size: clamp(40px,8.3vw,64px); margin-top: 22px; }
+  .forest-content { padding-top: 64px; padding-bottom: 76px; }
+  .wood-home .forest-hero h1 { font-size: clamp(34px,7.8vw,60px); margin-top: 22px; }
   .forest-photo { object-position: 65% center; }
   .forest-shade { background: linear-gradient(90deg,#10251cec,#10251ca6),linear-gradient(0deg,#10251c99,transparent); }
   .forest-description { font-size: 15px; line-height: 1.8; }
@@ -331,8 +330,6 @@ input[type='number'] {
   .forest-eyebrow { font-size: 9px; letter-spacing: .17em; }
   .forest-actions { display: grid; grid-template-columns: minmax(0,1fr); }
   .forest-button { width: 100%; justify-content: space-between; }
-  .forest-motion-toggle { min-width: 44px; justify-content: center; }
-  .forest-motion-toggle span { display: none; }
 }
 @media (hover: none) {
   .wood-benefit-card:hover, .wood-cta:hover, .wood-product-card:hover { transform: none; }
@@ -341,6 +338,22 @@ input[type='number'] {
 @media (prefers-reduced-motion: reduce) {
   .forest-hero *, .forest-hero *::before, [data-reveal] { animation: none !important; transition: none !important; }
   .forest-photo, [data-reveal], .wood-detail-photo img, .wood-photo-link img { transform: none !important; opacity: 1; }
-  .forest-motion-toggle { display: none; }
   .forest-button:hover, .forest-button:hover svg, .site-background a[class*="bg-"]:hover { transform: none; }
+}
+
+/* Compact layouts keep copy, badges and touch targets within the viewport. */
+.wood-product-card, .wood-benefit-card, .forest-content { min-width: 0; }
+.wood-chip { max-width: 100%; white-space: normal; }
+.wood-chip svg { flex-shrink: 0; }
+.forest-title-line { overflow: visible; }
+.forest-button svg { flex-shrink: 0; }
+#essences { scroll-margin-top: 6rem; }
+@media (max-width: 767px) {
+  .forest-hero .forest-photo { animation-duration: 4s; }
+  .forest-content { padding-top: clamp(40px,8vw,64px); }
+  .wood-product-card > a { height: auto; aspect-ratio: 4 / 3; }
+  .forest-description { max-width: 36rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wood-product-card *, .wood-detail-photo * { transition: none !important; }
 }

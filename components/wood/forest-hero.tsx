@@ -3,10 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Pause, Play, TreePine } from 'lucide-react';
+import { ArrowRight, TreePine } from 'lucide-react';
 
 export function ForestHero() {
-  const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(true);
   const [tabVisible, setTabVisible] = useState(true);
   const heroRef = useRef<HTMLElement>(null);
@@ -15,18 +14,20 @@ export function ForestHero() {
     const hero = heroRef.current;
     if (!hero) return;
     const visibility = () => setTabVisible(!document.hidden);
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
-    observer.observe(hero);
+    const observer = typeof IntersectionObserver !== 'undefined'
+      ? new IntersectionObserver(([entry]) => setInView(entry.isIntersecting))
+      : null;
+    observer?.observe(hero);
     document.addEventListener('visibilitychange', visibility);
     visibility();
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       document.removeEventListener('visibilitychange', visibility);
     };
   }, []);
 
   return (
-    <section ref={heroRef} className="forest-hero" data-paused={paused || !inView || !tabVisible} aria-labelledby="forest-title">
+    <section ref={heroRef} className="forest-hero" data-paused={!inView || !tabVisible} aria-labelledby="forest-title">
       <div className="forest-landscape" aria-hidden="true">
         <div className="forest-scenery">
           <Image src="/images/wood/stacked-firewood-hero.webp" alt="" fill priority sizes="100vw" quality={85} className="forest-photo" />
@@ -48,9 +49,7 @@ export function ForestHero() {
       </div>
       <div className="forest-bottom container-app">
         <span>NATUR. HOLZ. ZUHAUSE.</span>
-        <button type="button" onClick={() => setPaused(!paused)} aria-label={paused ? 'Animation abspielen' : 'Animation pausieren'} aria-pressed={paused} className="forest-motion-toggle">
-          {paused ? <Play size={14} /> : <Pause size={14} />}<span>{paused ? 'Animation abspielen' : 'Animation pausieren'}</span>
-        </button>
+
       </div>
     </section>
   );
